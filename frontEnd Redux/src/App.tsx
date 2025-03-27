@@ -9,72 +9,79 @@ import RegisterPage from "./pages/RegisterPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import { auth } from "./utils/firebase.utils";
+import { onAuthStateChanged } from "firebase/auth";
+import { AuthService } from "./services/AuthService";
 import apiClient from "./api/apiClient";
-import { getRedirectResult } from "firebase/auth";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleGoogleAuth = async () => {
-      try {
-        // Check if we are in the middle of google auth
-        if (localStorage.getItem("googleLoginInProgress")) {
-
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-          console.log("Google Auth redirect...");
-
-          const result = await getRedirectResult(auth);
-          
-          console.log("result", result);
-
-          if (result) {
-            const user = result.user;
-
-            //Extract user data from Google auth result
-            const googleUserData = {
-              email: user.email,
-              fullName: user.displayName,
-              avatar: user.photoURL,
-            };
-
-            // Send the user data to the backend
-            const response = await apiClient.post(
-              "/users/google-login",
-              googleUserData
-            );
-
-            console.log("response", response);
-            // Save the token in the local storage
-            if (response.data.success) {
-              localStorage.setItem("token", response.data.data.accessToken);
-              localStorage.setItem("refreshToken", response.data.data.refreshToken);
-            }
-
-            dispatch(googleLoginSuccess(response.data.data.user));
-
-            console.log("Google Auth successful");
+    // First check if we have a redirect result from Google Sign-in
+    const checkGoogleRedirect = async () => {
+      if (localStorage.getItem("googleLoginInProgress")) {
+        try {
+          const result = await AuthService.checkRedirectResult();
+          if (result && result.success) {
+            dispatch(googleLoginSuccess(result.data.user));
             navigate("/");
           }
+        } catch (error) {
+          console.error("Failed to process Google redirect:", error);
         }
-        localStorage.removeItem("googleLoginInProgress");
-      } catch (error) {
-        console.error("Google Auth error:", error);
-        localStorage.removeItem("googleLoginInProgress");
       }
     };
-    // Handle normal token-based auth
-    const checkCurrentUser = () => {
-      if (localStorage.getItem("token")) {
+    
+    checkGoogleRedirect();
+    
+    // Listen for auth state changes
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      // Handle Firebase auth state changes
+      if (user && localStorage.getItem("googleLoginInProgress")) {
+        console.log("Auth state changed, user logged in:", user.email);
+        
+        try {
+          // Extract user data from Google auth result
+          const googleUserData = {
+            email: user.email,
+            fullName: user.displayName,
+            avatar: user.photoURL,
+          };
+
+          // Send the user data to the backend
+          const response = await apiClient.post(
+            "/users/google-login",
+            googleUserData
+          );
+
+          console.log("Backend response:", response.data);
+          
+          if (response.data.success) {
+            localStorage.setItem("token", response.data.data.accessToken);
+            localStorage.setItem("refreshToken", response.data.data.refreshToken);
+            
+            // Dispatch action to update Redux state
+            dispatch(googleLoginSuccess(response.data.data.user));
+            
+            // Navigate to dashboard
+            navigate("/");
+            
+            // Clear the login progress flag
+            localStorage.removeItem("googleLoginInProgress");
+          }
+        } catch (error) {
+          console.error("Error handling Google auth:", error);
+          localStorage.removeItem("googleLoginInProgress");
+        }
+      } else if (localStorage.getItem("token")) {
+        // Handle normal token-based auth
         dispatch(currentUser());
       }
-    };
-
-    // Run the functions
-    handleGoogleAuth();
-    checkCurrentUser();
-  }, [dispatch]);
+    });
+    
+    return () => unsubscribe();
+  }, [dispatch, navigate]);
 
   return (
     <Routes>

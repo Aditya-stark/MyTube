@@ -518,27 +518,37 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     );
 });
 
-// Google OAuth Login
-const googleAuth = asyncHandler(async (req, res) => {
+// Google Login
+const googleLogin = asyncHandler(async (req, res) => {
   try {
-    const { email, fullName, avatar } = req.body;
-
-    if (!email) {
-      throw new ApiError(400, "Email is required");
+    const { email, fullName, avatar, googleId } = req.body;
+    console.log("Inside Backend Google Login", req.body);
+    // Check if required field is present
+    if (
+      [email, fullName, avatar, googleId].some((field) => field?.trim() === "")
+    ) {
+      throw new ApiError(400, "All fields are required");
     }
 
-    //Check if user already exist
+    // Check if user already exist with this email
     let user = await User.findOne({ email });
 
-    if (user) {
-      //User Already Exist, generate tokens
+    if (!user) {
+      // Genrate a username from email
+      const username = email.split("@")[0].toLowerCase();
+      // Create a new user
+      user = await User.create({
+        username,
+        email,
+        fullName,
+        avatar,
+        password: googleId + process.env.ACCESS_TOKEN_SECRET,
+      });
+
+      console.log("User Created by Google", user);
+
       const { accessToken, refreshToken } =
         await generateAccessAndRefreshTokens(user._id);
-
-      //Update user data if needed (like updating avatar URL if they have changed their avatar)
-      user.avatar = avatar;
-      user.fullName = fullName;
-      await user.save({ validateBeforeSave: false });
 
       const loggedInUser = await User.findById(user._id).select(
         "-password -refreshToken"
@@ -550,7 +560,6 @@ const googleAuth = asyncHandler(async (req, res) => {
         secure: true,
       };
 
-      // return the response with cookie containing tokens and user details
       return res
         .status(200)
         .cookie("accessToken", accessToken, options)
@@ -562,55 +571,9 @@ const googleAuth = asyncHandler(async (req, res) => {
             "User logged in successfully"
           )
         );
-    } else {
-      // Create New User
-      // User Does Not Exist, Register User
-      let username = email.split("@")[0];
-      const usernameExists = await User.findOne({ username });
-
-      if (usernameExists) {
-        username = `${username}${Math.floor(Math.random() * 9000)}`;
-      }
-
-      const password =
-        Math.random().toString(36).slice(-8) +
-        Math.random().toString(36).slice(-8);
-
-      const newUser = await User.create({
-        fullName: fullName || "Google User",
-        email,
-        username,
-        password,
-        avatar:
-          avatar || "https://cdn-icons-png.flaticon.com/512/9385/9385289.png",
-        coverImage: "",
-      });
-
-      //Generate Tokens
-      const { accessToken, refreshToken } =
-        await generateAccessAndRefreshTokens(newUser._id);
-
-      // options for cookie
-      const options = {
-        httpOnly: true,
-        secure: true,
-      };
-
-      // return the response with cookie containing tokens and user details
-      return res
-        .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
-        .json(
-          new ApiResponse(
-            200,
-            { user: newUser, accessToken, refreshToken },
-            "User logged in successfully with Google"
-          )
-        );
     }
   } catch (error) {
-    throw new ApiError(500, "Error in Google OAuth Login");
+    throw new ApiError(500, "Error:" + error.message);
   }
 });
 
@@ -626,5 +589,5 @@ export {
   updateUserCoverImage,
   getUserChannelProfile,
   getWatchHistory,
-  googleAuth,
+  googleLogin,
 };

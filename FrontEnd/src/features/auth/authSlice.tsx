@@ -9,6 +9,8 @@ import {
   UserState,
 } from "../../types/AuthType";
 import { AuthService } from "../../services/AuthService";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "../../utils/firebase.utils";
 
 export const login = createAsyncThunk(
   "auth/login",
@@ -116,19 +118,41 @@ export const currentUser = createAsyncThunk(
   }
 );
 
-// GOOGLE LOGIN
-export const loginWithGoogle = createAsyncThunk(
-  "auth/loginWithGoogle",
+export const signInWithGoogle = createAsyncThunk(
+  "auth/signInWithGoogle",
   async (_, { rejectWithValue }) => {
     try {
-      return await AuthService.loginWithGoogle();
+      const result = await signInWithPopup(auth, googleProvider);
+      const crediantial = GoogleAuthProvider.credentialFromResult(result);
+
+      if (!crediantial) {
+        return rejectWithValue("Google Sign In failed at State");
+      }
+
+      const googleUserData = {
+        email: result.user.email,
+        fullName: result.user.displayName,
+        avatar: result.user.photoURL,
+        googleId: result.user.uid,
+        accessToken: crediantial.accessToken,
+      };
+
+      const response = await AuthService.googleAuth(googleUserData);
+
+      if (response?.success) {
+        localStorage.setItem("token", response.data.accessToken);
+        localStorage.setItem("refreshToken", response.data.refreshToken);
+        return response;
+      } else {
+        return rejectWithValue(response?.message || "Google Sign In failed");
+      }
     } catch (error: any) {
       console.error(
-        "Google Login Error:",
-        error.response?.data?.message || "Google Login Failed at State"
+        "Google Sign In Error:",
+        error.response?.data?.message || "Google Sign In Failed at State"
       );
       return rejectWithValue(
-        error.response?.data || "An unknown error occurred"
+        error.response.data || "An unknown error occurred"
       );
     }
   }
@@ -147,14 +171,6 @@ const authSlice = createSlice({
   reducers: {
     //Clear error
     clearError: (state) => {
-      state.error = null;
-    },
-
-    //Google login success
-    googleLoginSuccess: (state, action) => {
-      state.isLoading = false;
-      state.isAuthenticated = true;
-      state.user = action.payload;
       state.error = null;
     },
   },
@@ -215,22 +231,22 @@ const authSlice = createSlice({
       .addCase(currentUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
-      });
-
-    builder
-      .addCase(loginWithGoogle.pending, (state) => {
+      })
+      .addCase(signInWithGoogle.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(loginWithGoogle.fulfilled, (state) => {
+      .addCase(signInWithGoogle.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload?.data?.user;
       })
-      .addCase(loginWithGoogle.rejected, (state, action) => {
+      .addCase(signInWithGoogle.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });
   },
 });
 
-export const { clearError, googleLoginSuccess } = authSlice.actions;
+export const { clearError } = authSlice.actions;
 export default authSlice.reducer;

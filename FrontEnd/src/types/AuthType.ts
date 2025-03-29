@@ -110,3 +110,12 @@ export interface ErrorResponse {
   message: string;
   success: boolean;
 }
+
+// Google Auth Data
+export interface GoogleAuthData {
+  email: string | null;
+  fullName: string | null;
+  avatar: string | null;
+  googleId: string;
+  accessToken?: string;
+}

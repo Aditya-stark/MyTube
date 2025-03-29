@@ -4,7 +4,7 @@ import {
   getCurrentUser,
   getUserChannelProfile,
   getWatchHistory,
-  googleAuth,
+  googleLogin,
   logoutUser,
   refreshToken,
   registerUser,
@@ -57,7 +57,7 @@ router.route("/c/:username").get(verifyJWT, getUserChannelProfile);
 //Get Watch History
 router.route("/history").get(verifyJWT, getWatchHistory);
 
-// Google Login Route
-router.route("/google-login").post(googleAuth);
+// Google Login
+router.route("/google-login").post(googleLogin);
 
 export default router;

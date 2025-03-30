@@ -532,8 +532,35 @@ const googleLogin = asyncHandler(async (req, res) => {
 
     // Check if user already exist with this email
     let user = await User.findOne({ email });
+    if (user) {
+      //If the user already exist then we will update the access token and refresh token in the database
+      console.log("User Exist", user);
 
-    if (!user) {
+      const { accessToken, refreshToken } =
+        await generateAccessAndRefreshTokens(user._id);
+
+      const loggedInUser = await User.findById(user._id).select(
+        "-password -refreshToken"
+      );
+
+      // options for cookie
+      const options = {
+        httpOnly: true,
+        secure: true,
+      };
+
+      return res
+        .status(200)
+        .cookie("accessToken", accessToken, options)
+        .cookie("refreshToken", refreshToken, options)
+        .json(
+          new ApiResponse(
+            200,
+            { user: loggedInUser, accessToken, refreshToken },
+            "User logged in successfully"
+          )
+        );
+    } else {
       // Genrate a username from email
       const username = email.split("@")[0].toLowerCase();
       // Create a new user

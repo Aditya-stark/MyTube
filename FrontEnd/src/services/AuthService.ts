@@ -99,4 +99,34 @@ export const AuthService = {
       return null;
     }
   },
+
+  //Password reset
+  resetPasswordOTP: async (email: string) => {
+    try {
+      console.log("emailService", email);
+      const res = await apiClient.post("/users/reset-password", {email});
+
+      console.log("res", res.data);
+      return res.data;
+    } catch (error) {
+      console.log("error", error);
+      return null;
+    }
+  },
+
+  //Password reset verify OTP
+  resetPasswordOTPVerify: async (data: {
+    email: string;
+    otp: string;
+    newPassword: string;
+  }) => {
+    try {
+      const res = await apiClient.post("/users/reset-password-verify", data);
+      console.log("res", res.data);
+      return res.data;
+    } catch (error) {
+      console.log("error", error);
+      return null;
+    }
+  },
 };

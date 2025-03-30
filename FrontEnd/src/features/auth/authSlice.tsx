@@ -158,11 +158,62 @@ export const signInWithGoogle = createAsyncThunk(
   }
 );
 
+export const passwordResetOTP = createAsyncThunk(
+  "auth/passwordResetOTP",
+  async (email: string, { rejectWithValue }) => {
+    try {
+      console.log("email", email);
+      const res = await AuthService.resetPasswordOTP(email);
+      if (res?.success) {
+        return res;
+      } else {
+        return rejectWithValue(res?.message || "Password Reset OTP failed");
+      }
+    } catch (error: any) {
+      console.error(
+        "Password Reset OTP Error:",
+        error.response?.data?.message || "Password Reset OTP Failed at State"
+      );
+      return rejectWithValue(
+        error.response?.data || "An unknown error occurred"
+      );
+    }
+  }
+);
+
+export const passwordResetOTPVerify = createAsyncThunk(
+  "auth/passwordResetOTPVerify",
+  async (
+    data: { email: string; otp: string; newPassword: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const res = await AuthService.resetPasswordOTPVerify(data);
+
+      if (res?.success) {
+        return res;
+      } else {
+        return rejectWithValue(
+          res?.message || "Password Reset OTP Verify failed"
+        );
+      }
+    } catch (error: any) {
+      console.error(
+        "Password Reset OTP Verify Error:",
+        error.response?.data?.message ||
+          "Password Reset OTP Verify Failed at State"
+      );
+    }
+  }
+);
+
 const initialState: UserState = {
   user: null as ResponseUser | null,
   isAuthenticated: false,
   isLoading: false,
   error: null,
+  isOTPSent: false,
+  isPasswordReset: false,
 };
 
 const authSlice = createSlice({
@@ -242,6 +293,33 @@ const authSlice = createSlice({
         state.user = action.payload?.data?.user;
       })
       .addCase(signInWithGoogle.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      //Password Reset OTP
+      .addCase(passwordResetOTP.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(passwordResetOTP.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isOTPSent = true;
+      })
+      .addCase(passwordResetOTP.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isOTPSent = false;
+        state.error = action.payload as string;
+      })
+      // Password Reset Verify
+      .addCase(passwordResetOTPVerify.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(passwordResetOTPVerify.fulfilled, (state) => {
+        state.isLoading = false;
+        state.isPasswordReset = true;
+      })
+      .addCase(passwordResetOTPVerify.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });

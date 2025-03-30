@@ -102,6 +102,8 @@ export interface UserState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  isOTPSent: boolean;
+  isPasswordReset: boolean;
 }
 
 // Error Response

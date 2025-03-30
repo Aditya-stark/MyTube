@@ -86,7 +86,7 @@ const LoginForm = () => {
             onChange={handleChange}
             required
           />
-
+          
           <div className="mt-2">
             <label className="flex items-center">
               <input
@@ -96,6 +96,19 @@ const LoginForm = () => {
               />
               <span className="ml-2">Show password</span>
             </label>
+          </div>
+
+          <div className="flex justify-end mt-2">
+            <a
+              className="text-sm text-blue-500 hover:text-blue-800"
+              href="/forgot-password"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/forgot-password");
+              }}
+            >
+              Forgot Password?
+            </a>
           </div>
         </div>
         <div className="flex items-center justify-between">

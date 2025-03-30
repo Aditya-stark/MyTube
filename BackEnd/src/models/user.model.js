@@ -42,6 +42,15 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
     },
+
+    passwordResetOTP: {
+      type: String,
+    },
+
+    passwordRestOTPExpires: {
+      type: Date,
+    },
+
     refreshToken: {
       type: String,
     },

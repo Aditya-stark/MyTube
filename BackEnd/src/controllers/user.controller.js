@@ -8,6 +8,8 @@ import {
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import nodemailer from "nodemailer";
+import crypto from "crypto";
 
 // Method for generating access and refresh tokens
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -604,6 +606,131 @@ const googleLogin = asyncHandler(async (req, res) => {
   }
 });
 
+//Password Reset
+const passwordResetOTP = asyncHandler(async (req, res) => {
+  //Get the mail from the request
+  const { email } = req.body;
+
+  if (!email) {
+    throw new ApiError(400, "Email is required");
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new ApiError(404, "User not found with this email");
+  }
+
+  // Generate OTP, hash it and save to DB
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  console.log("OTP:", otp);
+
+  const hashedOTP = crypto.createHash("sha256").update(otp).digest("hex");
+  user.passwordResetOTP = hashedOTP;
+  user.passwordRestOTPExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  await user.save({ validateBeforeSave: false });
+
+  // Send OTP to user's email
+  const message = `Your OTP for password reset is ${otp}\n\nThis OTP is valid for 10 minutes.`;
+
+  try {
+    //Configure email transporter using nodemailer
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    //Send email
+    await transporter.sendMail({
+      to: email,
+      subject: "Your Password Reset OTP",
+      text: message,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Password Reset Request</h2>
+          <p style="font-size: 16px;">Your password reset OTP is:</p>
+          <div style="background-color: #f4f4f4; padding: 12px; font-size: 24px; font-weight: bold; letter-spacing: 5px; text-align: center; margin: 20px 0;">
+            ${otp}
+          </div>
+          <p>This OTP is valid for 10 minutes.</p>
+          <p>If you didn't request this, please ignore this email.</p>
+          <p style="color: #777; font-size: 12px; margin-top: 30px;">This is an automated message, please do not reply.</p>
+        </div>
+      `,
+    });
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { message: "OTP sent to your email" },
+          "OTP sent to your email"
+        )
+      );
+  } catch (error) {
+    user.passwordResetOTP = undefined;
+    user.passwordRestOTPExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    throw new ApiError(500, "Error sending email. Try again later.");
+  }
+});
+
+// Verify OTP and reset password
+const passwordResetOTPVerify = asyncHandler(async (req, res) => {
+  // Get the OTP and new password from the request
+  const { email, otp, newPassword } = req.body;
+
+  if ([email, otp, newPassword].some((field) => field?.trim() === "")) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  // Hash the OTP
+  const hashedOTP = crypto.createHash("sha256").update(otp).digest("hex");
+
+  // Find the user by email
+  const user = await User.findOne({
+    email,
+    passwordResetOTP: hashedOTP,
+    passwordRestOTPExpires: {
+      $gt: Date.now(),
+    },
+  });
+
+  if (!user) {
+    throw new ApiError(404, "User not found with this email");
+  }
+
+  user.password = newPassword;
+  user.passwordResetOTP = undefined;
+  user.passwordRestOTPExpires = undefined;
+  await user.save();
+
+  // // Genrate new access and refresh tokens
+  // const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+  //   user._id
+  // );
+
+  // const options = {
+  //   httpOnly: true,
+  //   secure: true,
+  // };
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { message: "Password reset successfully You can log in now" },
+        "Password reset successfully. User logged in successfully"
+      )
+    );
+});
+
 export {
   registerUser,
   loginUser,
@@ -617,4 +744,6 @@ export {
   getUserChannelProfile,
   getWatchHistory,
   googleLogin,
+  passwordResetOTP,
+  passwordResetOTPVerify,
 };

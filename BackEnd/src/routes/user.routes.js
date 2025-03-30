@@ -6,6 +6,8 @@ import {
   getWatchHistory,
   googleLogin,
   logoutUser,
+  passwordResetOTP,
+  passwordResetOTPVerify,
   refreshToken,
   registerUser,
   updateAccountUserDetails,
@@ -59,5 +61,9 @@ router.route("/history").get(verifyJWT, getWatchHistory);
 
 // Google Login
 router.route("/google-login").post(googleLogin);
+
+// Password Reset
+router.route("/reset-password").post(passwordResetOTP);
+router.route("/reset-password-verify").post(passwordResetOTPVerify);
 
 export default router;

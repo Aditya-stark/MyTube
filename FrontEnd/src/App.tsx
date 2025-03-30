@@ -8,6 +8,7 @@ import RegisterPage from "./pages/RegisterPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import { currentUser } from "./features/auth/authSlice";
+import ForgotPassword from "./components/ForgotPassword";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -25,6 +26,7 @@ function App() {
       {/* Public routes */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>

@@ -710,15 +710,6 @@ const passwordResetOTPVerify = asyncHandler(async (req, res) => {
   user.passwordRestOTPExpires = undefined;
   await user.save();
 
-  // // Genrate new access and refresh tokens
-  // const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-  //   user._id
-  // );
-
-  // const options = {
-  //   httpOnly: true,
-  //   secure: true,
-  // };
 
   return res
     .status(200)

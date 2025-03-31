@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
-import { passwordResetOTP, passwordResetOTPVerify, clearError } from "../features/auth/authSlice";
+import {
+  passwordResetOTP,
+  passwordResetOTPVerify,
+  clearError,
+} from "../features/auth/authSlice";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -10,6 +14,7 @@ const ForgotPassword = () => {
   const { isLoading, error, isOTPSent, isPasswordReset } = useSelector(
     (state: RootState) => state.auth
   );
+  
 
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -29,7 +34,7 @@ const ForgotPassword = () => {
       const timer = setTimeout(() => {
         navigate("/login");
       }, 3000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isPasswordReset, navigate]);
@@ -42,21 +47,21 @@ const ForgotPassword = () => {
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Client-side validation
     if (newPassword !== confirmPassword) {
       setPasswordError("Passwords do not match");
       return;
     }
-    
+
     if (newPassword.length < 8) {
       setPasswordError("Password must be at least 8 characters");
       return;
     }
-    
+
     setPasswordError("");
     dispatch(clearError());
-    
+
     await dispatch(
       passwordResetOTPVerify({
         email,
@@ -71,24 +76,27 @@ const ForgotPassword = () => {
       <h2 className="text-2xl font-bold mb-6 text-center">
         {isOTPSent ? "Reset Password" : "Forgot Password"}
       </h2>
-      
+
       {isPasswordReset && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
           Password reset successfully! Redirecting to login...
         </div>
       )}
-      
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
-      
+
       {!isOTPSent ? (
         // Step 1: Request OTP
         <form onSubmit={handleRequestOTP}>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="email"
+            >
               Email Address
             </label>
             <input
@@ -100,7 +108,7 @@ const ForgotPassword = () => {
               required
             />
           </div>
-          
+
           <div className="flex items-center justify-between">
             <button
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
@@ -125,7 +133,10 @@ const ForgotPassword = () => {
         // Step 2: Verify OTP and reset password
         <form onSubmit={handleResetPassword}>
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="otp">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="otp"
+            >
               Enter OTP
             </label>
             <input
@@ -137,9 +148,12 @@ const ForgotPassword = () => {
               required
             />
           </div>
-          
+
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="newPassword">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="newPassword"
+            >
               New Password
             </label>
             <input
@@ -151,9 +165,12 @@ const ForgotPassword = () => {
               required
             />
           </div>
-          
+
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="confirmPassword">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="confirmPassword"
+            >
               Confirm Password
             </label>
             <input
@@ -164,12 +181,12 @@ const ForgotPassword = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
-            
+
             {passwordError && (
               <p className="text-red-500 text-xs mt-1">{passwordError}</p>
             )}
           </div>
-          
+
           <div className="flex items-center justify-between">
             <button
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"

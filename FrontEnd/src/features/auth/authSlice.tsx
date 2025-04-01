@@ -1,11 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
-  CurrentUserResponse,
   LoginFormData,
-  LoginResponse,
   RegisterFormData,
-  RegisterResponse,
   ResponseUser,
+  UpdateUserData,
   UserState,
 } from "../../types/AuthType";
 import { AuthService } from "../../services/AuthService";
@@ -16,9 +14,9 @@ export const login = createAsyncThunk(
   "auth/login",
   async (loginData: LoginFormData, { rejectWithValue }) => {
     try {
-      const res: LoginResponse | null = await AuthService.login(loginData);
+      const res = await AuthService.login(loginData);
 
-      if (res?.success) {
+      if (res?.success && res?.data) {
         localStorage.setItem("token", res.data.accessToken);
         localStorage.setItem("refreshToken", res.data.refreshToken);
         return res;
@@ -41,8 +39,7 @@ export const register = createAsyncThunk(
   "auth/regsiter",
   async (userData: RegisterFormData, { rejectWithValue }) => {
     try {
-      const res: RegisterResponse | null =
-        (await AuthService.register(userData)) || null;
+      const res = await AuthService.register(userData);
       if (!res) {
         return rejectWithValue("Register failed: No response from server");
       }
@@ -55,7 +52,7 @@ export const register = createAsyncThunk(
             password: userData.password,
           });
 
-          if (loginRes?.success) {
+          if (loginRes?.success && loginRes?.data) {
             localStorage.setItem("token", loginRes.data.accessToken);
             localStorage.setItem("accessToken", loginRes.data.accessToken);
           }
@@ -104,7 +101,7 @@ export const currentUser = createAsyncThunk(
   "auth/currentUser",
   async (_, { rejectWithValue }) => {
     try {
-      const res: CurrentUserResponse | null = await AuthService.currentUser();
+      const res = await AuthService.currentUser();
       return res;
     } catch (error: any) {
       console.error(
@@ -139,7 +136,7 @@ export const signInWithGoogle = createAsyncThunk(
 
       const response = await AuthService.googleAuth(googleUserData);
 
-      if (response?.success) {
+      if (response?.success && response?.data) {
         localStorage.setItem("token", response.data.accessToken);
         localStorage.setItem("refreshToken", response.data.refreshToken);
         return response;
@@ -207,6 +204,31 @@ export const passwordResetOTPVerify = createAsyncThunk(
   }
 );
 
+export const updateUserAccountDetails = createAsyncThunk(
+  "auth/updateUserAccountDetails",
+  async (data: UpdateUserData, { rejectWithValue }) => {
+    try {
+      const res = await AuthService.updateUserAccountDetail(data);
+      if (res?.success) {
+        return res;
+      } else {
+        return rejectWithValue(
+          res?.message || "Update User Account Details failed"
+        );
+      }
+    } catch (error: any) {
+      console.error(
+        "Update User Account Details Error:",
+        error.response?.data?.message ||
+          "Update User Account Details Failed at State"
+      );
+      return rejectWithValue(
+        error.response?.data || "An unknown error occurred"
+      );
+    }
+  }
+);
+
 const initialState: UserState = {
   user: null as ResponseUser | null,
   isAuthenticated: false,
@@ -235,7 +257,7 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.user = action.payload?.data?.user;
+        state.user = action.payload?.data?.user || null;
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
@@ -290,7 +312,7 @@ const authSlice = createSlice({
       .addCase(signInWithGoogle.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.user = action.payload?.data?.user;
+        state.user = action.payload?.data?.user || null;
       })
       .addCase(signInWithGoogle.rejected, (state, action) => {
         state.isLoading = false;
@@ -320,6 +342,20 @@ const authSlice = createSlice({
         state.isPasswordReset = true;
       })
       .addCase(passwordResetOTPVerify.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      //Update User Account Details
+      .addCase(updateUserAccountDetails.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUserAccountDetails.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload?.data || null;
+      })
+      .addCase(updateUserAccountDetails.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });

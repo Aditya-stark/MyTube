@@ -7,6 +7,7 @@ import {
   LogoutResponse,
   RegisterFormData,
   RegisterResponse,
+  UpdateUserData,
 } from "../types/AuthType";
 
 export const AuthService = {
@@ -36,7 +37,7 @@ export const AuthService = {
       return res.data;
     } catch (error) {
       console.log("error", error);
-      return null;
+      throw error;
     }
   },
   //Login user
@@ -49,8 +50,10 @@ export const AuthService = {
 
       return res.data;
     } catch (error: any) {
-      console.error("ERROR: ", error);
-      return null;
+      if (error.response?.data) {
+        return error.response.data as LoginResponse;
+      }
+      throw error;
     }
   },
 
@@ -62,7 +65,7 @@ export const AuthService = {
       return res.data;
     } catch (error) {
       console.log("error", error);
-      return null;
+      throw error;
     }
   },
 
@@ -76,7 +79,7 @@ export const AuthService = {
       return res.data;
     } catch (error) {
       console.log("error", error);
-      return null;
+      throw error;
     }
   },
 
@@ -96,7 +99,7 @@ export const AuthService = {
       }
     } catch (error: any) {
       console.error("ERROR: ", error);
-      return null;
+      return error;
     }
   },
 
@@ -104,13 +107,13 @@ export const AuthService = {
   resetPasswordOTP: async (email: string) => {
     try {
       console.log("emailService", email);
-      const res = await apiClient.post("/users/reset-password", {email});
+      const res = await apiClient.post("/users/reset-password", { email });
 
       console.log("res", res.data);
       return res.data;
     } catch (error) {
       console.log("error", error);
-      return null;
+      return error;
     }
   },
 
@@ -126,7 +129,20 @@ export const AuthService = {
       return res.data;
     } catch (error) {
       console.log("error", error);
-      return null;
+      return error;
+    }
+  },
+
+  // Update user details
+  updateUserAccountDetail: async (userData: UpdateUserData) => {
+    try {
+      const res = await apiClient.patch("/users/update-details", userData);
+
+      console.log("res", res.data);
+      return res.data;
+    } catch (error) {
+      console.log("error", error);
+      throw error;
     }
   },
 };

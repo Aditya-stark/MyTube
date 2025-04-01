@@ -294,6 +294,16 @@ const updateAccountUserDetails = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All Fields are required");
   }
 
+  //Check if the email or username is already exist in the database
+  const existingUser = await User.findOne({
+    $or: [{ email }, { username }],
+    _id: { $ne: req.user?._id }, // Exclude the current user
+  });
+
+  if (existingUser) {
+    throw new ApiError(409, "Email or username already exists");
+  } 
+
   //Find user and update by METHOD findByIdAndUpdate
   const user = await User.findByIdAndUpdate(
     req.user?._id,
@@ -304,7 +314,9 @@ const updateAccountUserDetails = asyncHandler(async (req, res) => {
         username,
       },
     },
-    { new: true }
+    {
+      new: true,
+    }
   ).select("-password");
 
   //return updated user
@@ -709,7 +721,6 @@ const passwordResetOTPVerify = asyncHandler(async (req, res) => {
   user.passwordResetOTP = undefined;
   user.passwordRestOTPExpires = undefined;
   await user.save();
-
 
   return res
     .status(200)

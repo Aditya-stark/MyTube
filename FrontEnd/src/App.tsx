@@ -9,6 +9,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import { currentUser } from "./features/auth/authSlice";
 import ForgotPassword from "./components/ForgotPassword";
+import UpdateProfile from "./components/UpdateProfile";
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -22,17 +24,21 @@ function App() {
   }, [dispatch]);
 
   return (
-    <Routes>
-      {/* Public routes */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
+    <>
+      <Toaster position="top-center" />
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
-      {/* Protected routes */}
-      <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<Dashboard />} />
-      </Route>
-    </Routes>
+        {/* Protected routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/edit-profile" element={<UpdateProfile />} />
+        </Route>
+      </Routes>
+    </>
   );
 }
 

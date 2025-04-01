@@ -46,6 +46,7 @@ import commentRouter from "./routes/comment.routes.js";
 import subscriptionRouter from "./routes/subscription.routes.js";
 import likeRouter from "./routes/like.routes.js";
 import playlistRouter from "./routes/playlist.routes.js";
+import { ApiError } from "./utils/ApiError.js";
 
 //User Routes
 app.use("/api/v1/users", userRouter);
@@ -62,5 +63,30 @@ app.use("/api/v1/subscriptions", subscriptionRouter);
 app.use("/api/v1/likes", likeRouter);
 //Playlist Routes
 app.use("/api/v1/playlists", playlistRouter);
+
+
+
+
+// Global error handling middleware
+app.use((err, req, res, next) => {
+  console.error("Error:", err);
+  
+  // Check if it's ApiError instance
+  if (err instanceof ApiError) {
+    return res.status(err.statusCode).json({
+      success: false,
+      message: err.message,
+      errors: err.errors || [],
+      statusCode: err.statusCode
+    });
+  }
+  
+  // For unexpected errors
+  return res.status(500).json({
+    success: false,
+    message: err.message || "Something went wrong",
+    statusCode: 500
+  });
+});
 
 export default app;

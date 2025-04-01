@@ -49,19 +49,8 @@ export interface RegisterResponse {
 export interface LoginResponse {
   statusCode: number;
   success: boolean;
-  data: {
-    user: {
-      _id: string;
-      username: string;
-      email: string;
-      fullName: string;
-      avatar: string;
-      coverImage?: string;
-      watchHistory: any[]; // If watchHistory has a fixed type, specify it
-      createdAt: string;
-      updatedAt: string;
-      __v: number;
-    };
+  data?: {
+    user: ResponseUser;
     accessToken: string;
     refreshToken: string;
   };
@@ -120,4 +109,11 @@ export interface GoogleAuthData {
   avatar: string | null;
   googleId: string;
   accessToken?: string;
+}
+
+// Update User Data
+export interface UpdateUserData {
+  username?: string;
+  email?: string;
+  fullName?: string;
 }

@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../store/store";
+import { AppDispatch, RootState } from "../../store/store";
 import {
   passwordResetOTP,
   passwordResetOTPVerify,
   clearError,
-} from "../features/auth/authSlice";
+} from "../../features/auth/authSlice";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();

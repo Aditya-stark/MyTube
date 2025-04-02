@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { login, signInWithGoogle } from "../features/auth/authSlice";
-import { AppDispatch, RootState } from "../store/store";
-import { LoginFormData } from "../types/AuthType";
+import { login, signInWithGoogle } from "../../features/auth/authSlice";
+import { AppDispatch, RootState } from "../../store/store";
+import { LoginFormData } from "../../types/AuthType";
 
 const LoginForm = () => {
   const dispatch = useDispatch<AppDispatch>();

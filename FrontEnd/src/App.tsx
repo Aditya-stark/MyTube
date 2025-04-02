@@ -8,8 +8,8 @@ import RegisterPage from "./pages/RegisterPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import { currentUser } from "./features/auth/authSlice";
-import ForgotPassword from "./components/ForgotPassword";
-import UpdateProfile from "./components/UpdateProfile";
+import ForgotPassword from "./components/auth/ForgotPassword";
+import UpdateProfile from "./components/auth/UpdateProfile";
 import { Toaster } from 'react-hot-toast';
 
 function App() {

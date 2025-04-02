@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { register } from "../features/auth/authSlice";
-import { AppDispatch, RootState } from "../store/store";
-import { RegisterFormData } from "../types/AuthType";
+import { register } from "../../features/auth/authSlice";
+import { AppDispatch, RootState } from "../../store/store";
+import { RegisterFormData } from "../../types/AuthType";
 
 const RegisterForm = () => {
   const dispatch = useDispatch<AppDispatch>();

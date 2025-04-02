@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../store/store";
+import { AppDispatch, RootState } from "../../store/store";
 import {
   updateUserAccountDetails,
   updateUserAvatar,
   updateUserCoverImage,
-} from "../features/auth/authSlice";
+} from "../../features/auth/authSlice";
 import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
 

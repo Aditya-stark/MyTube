@@ -145,4 +145,40 @@ export const AuthService = {
       throw error;
     }
   },
+
+  //Update User Avatar
+  updateUserAvatar: async (avatar: FormData) => {
+    try {
+      console.log("avatar", avatar);
+      const res = await apiClient.patch("/users/update-avatar", avatar);
+
+      if (res.data.success) {
+        return res.data;
+      } else {
+        throw new Error("Failed to update avatar");
+      }
+    } catch (error) {
+      console.log("error", error);
+      throw error;
+    }
+  },
+
+  //Update User Cover Image
+  updateUserCoverImage: async (coverImage: FormData) => {
+    try {
+      const res = await apiClient.patch(
+        "/users/update-cover-image",
+        coverImage
+      );
+
+      if (res.data.success) {
+        return res.data;
+      } else {
+        throw new Error("Failed to update cover image");
+      }
+    } catch (error) {
+      console.log("error", error);
+      throw error;
+    }
+  },
 };

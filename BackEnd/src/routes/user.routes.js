@@ -46,11 +46,12 @@ router.route("/update-details").patch(verifyJWT, updateAccountUserDetails);
 
 //Update Avatar
 router
-  .route("/avatar")
+  .route("/update-avatar")
   .patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
+
 // Update Cover Image
 router
-  .route("/cover-image")
+  .route("/update-cover-image")
   .patch(verifyJWT, upload.single("coverImage"), updateUserCoverImage);
 
 //Get User Profile Details

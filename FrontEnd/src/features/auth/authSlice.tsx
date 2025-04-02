@@ -229,6 +229,58 @@ export const updateUserAccountDetails = createAsyncThunk(
   }
 );
 
+// Update user avatar
+export const updateUserAvatar = createAsyncThunk(
+  "auth/updateUserAvatar",
+  async (avatar: File, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+
+      formData.append("avatar", avatar);
+      console.log("formData", formData.get("avatar"));
+
+      const res = await AuthService.updateUserAvatar(formData);
+
+      if (res?.success) {
+        return res;
+      }
+      throw new Error("Failed to update avatar");
+    } catch (error: any) {
+      console.error(
+        error.response?.data?.message || "Update User Avatar Failed at State"
+      );
+      return rejectWithValue(
+        error.response?.data || "An unknown error occurred"
+      );
+    }
+  }
+);
+
+// Update User Cover Image
+export const updateUserCoverImage = createAsyncThunk(
+  "auth/updateUserCoverImage",
+  async (coverImage: File, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      formData.append("coverImage", coverImage);
+
+      const res = await AuthService.updateUserCoverImage(formData);
+      if (res?.success) {
+        return res;
+      }
+      throw new Error("Failed to update cover image");
+    } catch (error: any) {
+      console.error(
+        error.response?.data?.message ||
+          "Update User Cover Image Failed at State"
+      );
+      return rejectWithValue(
+        error.response?.data || "An unknown error occurred"
+      );
+    }
+  }
+);
+
 const initialState: UserState = {
   user: null as ResponseUser | null,
   isAuthenticated: false,
@@ -356,6 +408,34 @@ const authSlice = createSlice({
         state.user = action.payload?.data || null;
       })
       .addCase(updateUserAccountDetails.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      //Update User Avatar
+      .addCase(updateUserAvatar.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUserAvatar.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload?.data || null;
+      })
+      .addCase(updateUserAvatar.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      //Update User Cover Image
+      .addCase(updateUserCoverImage.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateUserCoverImage.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.user = action.payload?.data || null;
+      })
+      .addCase(updateUserCoverImage.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });

@@ -6,11 +6,11 @@ import { Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Dashboard from "./pages/Dashboard";
 import { currentUser } from "./features/auth/authSlice";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import UpdateProfile from "./components/auth/UpdateProfile";
 import { Toaster } from 'react-hot-toast';
+import UserProfile from "./pages/UserProfile";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -34,7 +34,7 @@ function App() {
 
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<UserProfile />} />
           <Route path="/edit-profile" element={<UpdateProfile />} />
         </Route>
       </Routes>

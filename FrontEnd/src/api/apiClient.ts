@@ -64,7 +64,8 @@ apiClient.interceptors.response.use(
           "/users/refresh-token",
           refreshToken
         );
-        if (response.data.status) {
+
+        if (response.data.success) {
           const { accessToken, refreshToken: newRefreshToken } =
             response.data.data;
 
@@ -90,7 +91,6 @@ apiClient.interceptors.response.use(
         localStorage.removeItem("token");
         localStorage.removeItem("refreshToken");
         window.location.href = "/login";
-
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

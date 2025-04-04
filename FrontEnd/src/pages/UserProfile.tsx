@@ -2,11 +2,13 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { AppDispatch } from "../store/store";
-import {logout} from "../features/auth/authSlice";
+import { logout } from "../features/auth/authSlice";
+import UploadNewVideoPopUp from "../components/video/UploadNewVideoPopUp";
 
-const Dashboard: React.FC = () => {
+const UserProfile: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user);
   const dispatch = useDispatch<AppDispatch>();
+  const [isUploadPopupOpen, setIsUploadPopupOpen] = React.useState(false);
 
   const handleLogout = async () => {
     dispatch(logout());
@@ -32,7 +34,29 @@ const Dashboard: React.FC = () => {
             <div className="flex items-center">
               <div className="ml-3 relative">
                 <div className="flex items-center space-x-4">
-                  <span className="text-gray-700">{user.username}</span>
+                  {/* Upload Video Button */}
+                  <button
+                    onClick={() => setIsUploadPopupOpen(true)}
+                    className="bg-blue-500 hover:bg-blue-600 text-white opacity-50 hover:opacity-80 rounded-full p-2 pr-4 flex items-center justify-center transition-colors"
+                    aria-label="Upload video"
+                    title="Upload video"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    <p className="ml-1 text-sm font-medium">Upload</p>
+                  </button>
                   <button
                     onClick={handleLogout}
                     className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium"
@@ -45,6 +69,12 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </nav>
+
+      {/* Video Upload Popup */}
+      <UploadNewVideoPopUp
+        isOpen={isUploadPopupOpen}
+        onClose={() => setIsUploadPopupOpen(false)}
+      />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -229,4 +259,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+export default UserProfile;

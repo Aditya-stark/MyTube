@@ -11,7 +11,6 @@ const UploadNewVideoPopUp: React.FC<UploadNewVideoPopUpProps> = ({
   isOpen,
   onClose,
 }) => {
-  // const dispatch = useDispatch<AppDispatch>();
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
 
@@ -42,9 +41,9 @@ const UploadNewVideoPopUp: React.FC<UploadNewVideoPopUpProps> = ({
     thumbnail: File | null;
     video: File | null;
   }) => {
-    console.log("Submitting video with metadata:", data);
+    setVideoFile(null);
     
-
+    console.log("Submitting video with metadata:", data);
     //Cleanup
     onClose();
   };

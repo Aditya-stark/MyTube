@@ -37,20 +37,34 @@ const VideoMetadataStep: React.FC<VideoMetadataStepProps> = ({
   // HANDLE FINAL SUBMISSION WITH METADATA
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // clear all details
+    setThumbnail(null);
+    setThumbnailPreviewUrl(null);
+    setTitle("");
+    setDescription("");
+    if (thumbnailPreviewUrl) {
+      URL.revokeObjectURL(thumbnailPreviewUrl); // Clean up the object URL
+    }
+    if (videoPreviewUrl) {
+      URL.revokeObjectURL(videoPreviewUrl); // Clean up the object URL
+    }
     onSubmit({ title, description, thumbnail, video: videoFile });
   };
 
   return (
     <div className="h-full flex flex-col">
       <div className="flex-grow overflow-y-auto pr-2 pb-4">
-        <form onSubmit={handleSubmit} className="h-full">
+        <form onSubmit={handleSubmit} id="videoMetadataForm" className="h-full">
           <div className="flex flex-col md:flex-row h-full">
             {/* Left side: Metadata form */}
             <div className="md:w-2/3 pr-0 md:pr-6">
               <div className="space-y-6">
                 {/* Title Input */}
                 <div>
-                  <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="title"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Title
                   </label>
                   <input
@@ -67,7 +81,10 @@ const VideoMetadataStep: React.FC<VideoMetadataStepProps> = ({
 
                 {/* Description Input */}
                 <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="description"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Description
                   </label>
                   <textarea
@@ -155,11 +172,10 @@ const VideoMetadataStep: React.FC<VideoMetadataStepProps> = ({
                     />
                   </div>
                   <p className="mt-1 text-sm text-gray-500">
-                    Select or upload a picture that shows what's in your video. A
-                    good thumbnail stands out and draws viewers' attention.
+                    Select or upload a picture that shows what's in your video.
+                    A good thumbnail stands out and draws viewers' attention.
                   </p>
                 </div>
-
               </div>
             </div>
 
@@ -179,6 +195,10 @@ const VideoMetadataStep: React.FC<VideoMetadataStepProps> = ({
                 <p className="text-sm text-gray-500">
                   Size: {(videoFile?.size / 1048576).toFixed(2)} MB
                 </p>
+                <p className="text-sm text-gray-500">
+                  Thumbnail:{" "}
+                  {thumbnail ? thumbnail.name : "No thumbnail selected"}
+                </p>
               </div>
             </div>
           </div>
@@ -186,7 +206,7 @@ const VideoMetadataStep: React.FC<VideoMetadataStepProps> = ({
       </div>
 
       {/* Fixed position buttons at bottom */}
-      <div className="border-t border-gray-200 pt-4 mt-2 flex justify-between">
+      <div className="border-t border-gray-200 pt-4 mt-2 flex justify-between m-1">
         <button
           type="button"
           onClick={onBack}

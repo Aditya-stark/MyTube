@@ -41,186 +41,162 @@ const VideoMetadataStep: React.FC<VideoMetadataStepProps> = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="h-[calc(100%-80px)] overflow-hidden"
-    >
-      <div className="flex flex-col md:flex-row h-full">
-        {/* Left side: Metadata form (2/3 width on medium screens and above) */}
-        <div className="md:w-2/3 pr-0 md:pr-6 overflow-y-auto pb-4">
-          <div className="space-y-6">
-            {/* Title input */}
-            <div>
-              <label
-                htmlFor="title"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Title (required)
-              </label>
-              <input
-                type="text"
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+    <div className="h-full flex flex-col">
+      <div className="flex-grow overflow-y-auto pr-2 pb-4">
+        <form onSubmit={handleSubmit} className="h-full">
+          <div className="flex flex-col md:flex-row h-full">
+            {/* Left side: Metadata form */}
+            <div className="md:w-2/3 pr-0 md:pr-6">
+              <div className="space-y-6">
+                {/* Title Input */}
+                <div>
+                  <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Video title"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    required
+                  />
+                </div>
 
-            {/* Description input */}
-            <div>
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Description
-              </label>
-              <textarea
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Tell viewers about your video"
-                rows={6}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-              ></textarea>
-            </div>
+                {/* Description Input */}
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    Description
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    rows={4}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Video description"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                    required
+                  />
+                </div>
 
-            {/* Thumbnail upload */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Thumbnail
-              </label>
-              <div className="mt-1 flex items-start">
-                {thumbnailPreviewUrl ? (
-                  <div className="relative group">
-                    <div className="relative w-48 pb-[56.25%]">
-                      {/* 56.25% = 9/16 ratio */}
-                      <img
-                        src={thumbnailPreviewUrl}
-                        alt="Thumbnail preview"
-                        className="absolute top-0 left-0 w-full h-full object-cover rounded-md"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (thumbnailPreviewUrl) {
-                          URL.revokeObjectURL(thumbnailPreviewUrl);
-                        }
-                        setThumbnail(null);
-                        setThumbnailPreviewUrl(null);
-                      }}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
+                {/* Thumbnail upload*/}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Thumbnail
+                  </label>
+                  <div className="mt-1 flex items-start">
+                    {thumbnailPreviewUrl ? (
+                      <div className="relative group">
+                        <div className="relative w-48 pb-[56.25%]">
+                          {/* 56.25% = 9/16 ratio */}
+                          <img
+                            src={thumbnailPreviewUrl}
+                            alt="Thumbnail preview"
+                            className="absolute top-0 left-0 w-full h-full object-cover rounded-md"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (thumbnailPreviewUrl) {
+                              URL.revokeObjectURL(thumbnailPreviewUrl);
+                            }
+                            setThumbnail(null);
+                            setThumbnailPreviewUrl(null);
+                          }}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => thumbnailInputRef.current?.click()}
+                        className="flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
+                        <svg
+                          className="w-5 h-5 mr-2 text-gray-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0l-4 4m4-4v12"
+                          />
+                        </svg>
+                        Upload thumbnail
+                      </button>
+                    )}
+                    <input
+                      ref={thumbnailInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleThumbnailSelect}
+                    />
                   </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => thumbnailInputRef.current?.click()}
-                    className="flex items-center justify-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <svg
-                      className="w-5 h-5 mr-2 text-gray-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0l-4 4m4-4v12"
-                      />
-                    </svg>
-                    Upload thumbnail
-                  </button>
-                )}
-                <input
-                  ref={thumbnailInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleThumbnailSelect}
-                />
-              </div>
-              <p className="mt-1 text-sm text-gray-500">
-                Select or upload a picture that shows what's in your video. A
-                good thumbnail stands out and draws viewers' attention.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Right side: Video preview (1/3 width on medium screens and above) */}
-        <div className="md:w-1/3 mt-6 md:mt-0">
-          <div className="sticky top-0">
-            <h3 className="text-lg font-medium text-gray-900 mb-3">
-              Video Preview
-            </h3>
-            {videoPreviewUrl && (
-              <div className="rounded-lg overflow-hidden bg-gray-100 shadow">
-                <video
-                  src={videoPreviewUrl}
-                  controls
-                  className="w-full h-auto"
-                  preload="metadata"
-                ></video>
-                <div className="p-3">
-                  <p className="text-sm font-medium text-gray-700 mb-1 truncate">
-                    {videoFile.name}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {(videoFile.size / (1024 * 1024)).toFixed(2)} MB
-                  </p>
-                  <p className="text-xs text-gray-500">{videoFile.type}</p>
-                  <p className="text-xs text-gray-500">
-                    Thumbnail: {thumbnail?.name || "not selected"}
+                  <p className="mt-1 text-sm text-gray-500">
+                    Select or upload a picture that shows what's in your video. A
+                    good thumbnail stands out and draws viewers' attention.
                   </p>
                 </div>
+
               </div>
-            )}
+            </div>
+
+            {/* Right side: Video preview */}
+            <div className="md:w-1/3 mt-6 md:mt-0">
+              <div className="sticky top-0">
+                <div className="aspect-w-16 aspect-h-9 bg-gray-100 rounded-lg overflow-hidden">
+                  <video
+                    src={videoPreviewUrl || ""}
+                    controls
+                    className="object-contain w-full h-full"
+                  />
+                </div>
+                <p className="mt-2 text-sm text-gray-500">
+                  File: {videoFile?.name}
+                </p>
+                <p className="text-sm text-gray-500">
+                  Size: {(videoFile?.size / 1048576).toFixed(2)} MB
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
+        </form>
       </div>
 
-      {/* Action buttons - fixed at the bottom */}
-      <div className="flex justify-between pt-4 border-t border-gray-200 mt-6">
+      {/* Fixed position buttons at bottom */}
+      <div className="border-t border-gray-200 pt-4 mt-2 flex justify-between">
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
-          <svg
-            className="w-4 h-4 mr-2"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10 19l-7-7m0 0l7-7m-7 7h18"
-            />
-          </svg>
           Back
         </button>
         <button
           type="submit"
+          form="videoMetadataForm"
           disabled={!title.trim() || !thumbnail}
           className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
             !title.trim() || !thumbnail
@@ -244,7 +220,7 @@ const VideoMetadataStep: React.FC<VideoMetadataStepProps> = ({
           </svg>
         </button>
       </div>
-    </form>
+    </div>
   );
 };
 

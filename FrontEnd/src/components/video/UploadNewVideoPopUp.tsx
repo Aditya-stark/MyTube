@@ -15,14 +15,16 @@ const UploadNewVideoPopUp: React.FC<UploadNewVideoPopUpProps> = ({
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
 
+  // Prevent background scrolling when popup is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow = "auto";
     }
+
     return () => {
-      document.body.style.overflow = ""; // Cleanup on unmount
+      document.body.style.overflow = "auto";
     };
   }, [isOpen]);
 
@@ -41,7 +43,7 @@ const UploadNewVideoPopUp: React.FC<UploadNewVideoPopUpProps> = ({
     video: File | null;
   }) => {
     console.log("Submitting video with metadata:", data);
-    // Here you would typically dispatch an action to upload the video and metadata
+    
 
     //Cleanup
     onClose();
@@ -60,12 +62,15 @@ const UploadNewVideoPopUp: React.FC<UploadNewVideoPopUpProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      {/* Responsive sizing with adjusted padding */}
-      <div className="bg-white rounded-3xl shadow-lg w-full max-w-4xl min-h-[400px] sm:min-h-[500px] md:min-h-[600px] p-4 sm:p-6 md:p-8 relative">
+      
+      <div className="bg-white rounded-3xl shadow-lg w-full max-w-4xl 
+                    min-h-[400px] sm:min-h-[500px] md:min-h-[600px] 
+                    h-[80vh] 
+                    p-4 sm:p-6 md:p-8 relative">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-500 hover:text-gray-700"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-500 hover:text-gray-700 z-10"
           aria-label="Close"
         >
           <svg
@@ -84,21 +89,23 @@ const UploadNewVideoPopUp: React.FC<UploadNewVideoPopUpProps> = ({
         </button>
 
         {/* Title with responsive text size */}
-        <h2 className="text-2xl sm:text-2xl md:text-3xl font-bold text-left text-gray-800 mb-4 sm:mb-6 md:mb-8">
+        <h2 className="text-2xl sm:text-2xl md:text-3xl font-bold text-left text-gray-800 mb-4 sm:mb-6">
           Upload Video
         </h2>
 
-        {/* CONDITIONAL RENDERING BASED ON WHETHER A VIDEO IS SELECTED */}
-        {!videoFile ? (
-          <VideoSelectionStep onVideoSelect={handleVideoSelect} />
-        ) : (
-          <VideoMetadataStep
-            videoFile={videoFile}
-            videoPreviewUrl={videoPreviewUrl}
-            onSubmit={handleSubmitVideo}
-            onBack={handleBack}
-          />
-        )}
+        {/* Content with fixed height container */}
+        <div className="h-[calc(100%-8%)] sm:h-[calc(100%-10%)] md:h-[calc(100%-10%)] overflow-hidden">
+          {!videoFile ? (
+            <VideoSelectionStep onVideoSelect={handleVideoSelect} />
+          ) : (
+            <VideoMetadataStep
+              videoFile={videoFile}
+              videoPreviewUrl={videoPreviewUrl}
+              onSubmit={handleSubmitVideo}
+              onBack={handleBack}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

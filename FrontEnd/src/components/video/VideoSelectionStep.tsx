@@ -16,7 +16,7 @@ const VideoSelectionStep: React.FC<VideoSelectionStepProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-center h-[calc(100%-80px)] sm:h-[calc(100%-100px)] md:h-[calc(100%-120px)]">
+    <div className="flex items-center justify-center h-[calc(100%-80px)] sm:h-[calc(100%-100px)] md:h-[calc(100%-120px)] pt-14">
       <div className="flex flex-col items-center justify-center w-full">
         {/* Upload icon in the center */}
         <div className="flex flex-col items-center justify-center mb-8 sm:mb-10 md:mb-12">

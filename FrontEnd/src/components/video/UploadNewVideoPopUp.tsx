@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import VideoSelectionStep from "./VideoSelectionStep";
 import VideoMetadataStep from "./VideoMetadataStep";
+import { useDispatch } from "react-redux";
+import { publishVideo } from "../../features/videos/videoSlice";
+import { AppDispatch } from "../../store/store";
+import toast from "react-hot-toast";
 
 interface UploadNewVideoPopUpProps {
   isOpen: boolean;
@@ -11,6 +15,8 @@ const UploadNewVideoPopUp: React.FC<UploadNewVideoPopUpProps> = ({
   isOpen,
   onClose,
 }) => {
+  const dispatch = useDispatch<AppDispatch>();
+
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
 
@@ -42,9 +48,34 @@ const UploadNewVideoPopUp: React.FC<UploadNewVideoPopUpProps> = ({
     video: File | null;
   }) => {
     setVideoFile(null);
-    
+
     console.log("Submitting video with metadata:", data);
-    //Cleanup
+
+    // Sending data to the server
+    const formData = new FormData();
+
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+    if (data.thumbnail) {
+      formData.append("thumbnail", data.thumbnail);
+    }
+    if (data.video) {
+      formData.append("video", data.video);
+    }
+
+    try {
+      const response = await dispatch(publishVideo(formData));
+      console.log("Video upload response:", response);
+      if (response.meta.requestStatus === "fulfilled") {
+        toast.success("Video upload successful!");
+        console.log("Video upload successful:", response.payload);
+      } else {
+        toast.error("Video upload failed!");
+        console.error("Video upload failed:");
+      }
+    } catch (error) {
+      console.error("Error uploading the video:", error as any);
+    }
     onClose();
   };
 
@@ -61,11 +92,12 @@ const UploadNewVideoPopUp: React.FC<UploadNewVideoPopUpProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      
-      <div className="bg-white rounded-3xl shadow-lg w-full max-w-4xl 
+      <div
+        className="bg-white rounded-3xl shadow-lg w-full max-w-4xl 
                     min-h-[400px] sm:min-h-[500px] md:min-h-[600px] 
                     h-[80vh] 
-                    p-4 sm:p-6 md:p-8 relative">
+                    p-4 sm:p-6 md:p-8 relative"
+      >
         {/* Close button */}
         <button
           onClick={onClose}

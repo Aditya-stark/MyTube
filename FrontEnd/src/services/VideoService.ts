@@ -1,10 +1,39 @@
+import toast from "react-hot-toast";
 import apiClient from "../api/apiClient";
+
+let progressToastId: string;
 
 export const VideoService = {
   //Publish video
   publishVideo: async (VideoData: FormData) => {
     try {
-      const res = await apiClient.post("/videos/publish", VideoData);
+      progressToastId = toast.loading("uploading video...", {
+        duration: Infinity,
+      });
+
+      const res = await apiClient.post("/videos/publish", VideoData, {
+        timeout: 0,
+        headers: {
+          "Content-type": "mutilpart/form-data",
+        },
+        onUploadProgress: (progressEvent) => {
+          const percent = progressEvent.total
+            ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            : 0;
+
+          if (percent < 100) {
+            toast.loading(`Uploading video... ${percent}%`, {
+              id: progressToastId,
+            });
+          } else {
+            toast.loading(`Proccesing video...`, { id: progressToastId });
+          }
+        },
+      });
+
+      toast.dismiss(progressToastId);
+
+      console.log("Publish video response VIDEOSERVICE:", res);
       return res.data;
     } catch (error) {
       console.error("Error publishing video:", error);

@@ -38,6 +38,7 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
     // Check if it's a 401 and not already retried
     if (
+      error.response &&
       error.response.status === 401 &&
       !originalRequest._retry &&
       !originalRequest.url.includes("/login")

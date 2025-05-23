@@ -7,7 +7,7 @@ export const publishVideo = createAsyncThunk(
   async (videoData: FormData, { rejectWithValue }) => {
     try {
       const res = await VideoService.publishVideo(videoData);
-
+      console.log("Publish video response VIDEOSLICE:", res);
       if (res.success) {
         return res.data;
       }

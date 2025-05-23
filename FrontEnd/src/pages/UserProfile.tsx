@@ -145,114 +145,152 @@ const UserProfile: React.FC = () => {
               </div>
             </div>
           </div>
+          {/* Tabs for Home | My Videos | Tweets | Stats */}
 
-          {/* Stats and Activity */}
-          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {/* Video Stats */}
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-              <div className="p-5">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Video Stats
-                </h3>
-                <div className="mt-4 grid grid-cols-2 gap-4">
-                  <div className="col-span-1">
-                    <div className="flex flex-col border-2 border-gray-200 rounded-lg p-4 text-center">
-                      <dt className="text-sm font-medium text-gray-500">
-                        Videos
-                      </dt>
-                      <dd className="text-3xl font-extrabold text-blue-600">
-                        0
-                      </dd>
+          <div className="mt-8">
+            <div className="border-b border-gray-200">
+              <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                {/* Home Tab */}
+                <button
+                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                    true
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                  // Only one tab for now, so always active
+                  type="button"
+                >
+                  Home
+                </button>
+                {/* Videos Tab */}
+                <button
+                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
+                    false
+                      ? "border-blue-500 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                  type="button"
+                >
+                  My Videos
+                </button>
+              </nav>
+            </div>
+            {/* Tab Content */}
+            <div className="pt-6">
+              {/* Stats Content */}
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                {/* Video Stats */}
+                <div className="bg-white shadow rounded-lg overflow-hidden">
+                  <div className="p-5">
+                    <h3 className="text-lg font-medium text-gray-900">
+                      Video Stats
+                    </h3>
+                    <div className="mt-4 grid grid-cols-2 gap-4">
+                      <div className="col-span-1">
+                        <div className="flex flex-col border-2 border-gray-200 rounded-lg p-4 text-center">
+                          <dt className="text-sm font-medium text-gray-500">
+                            Videos
+                          </dt>
+                          <dd className="text-3xl font-extrabold text-blue-600">
+                            0
+                          </dd>
+                        </div>
+                      </div>
+                      <div className="col-span-1">
+                        <div className="flex flex-col border-2 border-gray-200 rounded-lg p-4 text-center">
+                          <dt className="text-sm font-medium text-gray-500">
+                            Views
+                          </dt>
+                          <dd className="text-3xl font-extrabold text-blue-600">
+                            0
+                          </dd>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="col-span-1">
-                    <div className="flex flex-col border-2 border-gray-200 rounded-lg p-4 text-center">
-                      <dt className="text-sm font-medium text-gray-500">
-                        Views
-                      </dt>
-                      <dd className="text-3xl font-extrabold text-blue-600">
-                        0
-                      </dd>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 px-5 py-3">
-                <div className="text-sm">
-                  <Link
-                    to="/videos"
-                    className="font-medium text-blue-600 hover:text-blue-500"
-                  >
-                    View all videos
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Subscribers */}
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-              <div className="p-5">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Subscribers
-                </h3>
-                <div className="mt-4">
-                  <div className="flex flex-col border-2 border-gray-200 rounded-lg p-4 text-center">
-                    <dt className="text-sm font-medium text-gray-500">
-                      Total Subscribers
-                    </dt>
-                    <dd className="text-3xl font-extrabold text-blue-600">0</dd>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 px-5 py-3">
-                <div className="text-sm">
-                  <Link
-                    to="/subscribers"
-                    className="font-medium text-blue-600 hover:text-blue-500"
-                  >
-                    Manage subscribers
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Account Status */}
-            <div className="bg-white shadow rounded-lg overflow-hidden">
-              <div className="p-5">
-                <h3 className="text-lg font-medium text-gray-900">
-                  Account Status
-                </h3>
-                <div className="mt-4">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <svg
-                        className="h-6 w-6 text-green-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
+                  <div className="bg-gray-50 px-5 py-3">
+                    <div className="text-sm">
+                      <Link
+                        to="/videos"
+                        className="font-medium text-blue-600 hover:text-blue-500"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
+                        View all videos
+                      </Link>
                     </div>
-                    <div className="ml-3">
-                      <h3 className="text-sm font-medium text-gray-900">
-                        Account Active
-                      </h3>
-                      <p className="mt-1 text-sm text-gray-500">
-                        Your account is in good standing
-                      </p>
+                  </div>
+                </div>
+
+                {/* Subscribers */}
+                <div className="bg-white shadow rounded-lg overflow-hidden">
+                  <div className="p-5">
+                    <h3 className="text-lg font-medium text-gray-900">
+                      Subscribers
+                    </h3>
+                    <div className="mt-4">
+                      <div className="flex flex-col border-2 border-gray-200 rounded-lg p-4 text-center">
+                        <dt className="text-sm font-medium text-gray-500">
+                          Total Subscribers
+                        </dt>
+                        <dd className="text-3xl font-extrabold text-blue-600">
+                          0
+                        </dd>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 px-5 py-3">
+                    <div className="text-sm">
+                      <Link
+                        to="/subscribers"
+                        className="font-medium text-blue-600 hover:text-blue-500"
+                      >
+                        Manage subscribers
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Account Status */}
+                <div className="bg-white shadow rounded-lg overflow-hidden">
+                  <div className="p-5">
+                    <h3 className="text-lg font-medium text-gray-900">
+                      Account Status
+                    </h3>
+                    <div className="mt-4">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <svg
+                            className="h-6 w-6 text-green-500"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="text-sm font-medium text-gray-900">
+                            Account Active
+                          </h3>
+                          <p className="mt-1 text-sm text-gray-500">
+                            Your account is in good standing
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
+
+
         </div>
       </div>
     </div>

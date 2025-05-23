@@ -5,7 +5,7 @@ interface VideoSelectionStepProps {
 }
 
 const VideoSelectionStep: React.FC<VideoSelectionStepProps> = ({
-  onVideoSelect,
+  onVideoSelect, 
 }) => {
   const videoInputRef = useRef<HTMLInputElement>(null);
 

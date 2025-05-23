@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   deleteVideo,
   getAllVideos,
+  getAllVideosByUserId,
   getVideoById,
   publishAVideo,
   togglePublishStatus,
@@ -15,6 +16,10 @@ const router = Router();
 
 //Get Videos according to the search query
 router.route("/getVideos").get(getAllVideos);
+
+//Get All Videos of the user
+router.route("/user-videos").get(verifyJWT, getAllVideosByUserId);
+
 //Publish a video
 router.route("/publish").post(
   upload.fields([
@@ -30,7 +35,7 @@ router.route("/:videoId").get(getVideoById);
 //Update Video
 router
   .route("/update/:videoId")
-  .patch(upload.single("thumbnail"), verifyJWT, verifiedVideo,  updatedVideo);
+  .patch(upload.single("thumbnail"), verifyJWT, verifiedVideo, updatedVideo);
 
 //Delete Video
 router.route("/delete/:videoId").delete(verifyJWT, verifiedVideo, deleteVideo);

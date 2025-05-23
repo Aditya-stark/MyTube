@@ -1,3 +1,10 @@
+/**
+ * This file handles user authentication state for the app.
+ * It keeps track of whether a user is logged in, loading, or has errors.
+ * It has functions for login, register, logout, Google sign-in, password reset, and updating user info.
+ * It saves tokens in localStorage and updates the user state in Redux.
+ * Use this file to manage all authentication actions in your React app.
+ */
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
   LoginFormData,

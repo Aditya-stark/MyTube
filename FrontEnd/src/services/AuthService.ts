@@ -1,3 +1,17 @@
+/**
+ * AuthService provides a set of methods for handling user authentication and account management
+ * in the frontend application. It make the backend API calls to perform various actions
+ * It communicates with the backend API to perform actions such as:
+ * - Registering new users (with avatar and optional cover image)
+ * - Logging in and logging out users
+ * - Fetching the current logged-in user's information
+ * - Authenticating users via Google
+ * - Handling password reset via OTP (sending and verifying)
+ * - Updating user account details, avatar, and cover image
+ *
+ * This service acts as a central place for all authentication-related API calls,
+ * making it easier to manage user sessions and profile updates throughout the app.
+ */
 import apiClient from "../api/apiClient";
 import {
   CurrentUserResponse,

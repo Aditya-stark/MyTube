@@ -18,12 +18,11 @@ const VideoMetadataStep: React.FC<VideoMetadataStepProps> = ({
   onSubmit,
   onBack,
 }) => {
+
   let [title, setTitle] = useState(videoFile.name.split(".")[0]);
   const [description, setDescription] = useState("");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
-  const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(
-    null
-  );
+  const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(null);
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   //HANDLE THUMBNAIL SUBMISSION

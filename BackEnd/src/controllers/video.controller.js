@@ -124,6 +124,94 @@ const getAllVideos = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, videos, "Videos Fetched Successfully"));
 });
+
+// Get all videos by userId
+
+const getAllVideosByUserId = asyncHandler(async (req, res) => {
+  // Get the userId from the request parameters
+  // Get the page , limit , sortBy and sortType from the request
+  // Convert the page and limit to numbers
+  // Validate the page and limit
+  // Validate the sortBy and sortType
+  // Find all videos by the userId
+  // Construct sorting options based on sortBy and sortType
+  // Fetch videos from the database with applied filters, pagination and sorting
+  // Handle cases where no videos are found and return an appropriate response
+  // Return the paginated list of videos along with metadata (total count, current page, total pages)
+  // Handle any errors and send an appropriate error response
+
+  // Get the userId from req.user
+  const userId = req.user._id;
+
+  // Get the page , limit , sortBy and sortType from the request
+  const { limit = 10, lastVideoId, sortBy, sortType } = req.query;
+  const parsedLimit = parseInt(limit, 10);
+
+  // Validate the page and limit
+  if (isNaN(parsedLimit) || parsedLimit < 1) {
+    return res.status(400).json(new ApiError(400, "Invalid Limit"));
+  }
+
+  // Validate the sortBy and SortType
+  if (sortBy && !["latest" || "oldest" || "most-viewed"].includes(sortBy)) {
+    return res.status(400).json(new ApiError(400, "Invalid sortBy value"));
+  }
+
+  if (sortType && !["asc" || "desc"].includes(sortType)) {
+    return res.status(400).json(new ApiError(400, "Invalid sortType value"));
+  }
+
+  // Find all videos by the userId
+  const searchFilter = { owner: userId };
+
+  // Add cursor condition if lastVideoId is provided
+  if (lastVideoId) {
+    try {
+      const lastVideo = await Video.findById(lastVideoId);
+      if (!lastVideo) {
+        return res.status(400).json(new ApiError(400, "Invalid lastVideoId"));
+      }
+
+      searchFilter.createdAt = { $lt: lastVideo.createdAt };
+    } catch (error) {
+      return res.status(400).json(new ApiError(400, "Invalid lastVideoId"));
+    }
+  }
+
+  // Construct sorting options based on sortBy and sortType
+  let sort = {};
+  if (sortBy === "latest") {
+    sort.createdAt = sortType === "asc" ? 1 : -1;
+  } else if (sortBy === "oldest") {
+    sort.createdAt = sortType === "asc" ? 1 : -1;
+  } else if (sortBy === "most-viewed") {
+    sort.views = -1;
+  } else {
+    sort.createdAt = -1; //default latest first
+  }
+  // Fetch videos from the database with applied filters, pagination and sorting
+  const videos = await Video.find(searchFilter)
+    .sort(sort)
+    .limit(parsedLimit)
+    .populate("owner", "username avatar");
+
+  // Check if the are more videos available
+  const hasMoreVideos = videos.length === parsedLimit;
+
+  // Return the videos with a flag indicating if there are more videos
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        videos,
+        hasMoreVideos,
+        lastVideoId: videos.length > 0 ? videos[videos.length - 1]._id : null,
+      },
+      "Videos fetched successfully"
+    )
+  );
+});
+
 // Publish a video
 const publishAVideo = asyncHandler(async (req, res) => {
   // Get information from the req.body
@@ -351,6 +439,7 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
 
 export {
   getAllVideos,
+  getAllVideosByUserId,
   publishAVideo,
   getVideoById,
   updatedVideo,

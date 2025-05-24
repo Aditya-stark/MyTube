@@ -16,7 +16,7 @@ const videoSchema = new Schema(
       required: true,
     },
     description: {
-      type: String, 
+      type: String,
       required: true,
     },
     views: {
@@ -30,6 +30,11 @@ const videoSchema = new Schema(
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+    },
+    duration: {
+      type: String,
+      required: true,
+      default: "0:00",
     },
   },
   { timestamps: true }

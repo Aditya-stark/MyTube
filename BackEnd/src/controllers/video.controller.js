@@ -245,6 +245,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     thumbnail: thumbnailCloudinary.url,
     title,
     description,
+    duration: videoCloudinary.duration,
     owner: req.user._id,
     views: 0,
     isPublished,

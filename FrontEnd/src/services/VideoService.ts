@@ -40,6 +40,18 @@ export const VideoService = {
       throw error;
     }
   },
+
+  // Get user Videos
+  getUserVideos: async () => {
+    try {
+      const res = await apiClient.get("/videos/videos");
+      console.log("Get user videos response VIDEOSERVICE:", res);
+      return res.data;
+    } catch (error) {
+      console.error("Error fetching user videos:", error);
+      throw error;
+    }
+  },
 };
 
 export default VideoService;

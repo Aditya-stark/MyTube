@@ -1,15 +1,25 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { AppDispatch } from "../store/store";
+import { AppDispatch, RootState } from "../store/store";
 import { logout } from "../features/auth/authSlice";
 import UploadNewVideoPopUp from "../components/video/UploadNewVideoPopUp";
+import { getUserVideos } from "../features/videos/videoSlice";
+import VideoCard from "../components/video/VideoCard";
 
 const UserProfile: React.FC = () => {
   const user = useSelector((state: any) => state.auth.user);
   const dispatch = useDispatch<AppDispatch>();
   const [isUploadPopupOpen, setIsUploadPopupOpen] = React.useState(false);
+  const [activeTab, setActiveTab] = useState("home");
+  const { videos, isLoading } = useSelector((state: RootState) => state.videos);
 
+  // Get the user videos when the component mounts or when the active tab changes
+  useEffect(() => {
+    if (activeTab === "videos") {
+      dispatch(getUserVideos());
+    }
+  }, [activeTab, dispatch, isUploadPopupOpen]);
   const handleLogout = async () => {
     dispatch(logout());
   };
@@ -25,7 +35,7 @@ const UserProfile: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header/Navigation */}
-      <nav className="bg-white shadow-md">
+      <nav className="bg-white shadow-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
@@ -153,11 +163,11 @@ const UserProfile: React.FC = () => {
                 {/* Home Tab */}
                 <button
                   className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
-                    true
+                    activeTab === "home"
                       ? "border-blue-500 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
-                  // Only one tab for now, so always active
+                  onClick={() => setActiveTab("home")}
                   type="button"
                 >
                   Home
@@ -165,10 +175,11 @@ const UserProfile: React.FC = () => {
                 {/* Videos Tab */}
                 <button
                   className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
-                    false
+                    activeTab === "videos"
                       ? "border-blue-500 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
+                  onClick={() => setActiveTab("videos")}
                   type="button"
                 >
                   My Videos
@@ -177,120 +188,178 @@ const UserProfile: React.FC = () => {
             </div>
             {/* Tab Content */}
             <div className="pt-6">
-              {/* Stats Content */}
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                {/* Video Stats */}
-                <div className="bg-white shadow rounded-lg overflow-hidden">
-                  <div className="p-5">
-                    <h3 className="text-lg font-medium text-gray-900">
-                      Video Stats
-                    </h3>
-                    <div className="mt-4 grid grid-cols-2 gap-4">
-                      <div className="col-span-1">
+              {activeTab === "home" && (
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                  {/* Video Stats */}
+                  <div className="bg-white shadow rounded-lg overflow-hidden">
+                    <div className="p-5">
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Video Stats
+                      </h3>
+                      <div className="mt-4 grid grid-cols-2 gap-4">
+                        <div className="col-span-1">
+                          <div className="flex flex-col border-2 border-gray-200 rounded-lg p-4 text-center">
+                            <dt className="text-sm font-medium text-gray-500">
+                              Videos
+                            </dt>
+                            <dd className="text-3xl font-extrabold text-blue-600">
+                              0
+                            </dd>
+                          </div>
+                        </div>
+                        <div className="col-span-1">
+                          <div className="flex flex-col border-2 border-gray-200 rounded-lg p-4 text-center">
+                            <dt className="text-sm font-medium text-gray-500">
+                              Views
+                            </dt>
+                            <dd className="text-3xl font-extrabold text-blue-600">
+                              0
+                            </dd>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 px-5 py-3">
+                      <div className="text-sm">
+                        <Link
+                          to="/videos"
+                          className="font-medium text-blue-600 hover:text-blue-500"
+                        >
+                          View all videos
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Subscribers */}
+                  <div className="bg-white shadow rounded-lg overflow-hidden">
+                    <div className="p-5">
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Subscribers
+                      </h3>
+                      <div className="mt-4">
                         <div className="flex flex-col border-2 border-gray-200 rounded-lg p-4 text-center">
                           <dt className="text-sm font-medium text-gray-500">
-                            Videos
+                            Total Subscribers
                           </dt>
                           <dd className="text-3xl font-extrabold text-blue-600">
                             0
                           </dd>
                         </div>
                       </div>
-                      <div className="col-span-1">
-                        <div className="flex flex-col border-2 border-gray-200 rounded-lg p-4 text-center">
-                          <dt className="text-sm font-medium text-gray-500">
-                            Views
-                          </dt>
-                          <dd className="text-3xl font-extrabold text-blue-600">
-                            0
-                          </dd>
+                    </div>
+                    <div className="bg-gray-50 px-5 py-3">
+                      <div className="text-sm">
+                        <Link
+                          to="/subscribers"
+                          className="font-medium text-blue-600 hover:text-blue-500"
+                        >
+                          Manage subscribers
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Account Status */}
+                  <div className="bg-white shadow rounded-lg overflow-hidden">
+                    <div className="p-5">
+                      <h3 className="text-lg font-medium text-gray-900">
+                        Account Status
+                      </h3>
+                      <div className="mt-4">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0">
+                            <svg
+                              className="h-6 w-6 text-green-500"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                          </div>
+                          <div className="ml-3">
+                            <h3 className="text-sm font-medium text-gray-900">
+                              Account Active
+                            </h3>
+                            <p className="mt-1 text-sm text-gray-500">
+                              Your account is in good standing
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div className="bg-gray-50 px-5 py-3">
-                    <div className="text-sm">
-                      <Link
-                        to="/videos"
-                        className="font-medium text-blue-600 hover:text-blue-500"
-                      >
-                        View all videos
-                      </Link>
-                    </div>
-                  </div>
                 </div>
-
-                {/* Subscribers */}
-                <div className="bg-white shadow rounded-lg overflow-hidden">
-                  <div className="p-5">
-                    <h3 className="text-lg font-medium text-gray-900">
-                      Subscribers
-                    </h3>
-                    <div className="mt-4">
-                      <div className="flex flex-col border-2 border-gray-200 rounded-lg p-4 text-center">
-                        <dt className="text-sm font-medium text-gray-500">
-                          Total Subscribers
-                        </dt>
-                        <dd className="text-3xl font-extrabold text-blue-600">
-                          0
-                        </dd>
-                      </div>
+              )}
+              {/* Video Tab*/}
+              {activeTab === "videos" && (
+                <div>
+                  <h2 className="text-xl font-bold mb-4">My Videos</h2>
+                  {isLoading ? (
+                    <div className="flex justify-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
                     </div>
-                  </div>
-                  <div className="bg-gray-50 px-5 py-3">
-                    <div className="text-sm">
-                      <Link
-                        to="/subscribers"
-                        className="font-medium text-blue-600 hover:text-blue-500"
+                  ) : videos && videos.videos && videos.videos.length > 0 ? (
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {videos.videos.map((video) => (
+                        <VideoCard key={video._id} video={video} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-10">
+                      <svg
+                        className="mx-auto h-12 w-12 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
                       >
-                        Manage subscribers
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Account Status */}
-                <div className="bg-white shadow rounded-lg overflow-hidden">
-                  <div className="p-5">
-                    <h3 className="text-lg font-medium text-gray-900">
-                      Account Status
-                    </h3>
-                    <div className="mt-4">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <h3 className="mt-2 text-sm font-medium text-gray-900">
+                        No videos
+                      </h3>
+                      <p className="mt-1 text-sm text-gray-500">
+                        You haven't uploaded any videos yet.
+                      </p>
+                      <div className="mt-6">
+                        <button
+                          onClick={() => setIsUploadPopupOpen(true)}
+                          className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
                           <svg
-                            className="h-6 w-6 text-green-500"
+                            className="-ml-1 mr-2 h-5 w-5"
                             xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
                           >
                             <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                              fillRule="evenodd"
+                              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                              clipRule="evenodd"
                             />
                           </svg>
-                        </div>
-                        <div className="ml-3">
-                          <h3 className="text-sm font-medium text-gray-900">
-                            Account Active
-                          </h3>
-                          <p className="mt-1 text-sm text-gray-500">
-                            Your account is in good standing
-                          </p>
-                        </div>
+                          Upload a video
+                        </button>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
-              </div>
+              )}
             </div>
           </div>
-
-
-
         </div>
       </div>
     </div>

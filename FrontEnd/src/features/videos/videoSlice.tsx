@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { PaginatedVideos, UploadVideoData, Video } from "../../types/VideoType";
+import { PaginatedVideos, Video } from "../../types/VideoType";
 import VideoService from "../../services/VideoService";
 
 export const publishVideo = createAsyncThunk(
@@ -14,6 +14,25 @@ export const publishVideo = createAsyncThunk(
       throw rejectWithValue(res.message);
     } catch (error: any) {
       console.error("Error publishing video:", error);
+      return rejectWithValue(
+        error.response?.data.message || "Something went wrong"
+      );
+    }
+  }
+);
+
+export const getUserVideos = createAsyncThunk(
+  "videos/getUserVideos",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await VideoService.getUserVideos();
+      console.log("Get user videos response VIDEOSLICE:", res);
+      if (res.success) {
+        return res.data;
+      }
+      throw rejectWithValue(res.message);
+    } catch (error: any) {
+      console.error("Error fectching user videos:", error);
       return rejectWithValue(
         error.response?.data.message || "Something went wrong"
       );
@@ -69,6 +88,20 @@ const videoSlice = createSlice({
       .addCase(publishVideo.rejected, (state, action) => {
         state.isPublishing = false;
         state.error = action.payload as string;
+      })
+      .addCase(getUserVideos.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getUserVideos.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.videos = action.payload;
+        console.log("Videos API Structure:", action.payload);
+      })
+      .addCase(getUserVideos.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        state.videos = null;
       });
   },
 });

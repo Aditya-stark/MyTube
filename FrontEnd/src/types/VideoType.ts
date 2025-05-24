@@ -4,6 +4,7 @@ export interface Video {
   description: string;
   videoFile: string;
   thumbnail: string;
+  duration: number; // in seconds
   views: number;
   isPublished: boolean;
   owner: {
@@ -31,16 +32,10 @@ export interface PublishVideo {
 }
 
 export interface PaginatedVideos {
-  docs: Video[];
+  videos: Video[];
   totalDocs: number;
-  limit: number;
-  page: number;
-  totalPages: number;
-  pagingCounter: 1;
-  hasPrevPage: boolean;
-  hasNextPage: boolean;
-  prevPage: number | null;
-  nextPage: number | null;
+  hasMoreVideos: boolean;
+  lastVideoId: string;
 }
 
 export interface UploadVideoData {

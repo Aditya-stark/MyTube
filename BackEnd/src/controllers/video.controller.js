@@ -144,7 +144,7 @@ const getAllVideosByUserId = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   // Get the page , limit , sortBy and sortType from the request
-  const { limit = 10, lastVideoId, sortBy, sortType } = req.query;
+  const { limit = 4, lastVideoId, sortBy, sortType } = req.query;
   const parsedLimit = parseInt(limit, 10);
 
   // Validate the page and limit

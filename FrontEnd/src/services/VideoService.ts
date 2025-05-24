@@ -42,9 +42,13 @@ export const VideoService = {
   },
 
   // Get user Videos
-  getUserVideos: async () => {
+  getUserVideos: async (lastVideoId?: string) => {
     try {
-      const res = await apiClient.get("/videos/videos");
+      const url = lastVideoId
+        ? `/videos/videos?lastVideoId=${lastVideoId}`
+        : "/videos/videos";
+
+      const res = await apiClient.get(url);
       console.log("Get user videos response VIDEOSERVICE:", res);
       return res.data;
     } catch (error) {

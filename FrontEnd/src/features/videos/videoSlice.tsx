@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { PaginatedVideos, Video } from "../../types/VideoType";
 import VideoService from "../../services/VideoService";
+import { RootState } from "../../store/store";
 
 export const publishVideo = createAsyncThunk(
   "videos/publish",
@@ -40,6 +41,29 @@ export const getUserVideos = createAsyncThunk(
   }
 );
 
+export const loadMoreUserVideos = createAsyncThunk(
+  "videos/getMoreUserVideos",
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as RootState;
+      const lastVideoId = state.videos.lastVideoId;
+      if (!lastVideoId) {
+        return { videos: [], hasMoreVideos: false, lastVideoId: null };
+      }
+      const res = await VideoService.getUserVideos(lastVideoId);
+      console.log("Get more user videos response VIDEOSLICE:", res);
+      if (res.success) {
+        return res.data;
+      }
+    } catch (error: any) {
+      console.error("Error fetching more user videos:", error);
+      return rejectWithValue(
+        error.response?.data.message || "Something went wrong"
+      );
+    }
+  }
+);
+
 interface VideoState {
   videos: PaginatedVideos | null;
   currentVideo: Video | null;
@@ -47,6 +71,9 @@ interface VideoState {
   error: string | null;
   isPublishing: boolean;
   isPublished: boolean;
+  hasMoreVideos?: boolean;
+  lastVideoId?: string | null;
+  isLoadingMore?: boolean;
 }
 
 const initialState: VideoState = {
@@ -56,6 +83,9 @@ const initialState: VideoState = {
   error: null,
   isPublishing: false,
   isPublished: false,
+  hasMoreVideos: false,
+  lastVideoId: null,
+  isLoadingMore: false,
 };
 
 const videoSlice = createSlice({
@@ -96,16 +126,35 @@ const videoSlice = createSlice({
       .addCase(getUserVideos.fulfilled, (state, action) => {
         state.isLoading = false;
         state.videos = action.payload;
+        state.hasMoreVideos = action.payload.hasMoreVideos;
+        state.lastVideoId = action.payload.lastVideoId || null;
         console.log("Videos API Structure:", action.payload);
       })
       .addCase(getUserVideos.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
         state.videos = null;
+      })
+      .addCase(loadMoreUserVideos.pending, (state) => {
+        state.isLoadingMore = true;
+        state.error = null;
+      })
+      .addCase(loadMoreUserVideos.fulfilled, (state, action) => {
+        state.isLoadingMore = false;
+        if (state.videos && action.payload.videos.length > 0) {
+          state.videos.videos.push(...action.payload.videos);
+          state.hasMoreVideos = action.payload.hasMoreVideos;
+          state.lastVideoId = action.payload.lastVideoId || null;
+        }
+      })
+      .addCase(loadMoreUserVideos.rejected, (state, action) => {
+        state.isLoadingMore = false;
+        state.error = action.payload as string;
       });
   },
 });
 
 export const { clearVideoError, clearCurrentVideo, resetPublishState } =
   videoSlice.actions;
+
 export default videoSlice.reducer;

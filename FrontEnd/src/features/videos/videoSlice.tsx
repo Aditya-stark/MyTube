@@ -24,7 +24,7 @@ export const publishVideo = createAsyncThunk(
 
 export const getUserVideos = createAsyncThunk(
   "videos/getUserVideos",
-  async ({ sortBy }: { sortBy: string }, { rejectWithValue }) => {
+  async ({ sortBy }: { sortBy?: string }, { rejectWithValue }) => {
     try {
       const res = await VideoService.getUserVideos(undefined, sortBy);
       console.log("Get user videos response VIDEOSLICE:", res);

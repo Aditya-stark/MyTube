@@ -13,12 +13,16 @@ const UserProfile: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [isUploadPopupOpen, setIsUploadPopupOpen] = React.useState(false);
   const [activeTab, setActiveTab] = useState("home");
-  const { videos, isLoading, isLoadingMore = false } = useSelector((state: RootState) => state.videos);
+  const {
+    videos,
+    isLoading,
+    isLoadingMore = false,
+  } = useSelector((state: RootState) => state.videos);
 
   // Get the user videos when the component mounts or when the active tab changes
   useEffect(() => {
     if (activeTab === "videos") {
-      dispatch(getUserVideos());
+      dispatch(getUserVideos({}));
     }
   }, [activeTab, dispatch, isUploadPopupOpen]);
 
@@ -158,13 +162,10 @@ const UserProfile: React.FC = () => {
             </div>
           </div>
 
-
-
           {/* Tabs for Home | My Videos | Tweets | Stats */}
           <div className="mt-8">
             <div className="border-b border-gray-200">
               <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-
                 {/* Home Tab */}
                 <button
                   className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${
@@ -193,12 +194,9 @@ const UserProfile: React.FC = () => {
               </nav>
             </div>
 
-            
             {/* Tab Content */}
             <div className="pt-6">
-              {activeTab === "home" && (
-                <HomeTab user={user} />
-              )}
+              {activeTab === "home" && <HomeTab user={user} />}
               {activeTab === "videos" && (
                 <VideoTab
                   videos={videos}

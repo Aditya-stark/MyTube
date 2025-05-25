@@ -24,9 +24,9 @@ export const publishVideo = createAsyncThunk(
 
 export const getUserVideos = createAsyncThunk(
   "videos/getUserVideos",
-  async (_, { rejectWithValue }) => {
+  async ({ sortBy }: { sortBy: string }, { rejectWithValue }) => {
     try {
-      const res = await VideoService.getUserVideos();
+      const res = await VideoService.getUserVideos(undefined, sortBy);
       console.log("Get user videos response VIDEOSLICE:", res);
       if (res.success) {
         return res.data;
@@ -43,14 +43,14 @@ export const getUserVideos = createAsyncThunk(
 
 export const loadMoreUserVideos = createAsyncThunk(
   "videos/getMoreUserVideos",
-  async (_, { getState, rejectWithValue }) => {
+  async ({ sortBy }: { sortBy: string }, { getState, rejectWithValue }) => {
     try {
       const state = getState() as RootState;
       const lastVideoId = state.videos.lastVideoId;
       if (!lastVideoId) {
         return { videos: [], hasMoreVideos: false, lastVideoId: null };
       }
-      const res = await VideoService.getUserVideos(lastVideoId);
+      const res = await VideoService.getUserVideos(lastVideoId, sortBy);
       console.log("Get more user videos response VIDEOSLICE:", res);
       if (res.success) {
         return res.data;

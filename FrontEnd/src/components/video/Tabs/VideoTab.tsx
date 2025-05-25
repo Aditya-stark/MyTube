@@ -1,7 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import VideoCard from "../VideoCard";
-import { loadMoreUserVideos } from "../../../features/videos/videoSlice";
+import { getUserVideos, loadMoreUserVideos } from "../../../features/videos/videoSlice";
 
 interface VideoTabProps {
   videos: any;
@@ -20,12 +20,25 @@ const VideoTab: React.FC<VideoTabProps> = ({
   const hasMoreVideos = useSelector((state: any) => state.videos.hasMoreVideos);
   const loaderRef = useRef<HTMLDivElement>(null);
 
+  // Add sortBy state
+  const [sortBy, setSortBy] = useState<"latest" | "oldest" | "most-viewed">("latest");
+
+  // Fetch videos when sortBy changes
+  useEffect(() => {
+    dispatch({ type: "videos/clearCurrentVideo" }); // Optional: clear current videos
+    dispatch(
+      // Pass sortBy to thunk
+      // You may need to update getUserVideos to accept sortBy
+      getUserVideos({ sortBy })
+    );
+  }, [dispatch, sortBy]);
+
   useEffect(() => {
     if (!hasMoreVideos || isLoadingMore) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          dispatch(loadMoreUserVideos());
+          dispatch(loadMoreUserVideos({ sortBy }));
         }
       },
       { threshold: 0.1 }
@@ -38,11 +51,32 @@ const VideoTab: React.FC<VideoTabProps> = ({
         observer.unobserve(loaderRef.current);
       }
     };
-  }, [dispatch, hasMoreVideos, isLoadingMore]);
+  }, [dispatch, hasMoreVideos, isLoadingMore, sortBy]);
 
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">My Videos</h2>
+      {/* Sort Buttons */}
+      <div className="flex gap-2 mb-4">
+        <button
+          className={`px-3 py-1 rounded ${sortBy === "latest" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+          onClick={() => setSortBy("latest")}
+        >
+          Latest
+        </button>
+        <button
+          className={`px-3 py-1 rounded ${sortBy === "most-viewed" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+          onClick={() => setSortBy("most-viewed")}
+        >
+          Most Viewed
+        </button>
+        <button
+          className={`px-3 py-1 rounded ${sortBy === "oldest" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+          onClick={() => setSortBy("oldest")}
+        >
+          Oldest
+        </button>
+      </div>
       {isLoading ? (
         <div className="flex justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>

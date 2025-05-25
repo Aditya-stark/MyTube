@@ -86,7 +86,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
   if (sortBy === "latest") {
     sort.createdAt = sortType === "asc" ? 1 : -1;
   } else if (sortBy === "oldest") {
-    sort.createdAt = sortType === "asc" ? 1 : -1;
+    sort.createdAt = sortType === "desc" ? -1 : 1;
   } else if (sortBy === "most-viewed") {
     sort.views = -1;
   } else {
@@ -144,7 +144,7 @@ const getAllVideosByUserId = asyncHandler(async (req, res) => {
   const userId = req.user._id;
 
   // Get the page , limit , sortBy and sortType from the request
-  const { limit = 4, lastVideoId, sortBy, sortType } = req.query;
+  const { limit = 8, lastVideoId, sortBy, sortType } = req.query;
   const parsedLimit = parseInt(limit, 10);
 
   // Validate the page and limit
@@ -153,11 +153,11 @@ const getAllVideosByUserId = asyncHandler(async (req, res) => {
   }
 
   // Validate the sortBy and SortType
-  if (sortBy && !["latest" || "oldest" || "most-viewed"].includes(sortBy)) {
+  if (sortBy && !["latest", "oldest", "most-viewed"].includes(sortBy)) {
     return res.status(400).json(new ApiError(400, "Invalid sortBy value"));
   }
 
-  if (sortType && !["asc" || "desc"].includes(sortType)) {
+  if (sortType && !["asc", "desc"].includes(sortType)) {
     return res.status(400).json(new ApiError(400, "Invalid sortType value"));
   }
 
@@ -172,7 +172,18 @@ const getAllVideosByUserId = asyncHandler(async (req, res) => {
         return res.status(400).json(new ApiError(400, "Invalid lastVideoId"));
       }
 
-      searchFilter.createdAt = { $lt: lastVideo.createdAt };
+      // Adjust cursor condition based on sort order
+      if (sortBy === "oldest" && (!sortType || sortType === "asc")) {
+        searchFilter.createdAt = { $gt: lastVideo.createdAt }; // For oldest (ascending), get newer dates
+      } else if (sortBy === "most-viewed") {
+        // Correct compound cursor for most-viewed (descending)
+        searchFilter.$or = [
+          { views: { $lt: lastVideo.views } },
+          { views: lastVideo.views, _id: { $lt: lastVideo._id } },
+        ];
+      } else {
+        searchFilter.createdAt = { $lt: lastVideo.createdAt }; // Default (descending), get older dates
+      }
     } catch (error) {
       return res.status(400).json(new ApiError(400, "Invalid lastVideoId"));
     }
@@ -183,9 +194,9 @@ const getAllVideosByUserId = asyncHandler(async (req, res) => {
   if (sortBy === "latest") {
     sort.createdAt = sortType === "asc" ? 1 : -1;
   } else if (sortBy === "oldest") {
-    sort.createdAt = sortType === "asc" ? 1 : -1;
+    sort.createdAt = sortType === "desc" ? -1 : 1;
   } else if (sortBy === "most-viewed") {
-    sort.views = -1;
+    sort = { views: -1, _id: -1 }; // Always use compound sort for most-viewed
   } else {
     sort.createdAt = -1; //default latest first
   }

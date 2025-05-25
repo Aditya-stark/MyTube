@@ -42,11 +42,13 @@ export const VideoService = {
   },
 
   // Get user Videos
-  getUserVideos: async (lastVideoId?: string) => {
+  getUserVideos: async (lastVideoId?: string, sortBy?: string) => {
     try {
-      const url = lastVideoId
-        ? `/videos/videos?lastVideoId=${lastVideoId}`
-        : "/videos/videos";
+      let url = "/videos/videos";
+      const params = new URLSearchParams();
+      if (lastVideoId) params.append("lastVideoId", lastVideoId);
+      if (sortBy) params.append("sortBy", sortBy);
+      url += `?${params.toString()}`;
 
       const res = await apiClient.get(url);
       console.log("Get user videos response VIDEOSERVICE:", res);

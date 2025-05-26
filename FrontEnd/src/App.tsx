@@ -11,6 +11,7 @@ import ForgotPassword from "./components/auth/ForgotPassword";
 import UpdateProfile from "./components/auth/UpdateProfile";
 import { Toaster } from "react-hot-toast";
 import UserProfile from "./pages/UserProfile";
+import { WatchPage } from "./pages/WatchPage";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -31,6 +32,9 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        {/* Watch Page */}
+        <Route path="/watch" element={<WatchPage />} />
+
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<UserProfile />} />

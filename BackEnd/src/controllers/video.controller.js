@@ -272,31 +272,96 @@ const publishAVideo = asyncHandler(async (req, res) => {
 const getVideoById = asyncHandler(async (req, res) => {
   try {
     // Get the videoId from the request parameters
-    // Find the video with the given videoId
+    // Find the video with the given videoId with Aggregation pipeline
+    // Match the video by ID
+    // Lookup to populate the owner field
+    // Lookup to get subscriber count for the owner
+    // Add subscriber count to ownerDetails
+    // Lookup to get likes count
+    // Add likes count to the video
+    // Project the necessary fields to return
     // If the video is not found, return an error response
-    // Increment the view count of the video
-    // Populate the owner field with the username and avatar
+    // Increment the view count of the video in the database
     // Return the video details along with the owner details
 
     // Get the videoId from the request parameters
     const { videoId } = req.params;
 
-    // Find the video with the given videoId
-    const video = await Video.findById(videoId).populate(
-      "owner",
-      "username avatar"
-    );
+    // Find the video with the given videoId with Aggregation pipeline
+    const videoDataArr = await Video.aggregate([
+      // Match the video by ID
+      { $match: { _id: new mongoose.Types.ObjectId(videoId) } },
+      // Lookup to populate the owner field
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "ownerDetails",
+        },
+      },
+      { $unwind: "$ownerDetails" },
+      // Lookup to get subscriber count for the owner
+      {
+        $lookup: {
+          from: "subscribers",
+          localField: "owner",
+          foreignField: "channel",
+          as: "subscribers",
+        },
+      },
+      {
+        $addFields: {
+          "ownerDetails.subscriberCount": { $size: "$subscribers" },
+        },
+      },
+      // Lookup to get likes count
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "video",
+          as: "likes",
+        },
+      },
+      {
+        $addFields: {
+          likesCount: { $size: "$likes" },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          views: 1,
+          description: 1,
+          videoFile: 1,
+          thumbnail: 1,
+          duration: 1,
+          isPublished: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          ownerDetails: {
+            _id: 1,
+            username: 1,
+            avatar: 1,
+            subscriberCount: 1,
+          },
+          likesCount: 1,
+        },
+      },
+    ]);
+    const videoData = videoDataArr[0];
 
     // If the video is not found, return an error response
-    if (!video) {
+    if (!videoData) {
       return res.status(404).json(new ApiError(404, "Video not found"));
     }
-    // Increment the view count of the video
-    video.views += 1;
-    await video.save();
+    // Increment the view count of the video in the database
+    await Video.findByIdAndUpdate(videoId, { $inc: { views: 1 } });
 
     // Return the video details along with the owner details
-    return res.status(200).json(new ApiResponse(200, video, "Video Found"));
+    return res.status(200).json(new ApiResponse(200, videoData, "Video Found"));
   } catch (error) {
     return res.status(500).json(new ApiError(500, error.message));
   }

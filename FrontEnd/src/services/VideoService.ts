@@ -16,6 +16,7 @@ export const VideoService = {
         headers: {
           "Content-type": "mutilpart/form-data",
         },
+        // This is the key part for tracking upload progress
         onUploadProgress: (progressEvent) => {
           const percent = progressEvent.total
             ? Math.round((progressEvent.loaded * 100) / progressEvent.total)
@@ -51,7 +52,6 @@ export const VideoService = {
       url += `?${params.toString()}`;
 
       const res = await apiClient.get(url);
-      console.log("Get user videos response VIDEOSERVICE:", res);
       return res.data;
     } catch (error) {
       console.error("Error fetching user videos:", error);

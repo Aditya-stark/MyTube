@@ -9,7 +9,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { currentUser } from "./features/auth/authSlice";
 import ForgotPassword from "./components/auth/ForgotPassword";
 import UpdateProfile from "./components/auth/UpdateProfile";
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from "react-hot-toast";
 import UserProfile from "./pages/UserProfile";
 
 function App() {
@@ -31,7 +31,6 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-
         {/* Protected routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<UserProfile />} />

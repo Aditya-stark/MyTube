@@ -8,7 +8,6 @@ export const publishVideo = createAsyncThunk(
   async (videoData: FormData, { rejectWithValue }) => {
     try {
       const res = await VideoService.publishVideo(videoData);
-      console.log("Publish video response VIDEOSLICE:", res);
       if (res.success) {
         return res.data;
       }
@@ -27,7 +26,6 @@ export const getUserVideos = createAsyncThunk(
   async ({ sortBy }: { sortBy?: string }, { rejectWithValue }) => {
     try {
       const res = await VideoService.getUserVideos(undefined, sortBy);
-      console.log("Get user videos response VIDEOSLICE:", res);
       if (res.success) {
         return res.data;
       }
@@ -51,7 +49,6 @@ export const loadMoreUserVideos = createAsyncThunk(
         return { videos: [], hasMoreVideos: false, lastVideoId: null };
       }
       const res = await VideoService.getUserVideos(lastVideoId, sortBy);
-      console.log("Get more user videos response VIDEOSLICE:", res);
       if (res.success) {
         return res.data;
       }
@@ -127,8 +124,7 @@ const videoSlice = createSlice({
         state.isLoading = false;
         state.videos = action.payload;
         state.hasMoreVideos = action.payload.hasMoreVideos;
-        state.lastVideoId = action.payload.lastVideoId || null;
-        console.log("Videos API Structure:", action.payload);
+        state.lastVideoId = action.payload.lastVideoId || null; 
       })
       .addCase(getUserVideos.rejected, (state, action) => {
         state.isLoading = false;

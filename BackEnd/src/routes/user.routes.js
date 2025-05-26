@@ -55,7 +55,7 @@ router
   .patch(verifyJWT, upload.single("coverImage"), updateUserCoverImage);
 
 //Get User Profile Details
-router.route("/c/:username").get(verifyJWT, getUserChannelProfile);
+router.route("/@:username").get(verifyJWT, getUserChannelProfile);
 
 //Get Watch History
 router.route("/history").get(verifyJWT, getWatchHistory);

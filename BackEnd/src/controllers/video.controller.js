@@ -164,7 +164,7 @@ const getAllVideosByUserId = asyncHandler(async (req, res) => {
   // Find all videos by the userId
   const searchFilter = { owner: userId };
 
-  // Add cursor condition if lastVideoId is provided
+  // Add condition if lastVideoId is provided
   if (lastVideoId) {
     try {
       const lastVideo = await Video.findById(lastVideoId);

@@ -61,6 +61,25 @@ export const loadMoreUserVideos = createAsyncThunk(
   }
 );
 
+// Watch Page
+export const videoById = createAsyncThunk(
+  "videos/watchVideo",
+  async (videosId: string, { rejectWithValue }) => {
+    try {
+      const res = await VideoService.getVideoById(videosId);
+      if (res.success) {
+        return res.data;
+      }
+      throw rejectWithValue(res.message);
+    } catch (error: any) {
+      console.error("Error fetching video:", error);
+      return rejectWithValue(
+        error.response?.data.message || "Something went wrong"
+      );
+    }
+  }
+);
+
 interface VideoState {
   videos: PaginatedVideos | null;
   currentVideo: Video | null;
@@ -124,7 +143,7 @@ const videoSlice = createSlice({
         state.isLoading = false;
         state.videos = action.payload;
         state.hasMoreVideos = action.payload.hasMoreVideos;
-        state.lastVideoId = action.payload.lastVideoId || null; 
+        state.lastVideoId = action.payload.lastVideoId || null;
       })
       .addCase(getUserVideos.rejected, (state, action) => {
         state.isLoading = false;
@@ -146,6 +165,20 @@ const videoSlice = createSlice({
       .addCase(loadMoreUserVideos.rejected, (state, action) => {
         state.isLoadingMore = false;
         state.error = action.payload as string;
+      })
+      .addCase(videoById.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(videoById.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.currentVideo = action.payload;
+        // console.log("Current video:", action.payload);
+      })
+      .addCase(videoById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        state.currentVideo = null;
       });
   },
 });

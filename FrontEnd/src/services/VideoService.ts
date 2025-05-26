@@ -58,6 +58,17 @@ export const VideoService = {
       throw error;
     }
   },
+
+  // Get video by ID
+  getVideoById: async (videoId: string) => {
+    try {
+      const res = await apiClient.get(`/videos/${videoId}`);
+      return res.data;
+    } catch (error) {
+      console.error("Error fetching video by ID:", error);
+      throw error;
+    }
+  },
 };
 
 export default VideoService;

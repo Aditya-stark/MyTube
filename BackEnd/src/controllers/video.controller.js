@@ -209,9 +209,9 @@ const getAllVideosByUserId = asyncHandler(async (req, res) => {
     .populate("owner", "username avatar");
 
   // Check if the are more videos available
-  const hasMoreVideos = videos.length === parsedLimit;
+  const hasMoreVideos = videos.length > parsedLimit && videos.length > 0;
 
-  // Return the videos with a flag indicating if there are more videos
+  // Return the videos with accurate flags
   return res.status(200).json(
     new ApiResponse(
       200,

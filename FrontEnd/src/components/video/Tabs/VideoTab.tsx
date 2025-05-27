@@ -21,6 +21,7 @@ const VideoTab: React.FC<VideoTabProps> = ({
 }) => {
   const dispatch = useDispatch<any>();
   const hasMoreVideos = useSelector((state: any) => state.videos.hasMoreVideos);
+  const lastVideoId = useSelector((state: any) => state.videos.lastVideoId);
   const loaderRef = useRef<HTMLDivElement>(null);
 
   // Add sortBy state
@@ -34,24 +35,28 @@ const VideoTab: React.FC<VideoTabProps> = ({
   }, [dispatch, sortBy]);
 
   useEffect(() => {
-    if (!hasMoreVideos || isLoadingMore) return;
+    // Only set up observer if we have videos and there are more to load
+    if (!hasMoreVideos || isLoadingMore || !videos?.videos?.length) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0].isIntersecting && hasMoreVideos && !isLoadingMore) {
           dispatch(loadMoreUserVideos({ sortBy }));
         }
       },
       { threshold: 0.1 }
     );
+
     if (loaderRef.current) {
       observer.observe(loaderRef.current);
     }
+
     return () => {
       if (loaderRef.current) {
         observer.unobserve(loaderRef.current);
       }
     };
-  }, [dispatch, hasMoreVideos, isLoadingMore, sortBy]);
+  }, [dispatch, hasMoreVideos, isLoadingMore, sortBy, videos?.videos?.length]);
 
   return (
     <div>
@@ -135,9 +140,27 @@ const VideoTab: React.FC<VideoTabProps> = ({
         </div>
       )}
       {/* Loading indicator that will trigger more videos when visible */}
-      <div ref={loaderRef} style={{ height: "20px" }}>
-        {isLoadingMore && "Loading more videos..."}
-      </div>
+      {videos &&
+        videos.videos &&
+        videos.videos.length > 0 &&
+        hasMoreVideos && (
+          <div
+            ref={loaderRef}
+            className="mt-8 py-4 text-center"
+            style={{ height: "60px", marginBottom: "20px" }}
+          >
+            {isLoadingMore  ? (
+              <div className="flex justify-center items-center space-x-2">
+                <div className="animate-spin h-5 w-5 border-t-2 border-b-2 border-blue-500 rounded-full"></div>
+                <span className="text-gray-600">Loading more videos...</span>
+              </div>
+            ) : (
+              <div className="text-gray-500 text-sm">
+                Scroll for more videos
+              </div>
+            )}
+          </div>
+        )}
     </div>
   );
 };

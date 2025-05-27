@@ -26,6 +26,7 @@ export const getUserVideos = createAsyncThunk(
   async ({ sortBy }: { sortBy?: string }, { rejectWithValue }) => {
     try {
       const res = await VideoService.getUserVideos(undefined, sortBy);
+      console.log("Fetched user videos:", res);
       if (res.success) {
         return res.data;
       }
@@ -49,6 +50,7 @@ export const loadMoreUserVideos = createAsyncThunk(
         return { videos: [], hasMoreVideos: false, lastVideoId: null };
       }
       const res = await VideoService.getUserVideos(lastVideoId, sortBy);
+      console.log("Loading more user videos:", res);
       if (res.success) {
         return res.data;
       }

@@ -13,6 +13,7 @@
     "@reduxjs/toolkit": "^2.6.1",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/vite": "^4.0.15",
+    "@types/video.js": "^7.3.58",
     "axios": "^1.8.4",
     "dotenv": "^16.4.7",
     "firebase": "^11.5.0",
@@ -22,7 +23,9 @@
     "react-redux": "^9.2.0",
     "react-router": "^7.4.0",
     "react-router-dom": "^7.4.0",
-    "timeago.js": "^4.0.2"
+    "sharp": "^0.34.2",
+    "timeago.js": "^4.0.2",
+    "video.js": "^8.22.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

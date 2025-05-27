@@ -47,6 +47,32 @@ const uploadOnCloudinary = async (localFilePath) => {
   }
 };
 
+const uploadThumbnailToCloudinary = async (localFilePath) => {
+  try {
+    if (!localFilePath) return null;
+
+    // Upload with transformation parameters for 16:9 aspect ratio (YouTube standard)
+    const response = await cloudinary.uploader.upload(localFilePath, {
+      resource_type: "image",
+      folder: "thumbnails",
+      transformation: [
+        { width: 1280, height: 720, crop: "fill", gravity: "auto" }, // 16:9 aspect ratio
+        { quality: "auto" }, // Automatic quality optimization
+        { fetch_format: "auto" }, // Automatic format selection (WebP/AVIF for supported browsers)
+      ],
+    });
+
+    // Remove file from the local storage
+    fs.unlinkSync(localFilePath);
+
+    return response;
+  } catch (error) {
+    console.error("Error uploading thumbnail to Cloudinary:", error);
+    fs.unlinkSync(localFilePath);
+    return null;
+  }
+};
+
 const deleteOldFileCloundinary = async (oldFileURL) => {
   try {
     if (!oldFileURL) return null;
@@ -63,4 +89,8 @@ const deleteOldFileCloundinary = async (oldFileURL) => {
   }
 };
 
-export { uploadOnCloudinary, deleteOldFileCloundinary };
+export {
+  uploadOnCloudinary,
+  uploadThumbnailToCloudinary,
+  deleteOldFileCloundinary,
+};

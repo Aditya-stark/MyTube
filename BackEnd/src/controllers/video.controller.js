@@ -5,8 +5,10 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import {
   deleteOldFileCloundinary,
   uploadOnCloudinary,
+  uploadThumbnailToCloudinary,
 } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
+import transform from "cloudinary-build-url/dist/cjs/transformers/index.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   // Extract query parameters from the request (page, limit, query, sortBy, sortType, userId)
@@ -248,7 +250,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
   // Upload to cloundinary
   const videoCloudinary = await uploadOnCloudinary(videoLocalPath);
-  const thumbnailCloudinary = await uploadOnCloudinary(thumbnailLocalPath);
+  const thumbnailCloudinary =
+    await uploadThumbnailToCloudinary(thumbnailLocalPath);
 
   // create a video document in the database
   const video = await Video.create({

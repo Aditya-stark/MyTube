@@ -1,0 +1,57 @@
+/* Custom Video.js theme that matches MyTube's blue theme */
+:root {
+  --vjs-primary-color: #3b82f6; /* blue-500 in Tailwind */
+  --vjs-secondary-color: #1d4ed8; /* blue-700 in Tailwind */
+}
+
+.video-js .vjs-big-play-button {
+  background-color: rgba(59, 130, 246, 0.7); /* blue-500 with transparency */
+  border: none;
+  border-radius: 50%;
+  height: 3em;
+  width: 3em;
+  line-height: 3em;
+  margin-left: -1.5em;
+  margin-top: -1.5em;
+  transition: all 0.3s ease;
+}
+
+.video-js:hover .vjs-big-play-button {
+  background-color: rgba(59, 130, 246, 0.9); /* blue-500 with less transparency on hover */
+}
+
+.video-js .vjs-control-bar {
+  background-color: rgba(17, 24, 39, 0.8); /* gray-900 with transparency */
+}
+
+.video-js .vjs-play-progress,
+.video-js .vjs-volume-level {
+  background-color: var(--vjs-primary-color);
+}
+
+/* Progress bar */
+.video-js .vjs-progress-control {
+  height: 0.5em;
+  top: -0.5em;
+}
+
+.video-js .vjs-progress-control:hover {
+  height: 0.7em;
+  top: -0.7em;
+}
+
+/* Fullscreen button */
+.video-js .vjs-fullscreen-control {
+  margin-right: 0.5em;
+}
+
+/* Time display */
+.video-js .vjs-time-control {
+  padding: 0 0.5em;
+}
+
+/* Make the slider handle more visible */
+.video-js .vjs-slider-handle {
+  background-color: white;
+  border-radius: 50%;
+}

@@ -21,7 +21,6 @@ const VideoTab: React.FC<VideoTabProps> = ({
 }) => {
   const dispatch = useDispatch<any>();
   const hasMoreVideos = useSelector((state: any) => state.videos.hasMoreVideos);
-  const lastVideoId = useSelector((state: any) => state.videos.lastVideoId);
   const loaderRef = useRef<HTMLDivElement>(null);
 
   // Add sortBy state
@@ -59,108 +58,115 @@ const VideoTab: React.FC<VideoTabProps> = ({
   }, [dispatch, hasMoreVideos, isLoadingMore, sortBy, videos?.videos?.length]);
 
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-4">My Videos</h2>
-      {/* Sort Buttons */}
-      <div className="flex gap-2 mb-4">
-        <button
-          className={`px-3 py-1 rounded ${
-            sortBy === "latest" ? "bg-blue-600 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setSortBy("latest")}
-        >
-          Latest
-        </button>
-        <button
-          className={`px-3 py-1 rounded ${
-            sortBy === "most-viewed" ? "bg-blue-600 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setSortBy("most-viewed")}
-        >
-          Most Viewed
-        </button>
-        <button
-          className={`px-3 py-1 rounded ${
-            sortBy === "oldest" ? "bg-blue-600 text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setSortBy("oldest")}
-        >
-          Oldest
-        </button>
+    // Main container div with minimum height and flexible growth
+    <div className="min-h-screen flex flex-col  rounded-lg">
+      {/* Header section with title */}
+      <h2 className="text-2xl font-bold mb-4 text-gray-800">My Videos</h2>
+
+      {/* Sort buttons section */}
+      <div className="flex gap-2 mb-6">
+      <button
+        className={`px-4 py-2 rounded-md transition-colors ${
+        sortBy === "latest"
+          ? "bg-blue-600 text-white"
+          : "bg-gray-200 hover:bg-gray-300 text-gray-800"
+        }`}
+        onClick={() => setSortBy("latest")}
+      >
+        Latest
+      </button>
+      <button
+        className={`px-4 py-2 rounded-md transition-colors ${
+        sortBy === "most-viewed"
+          ? "bg-blue-600 text-white"
+          : "bg-gray-200 hover:bg-gray-300 text-gray-800"
+        }`}
+        onClick={() => setSortBy("most-viewed")}
+      >
+        Most Viewed
+      </button>
+      <button
+        className={`px-4 py-2 rounded-md transition-colors ${
+        sortBy === "oldest"
+          ? "bg-blue-600 text-white"
+          : "bg-gray-200 hover:bg-gray-300 text-gray-800"
+        }`}
+        onClick={() => setSortBy("oldest")}
+      >
+        Oldest
+      </button>
       </div>
+      <div className="flex-grow">
       {isLoading ? (
-        <div className="flex justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="h-full flex justify-center items-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
         </div>
       ) : videos && videos.videos && videos.videos.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {videos.videos.map((video: any) => (
-            <VideoCard key={video._id} video={video} />
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+        {videos.videos.map((video: any) => (
+          <VideoCard key={video._id} video={video} />
+        ))}
         </div>
       ) : (
-        <div className="text-center py-10">
+        <div className="h-full flex flex-col justify-center items-center py-10">
+        <svg
+          className="h-20 w-20 text-gray-400 mb-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+          />
+        </svg>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          No videos
+        </h3>
+        <p className="text-gray-500 mb-6 text-center max-w-md">
+          You haven't uploaded any videos yet. Upload your first video to get
+          started.
+        </p>
+        <button
+          onClick={() => setIsUploadPopupOpen(true)}
+          className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+        >
           <svg
-            className="mx-auto h-12 w-12 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+          className="mr-2 h-5 w-5"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-            />
+          <path
+            fillRule="evenodd"
+            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+            clipRule="evenodd"
+          />
           </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No videos</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            You haven't uploaded any videos yet.
-          </p>
-          <div className="mt-6">
-            <button
-              onClick={() => setIsUploadPopupOpen(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              <svg
-                className="-ml-1 mr-2 h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Upload a video
-            </button>
-          </div>
+          Upload a video
+        </button>
         </div>
       )}
-      {/* Loading indicator that will trigger more videos when visible */}
-      {videos &&
-        videos.videos &&
-        videos.videos.length > 0 &&
-        hasMoreVideos && (
-          <div
-            ref={loaderRef}
-            className="mt-8 py-4 text-center"
-            style={{ height: "60px", marginBottom: "20px" }}
-          >
-            {isLoadingMore  ? (
-              <div className="flex justify-center items-center space-x-2">
-                <div className="animate-spin h-5 w-5 border-t-2 border-b-2 border-blue-500 rounded-full"></div>
-                <span className="text-gray-600">Loading more videos...</span>
-              </div>
-            ) : (
-              <div className="text-gray-500 text-sm">
-                Scroll for more videos
-              </div>
-            )}
-          </div>
+      </div>
+
+      {/* Loading more indicator */}
+      {videos && videos.videos && videos.videos.length > 0 && hasMoreVideos && (
+      <div
+        ref={loaderRef}
+        className="mt-8 py-4 text-center"
+      >
+        {isLoadingMore ? (
+        <div className="flex justify-center items-center space-x-2">
+          <div className="animate-spin h-5 w-5 border-t-2 border-b-2 border-blue-500 rounded-full"></div>
+          <span className="text-gray-600">Loading more videos...</span>
+        </div>
+        ) : (
+        <div className="text-gray-500 text-sm">Scroll for more videos</div>
         )}
+      </div>
+      )}
     </div>
   );
 };

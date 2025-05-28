@@ -6,6 +6,7 @@ import { videoById } from "../features/videos/videoSlice";
 import VideoPlayer from "../components/video/player/VideoPlayer";
 import type Player from "video.js/dist/types/player";
 import { FaRegThumbsDown, FaRegThumbsUp } from "react-icons/fa";
+import { format } from "timeago.js"; // For Ago Time Formatting 1 Day Ago
 
 export const WatchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -109,13 +110,32 @@ export const WatchPage: React.FC = () => {
                 <div className="mt-4 bg-gray-200 p-4 rounded-2xl">
                   <div className="flex items-center">
                     <span className="text-gray-600">
-                      {currentVideo.views} views •{" "}
-                      {new Date(currentVideo.createdAt).toLocaleDateString()}
+                      {currentVideo.views.toLocaleString()} views •{" "}
+                      {format(currentVideo.createdAt)}
                     </span>
                   </div>
                   <p className="whitespace-pre-wrap">
                     {currentVideo.description}
                   </p>
+
+                  <div className="flex items-center space-x-3 bg-gray-200 p-2 rounded-3xl">
+                    <img
+                      src={
+                        currentVideo.ownerDetails?.avatar ||
+                        "/default-avatar.png"
+                      }
+                      alt="User Avatar"
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                    <div className="flex flex-col">
+                      <p className="text-md font-bold">
+                        {currentVideo.ownerDetails?.fullName}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {currentVideo.ownerDetails?.subscriberCount} subscribers
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </>

@@ -162,6 +162,7 @@ const videoSlice = createSlice({
           state.videos.videos.push(...action.payload.videos);
           state.hasMoreVideos = action.payload.hasMoreVideos;
           state.lastVideoId = action.payload.lastVideoId || null;
+          console.log("Loaded more videos:", action.payload);
         }
       })
       .addCase(loadMoreUserVideos.rejected, (state, action) => {

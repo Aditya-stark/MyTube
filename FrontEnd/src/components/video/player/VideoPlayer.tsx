@@ -14,7 +14,7 @@ interface VideoPlayerProps {
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   videoUrl,
   thumbnail,
-  autoplay = true,
+  autoplay = false,
   onReady,
 }) => {
   const videoRef = useRef<HTMLDivElement>(null);
@@ -176,7 +176,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }, [videoUrl, thumbnail]);
 
   return (
-    <div className="w-full relative overflow-hidden bg-black rounded-lg">
+    <div className="w-full relative overflow-hidden bg-black rounded-2xl">
       <div ref={videoRef} className="w-full aspect-video" data-vjs-player />
       <div className="shortcut-info absolute bottom-0 right-0 text-white text-xs bg-black bg-opacity-50 p-2 rounded m-2 hidden group-hover:block">
         Keyboard shortcuts: Space (play/pause), ←/→ (seek), ↑/↓ (volume), M

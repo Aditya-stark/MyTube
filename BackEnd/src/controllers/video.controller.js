@@ -8,7 +8,6 @@ import {
   uploadThumbnailToCloudinary,
 } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
-import transform from "cloudinary-build-url/dist/cjs/transformers/index.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   // Extract query parameters from the request (page, limit, query, sortBy, sortType, userId)
@@ -205,20 +204,21 @@ const getAllVideosByUserId = asyncHandler(async (req, res) => {
   // Fetch videos from the database with applied filters, pagination and sorting
   const videos = await Video.find(searchFilter)
     .sort(sort)
-    .limit(parsedLimit)
-    .populate("owner", "username avatar");
+    .limit(parsedLimit + 1) // Fetch one extra to check for more
+    .populate("owner", "username avatar fullName");
 
-  // Check if the are more videos available
-  const hasMoreVideos = videos.length > parsedLimit && videos.length > 0;
+  // Check if there are more videos available
+  const hasMoreVideos = videos.length > parsedLimit;
+  const videosToReturn = hasMoreVideos ? videos.slice(0, parsedLimit) : videos;
 
   // Return the videos with accurate flags
   return res.status(200).json(
     new ApiResponse(
       200,
       {
-        videos,
+        videos: videosToReturn,
         hasMoreVideos,
-        lastVideoId: videos.length > 0 ? videos[videos.length - 1]._id : null,
+        lastVideoId: videosToReturn.length > 0 ? videosToReturn[videosToReturn.length - 1]._id : null,
       },
       "Videos fetched successfully"
     )
@@ -250,8 +250,11 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
   // Upload to cloundinary
   const videoCloudinary = await uploadOnCloudinary(videoLocalPath);
+  console.log("Video Cloudinary:", videoCloudinary);
   const thumbnailCloudinary =
     await uploadThumbnailToCloudinary(thumbnailLocalPath);
+
+  console.log("Thumbnail Cloudinary:", thumbnailCloudinary);
 
   // create a video document in the database
   const video = await Video.create({

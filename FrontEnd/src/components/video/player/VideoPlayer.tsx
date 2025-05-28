@@ -86,6 +86,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           "ArrowDown",
           "KeyM",
           "KeyF",
+          "KeyK",
+          "KeyL",
+          "KeyJ",
         ].includes(event.code)
       ) {
         event.preventDefault();
@@ -93,6 +96,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
       switch (event.code) {
         case "Space":
+        case "KeyK":
           // Toggle play/pause
           if (player.paused()) {
             player.play();
@@ -101,20 +105,22 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           }
           break;
 
+        // Rewind 5 seconds
         case "ArrowLeft":
-          // Rewind 10 seconds
+        case "KeyJ":
           const currentTime = player.currentTime();
           if (typeof currentTime === "number") {
-            player.currentTime(Math.max(0, currentTime - 10));
+            player.currentTime(Math.max(0, currentTime - 5));
           }
           break;
 
+        // Forward 5 seconds
         case "ArrowRight":
-          // Forward 10 seconds
+        case "KeyL":
           const duration = player.duration();
           const current = player.currentTime();
           if (typeof duration === "number" && typeof current === "number") {
-            player.currentTime(Math.min(duration, current + 10));
+            player.currentTime(Math.min(duration, current + 5));
           }
           break;
 

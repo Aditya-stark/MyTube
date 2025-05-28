@@ -4,7 +4,8 @@ import { useSearchParams } from "react-router-dom";
 import { AppDispatch, RootState } from "../store/store";
 import { videoById } from "../features/videos/videoSlice";
 import VideoPlayer from "../components/video/player/VideoPlayer";
-import type Player from 'video.js/dist/types/player';
+import type Player from "video.js/dist/types/player";
+import { FaRegThumbsDown, FaRegThumbsUp } from "react-icons/fa";
 
 export const WatchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -26,8 +27,8 @@ export const WatchPage: React.FC = () => {
   const handlePlayerReady = (player: Player) => {
     setPlayer(player);
     // Add any event listeners you want here
-    player.on('ended', () => {
-      console.log('Video ended');
+    player.on("ended", () => {
+      console.log("Video ended");
       // You could show related videos or autoplay next
     });
   };
@@ -62,56 +63,65 @@ export const WatchPage: React.FC = () => {
                 thumbnail={currentVideo.thumbnail}
                 onReady={handlePlayerReady}
               />
-              
+
               <div className="mt-4">
                 <h1 className="text-2xl font-bold">{currentVideo.title}</h1>
                 <div className="flex items-center justify-between mt-2">
-                  <div className="flex items-center">
-                    <span className="text-gray-600">{currentVideo.views} views • {new Date(currentVideo.createdAt).toLocaleDateString()}</span>
-                  </div>
-                  
-                  <div className="flex space-x-4">
-                    <button className="flex items-center space-x-1 text-gray-700 hover:text-blue-500">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                      </svg>
-                      <span>Like</span>
-                    </button>
-                    <button className="flex items-center space-x-1 text-gray-700 hover:text-blue-500">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018c.163 0 .326.02.485.06L17 4m-7 10v2a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2" />
-                      </svg>
-                      <span>Dislike</span>
-                    </button>
-                    
+                  <div className="flex justify-between w-full">
+                    {/* User Info and Subscribe Button */}
+                    <div className="flex items-center space-x-3 bg-gray-200 p-2 rounded-3xl">
+                      <img
+                        src={
+                          currentVideo.ownerDetails?.avatar ||
+                          "/default-avatar.png"
+                        }
+                        alt="User Avatar"
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                      <div className="flex flex-col">
+                        <p className="text-md font-bold">
+                          {currentVideo.ownerDetails?.fullName}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {currentVideo.ownerDetails?.subscriberCount}{" "}
+                          subscribers
+                        </p>
+                      </div>
+                      <button className="ml-4 px-4 py-2 text-sm bg-blue-600 text-white rounded-full hover:bg-blue-700 transition font-bold shadow">
+                        Subscribe
+                      </button>
+                    </div>
+                    <div className="flex space-x-4 bg-gray-200 p-3 rounded-3xl">
+                      <button className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 group">
+                        <FaRegThumbsUp className="w-5 h-5 text-gray-600 group-hover:text-blue-600" />
+                        <span>26 Likes</span>
+                      </button>
+                      <button className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 group">
+                        <FaRegThumbsDown className="w-5 h-5 text-gray-600 group-hover:text-blue-600" />
+                        <span>0 Dislike</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-              
-              <div className="mt-6 border-t border-gray-200 pt-4">
-                <div className="flex items-center space-x-3">
-                  {currentVideo.owner?.avatar && (
-                    <img 
-                      src={currentVideo.owner.avatar} 
-                      alt={currentVideo.owner.username} 
-                      className="h-10 w-10 rounded-full"
-                    />
-                  )}
-                  <div>
-                    <h3 className="font-medium">{currentVideo.owner?.username}</h3>
-                    <button className="mt-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 text-sm font-medium rounded-full">
-                      Subscribe
-                    </button>
+
+              <div className="mt-6 border-t border-gray-300 pt-4">
+                <div className="mt-4 bg-gray-200 p-4 rounded-2xl">
+                  <div className="flex items-center">
+                    <span className="text-gray-600">
+                      {currentVideo.views} views •{" "}
+                      {new Date(currentVideo.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
-                </div>
-                <div className="mt-4 bg-gray-50 p-4 rounded-md">
-                  <p className="whitespace-pre-wrap">{currentVideo.description}</p>
+                  <p className="whitespace-pre-wrap">
+                    {currentVideo.description}
+                  </p>
                 </div>
               </div>
             </>
           )}
         </div>
-        
+
         {/* Sidebar - Takes 1/3 of the screen on large devices */}
         <div className="mt-6 lg:mt-0">
           <h2 className="text-xl font-bold mb-4">Related Videos</h2>

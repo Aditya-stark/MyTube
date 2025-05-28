@@ -346,7 +346,7 @@ const getVideoById = asyncHandler(async (req, res) => {
           updatedAt: 1,
           ownerDetails: {
             _id: 1,
-            username: 1,
+            fullName: 1,
             avatar: 1,
             subscriberCount: 1,
           },

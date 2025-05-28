@@ -7,10 +7,11 @@ export interface Video {
   duration: number; // in seconds
   views: number;
   isPublished: boolean;
-  owner: {
+  ownerDetails: {
     _id: string;
-    username: string;
+    fullName: string;
     avatar: string;
+    subscriberCount: number; // number of subscribers
   };
   createdAt: string;
   updatedAt: string;

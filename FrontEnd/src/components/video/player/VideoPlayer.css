@@ -1,11 +1,11 @@
 /* Custom Video.js theme that matches MyTube's blue theme */
 :root {
-  --vjs-primary-color: #3b82f6; /* blue-500 in Tailwind */
+  --vjs-primary-color: #2563eb; /* blue-600 in Tailwind */
   --vjs-secondary-color: #1d4ed8; /* blue-700 in Tailwind */
 }
 
 .video-js .vjs-big-play-button {
-  background-color: rgba(59, 130, 246, 0.7); /* blue-500 with transparency */
+  background-color: rgba(37, 99, 235, 0.7); /* blue-600 with transparency */
   border: none;
   border-radius: 50%;
   height: 3em;
@@ -17,7 +17,7 @@
 }
 
 .video-js:hover .vjs-big-play-button {
-  background-color: rgba(59, 130, 246, 0.9); /* blue-500 with less transparency on hover */
+  background-color: rgba(37, 99, 235, 0.7); /* blue-500 with less transparency on hover */
 }
 
 .video-js .vjs-control-bar {

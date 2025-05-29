@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import VideoCard from "../VideoCard";
+import VideoEditBox from "../VideoEditBox";
 import {
   getUserVideos,
   loadMoreUserVideos,
@@ -27,6 +28,10 @@ const VideoTab: React.FC<VideoTabProps> = ({
   const [sortBy, setSortBy] = useState<"latest" | "oldest" | "most-viewed">(
     "latest"
   );
+
+  // Edit popup state
+  const [editPopupOpen, setEditPopupOpen] = useState(false);
+  const [editVideoData, setEditVideoData] = useState<any>(null);
 
   // Fetch videos when sortBy changes
   useEffect(() => {
@@ -56,6 +61,16 @@ const VideoTab: React.FC<VideoTabProps> = ({
       }
     };
   }, [dispatch, hasMoreVideos, isLoadingMore, sortBy, videos?.videos?.length]);
+
+  // Handler for edit button
+  const handleEditClick = (video: any) => {
+    setEditVideoData(video);
+    setEditPopupOpen(true);
+  };
+  const handleCloseEdit = () => {
+    setEditPopupOpen(false);
+    setEditVideoData(null);
+  };
 
   return (
     // Main container div with minimum height and flexible growth
@@ -104,7 +119,7 @@ const VideoTab: React.FC<VideoTabProps> = ({
       ) : videos && videos.videos && videos.videos.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
         {videos.videos.map((video: any) => (
-          <VideoCard key={video._id} video={video} />
+          <VideoCard key={video._id} video={video} isOwner={true} onEdit={handleEditClick} />
         ))}
         </div>
       ) : (
@@ -166,6 +181,11 @@ const VideoTab: React.FC<VideoTabProps> = ({
         <div className="text-gray-500 text-sm">Scroll for more videos</div>
         )}
       </div>
+      )}
+
+      {/* Edit Popup */}
+      {editPopupOpen && (
+        <VideoEditBox isOpen={editPopupOpen} onClose={handleCloseEdit} editVideoData={editVideoData} />
       )}
     </div>
   );

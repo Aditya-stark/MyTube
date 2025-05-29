@@ -36,6 +36,11 @@ const videoSchema = new Schema(
       required: true,
       default: "0:00",
     },
+    localVideoData: {
+      type: Object, // to store local video data if needed
+      default: {},
+      required: false,
+    },
   },
   { timestamps: true }
 );

@@ -218,7 +218,10 @@ const getAllVideosByUserId = asyncHandler(async (req, res) => {
       {
         videos: videosToReturn,
         hasMoreVideos,
-        lastVideoId: videosToReturn.length > 0 ? videosToReturn[videosToReturn.length - 1]._id : null,
+        lastVideoId:
+          videosToReturn.length > 0
+            ? videosToReturn[videosToReturn.length - 1]._id
+            : null,
       },
       "Videos fetched successfully"
     )
@@ -266,6 +269,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
     owner: req.user._id,
     views: 0,
     isPublished,
+    localVideoData: videoCloudinary,
   });
 
   //Return the video document
@@ -385,7 +389,7 @@ const updatedVideo = asyncHandler(async (req, res) => {
   // Return the updated video
 
   // Get the updated information from the req.body
-  const { title, description } = req.body;
+  const { title, description, isPublished } = req.body;
   // Get the thumbnail from the req.file
   const thumbnailLocalPath = req.file?.path;
 
@@ -395,9 +399,19 @@ const updatedVideo = asyncHandler(async (req, res) => {
     return res.status(400).json(new ApiError(400, "All fields are required"));
   }
 
-  if (!thumbnailLocalPath) {
-    console.log("Error2");
-    return res.status(400).json(new ApiError(400, "Thumbnail is required"));
+  // If thumbnail is not provided, skip updating thumbnail
+  let thumbnailUrl = video.thumbnail;
+  if (thumbnailLocalPath) {
+    // Upload the thumbnail to cloudinary
+    const thumbnail = await uploadThumbnailToCloudinary(thumbnailLocalPath);
+    if (!thumbnail.url) {
+      return res
+        .status(500)
+        .json(new ApiError(500, "Error uploading thumbnail"));
+    }
+    // Delete the old thumbnail from cloudinary
+    await deleteOldFileCloundinary(video.thumbnail);
+    thumbnailUrl = thumbnail.url;
   }
 
   // Get Video from verifiedVideo middleware
@@ -410,19 +424,13 @@ const updatedVideo = asyncHandler(async (req, res) => {
       .json(new ApiError(403, "You are not allowed to update this video"));
   }
 
-  // Upload the thumbnail to cloudinary
-  const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
-  if (!thumbnail.url) {
-    return res.status(500).json(new ApiError(500, "Error uploading thumbnail"));
-  }
-
-  //Delete the old thumbnail from cloudinary
-  await deleteOldFileCloundinary(video.thumbnail);
-
   // Update the video with the new information
   video.title = title;
   video.description = description;
-  video.thumbnail = thumbnail.url;
+  if (thumbnailUrl) {
+    video.thumbnail = thumbnailUrl;
+  }
+  video.isPublished = !isPublished;
   await video.save();
 
   // Return the updated video

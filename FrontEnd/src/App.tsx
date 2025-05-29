@@ -12,6 +12,7 @@ import UpdateProfile from "./components/auth/UpdateProfile";
 import { Toaster } from "react-hot-toast";
 import UserProfile from "./pages/UserProfile";
 import { WatchPage } from "./pages/WatchPage";
+import VideoEditBox from "./components/video/VideoEditBox";
 
 function App() {
   const dispatch = useDispatch<AppDispatch>();
@@ -39,6 +40,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<UserProfile />} />
           <Route path="/edit-profile" element={<UpdateProfile />} />
+          <Route path="/edit-video" element={<VideoEditBox/>} />
         </Route>
       </Routes>
     </>

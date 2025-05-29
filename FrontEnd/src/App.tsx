@@ -40,7 +40,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<UserProfile />} />
           <Route path="/edit-profile" element={<UpdateProfile />} />
-          <Route path="/edit-video" element={<VideoEditBox/>} />
+          {/* <Route path="/edit-video" element={<VideoEditBox/>} /> */}
         </Route>
       </Routes>
     </>

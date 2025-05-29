@@ -1,7 +1,7 @@
-// filepath: d:\Programing\JS BackEnd\MyTube\FrontEnd\src\components\video\VideoCard.tsx
 import React from "react";
 import { format } from "timeago.js"; // For Ago Time Formatting 1 Day Ago
 import { useNavigate } from "react-router-dom";
+import { MdEdit, MdDelete } from "react-icons/md";
 
 interface VideoCardProps {
   video: {
@@ -13,9 +13,10 @@ interface VideoCardProps {
     views: number;
     createdAt: string;
   };
+  isOwner?: boolean;
 }
 
-const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
+const VideoCard: React.FC<VideoCardProps> = ({ video, isOwner = false }) => {
   // Function to format the views count
   function formatViews(views: number): string {
     if (views < 1000) return views.toString();
@@ -23,11 +24,11 @@ const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
     if (views < 1_000_000_000) return `${(views / 1_000_000).toFixed(1)}M `;
     return `${(views / 1_000_000_000).toFixed(1)}B `;
   }
-
   const navigate = useNavigate();
+
   return (
     <div
-      className="bg-gray-100 overflow-hidden cursor-pointer"
+      className="bg-gray-100 overflow-hidden cursor-pointer mb-1"
       onClick={() => navigate(`/watch?vId=${video._id}`)}
     >
       <div className="relative pb-[56.25%]">
@@ -47,13 +48,38 @@ const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
         </div>
       </div>
       <div>
-        <h3 className="py-2 text-sm font-medium text-gray-900 line-clamp-2">
+        <h3 className="pt-2 text-sm font-medium text-gray-900 line-clamp-2">
           {video.title}
         </h3>
-        <div className="flex text-xs text-gray-500">
+        {/* Align views/date and icons in the same row with space between */}
+        <div className="flex items-center justify-between text-xs text-gray-500 ">
           <span>
             {formatViews(video.views)} views • {format(video.createdAt)}
           </span>
+          <div className="flex gap-2">
+            <button
+              title="Edit"
+              className="p-1 rounded hover:bg-gray-200"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <span className="text-gray-400">
+                <MdEdit size={16} />
+              </span>
+            </button>
+            <button
+              title="Delete"
+              className="p-1 rounded hover:bg-gray-200"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
+              <span className="text-gray-400">
+                <MdDelete size={16} />
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

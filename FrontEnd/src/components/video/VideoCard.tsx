@@ -15,9 +15,15 @@ interface VideoCardProps {
   };
   isOwner?: boolean;
   onEdit?: (video: any) => void;
+  onDelete?: (videoId: string) => void;
 }
 
-const VideoCard: React.FC<VideoCardProps> = ({ video, isOwner = false, onEdit }) => {
+const VideoCard: React.FC<VideoCardProps> = ({
+  video,
+  isOwner = false,
+  onEdit,
+  onDelete,
+}) => {
   // Function to format the views count
   function formatViews(views: number): string {
     if (views < 1000) return views.toString();
@@ -75,6 +81,12 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, isOwner = false, onEdit })
               className="p-1 rounded hover:bg-gray-200"
               onClick={(e) => {
                 e.stopPropagation();
+                if (
+                  window.confirm("Are you sure you want to delete this video?")
+                ) {
+                  // Call the delete function
+                  if (onDelete) onDelete(video._id);
+                }
               }}
             >
               <span className="text-gray-400">

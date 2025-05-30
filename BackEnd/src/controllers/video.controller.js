@@ -389,6 +389,7 @@ const updatedVideo = asyncHandler(async (req, res) => {
   // Return the updated video
 
   // Get the updated information from the req.body
+  const video = req.video;
   const { title, description, isPublished } = req.body;
   // Get the thumbnail from the req.file
   const thumbnailLocalPath = req.file?.path;
@@ -415,7 +416,6 @@ const updatedVideo = asyncHandler(async (req, res) => {
   }
 
   // Get Video from verifiedVideo middleware
-  const video = req.video;
 
   // Check if the user is the owner of the video
   if (video.owner.toString() !== req.user._id.toString()) {
@@ -430,7 +430,11 @@ const updatedVideo = asyncHandler(async (req, res) => {
   if (thumbnailUrl) {
     video.thumbnail = thumbnailUrl;
   }
-  video.isPublished = !isPublished;
+  if (isPublished === "true") {
+    video.isPublished = true;
+  } else if (isPublished === "false") {
+    video.isPublished = false;
+  }
   await video.save();
 
   // Return the updated video

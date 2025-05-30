@@ -69,6 +69,45 @@ export const VideoService = {
       throw error;
     }
   },
+
+  // Update video details
+  updateVideoDetails: async (videoId: string, VideoData: FormData) => {
+    try {
+      const res = await apiClient.patch(
+        `/videos/update/${videoId}`,
+        VideoData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (!res.data.success) {
+        throw new Error(res.data.message || "Failed to update video details");
+      }
+      toast.success("Video details updated successfully!");
+
+      return res.data;
+    } catch (error) {
+      console.error("Error updating video details:", error);
+      throw error;
+    }
+  },
+
+  // Delete video
+  deleteVideo: async (videoId: string) => {
+    try {
+      const res = await apiClient.delete(`/videos/delete/${videoId}`);
+      if (!res.data.success) {
+        throw new Error(res.data.message || "Failed to delete video");
+      }
+      toast.success("Video deleted successfully!");
+      return res.data;
+    } catch (error) {
+      console.error("Error deleting video:", error);
+      throw error;
+    }
+  },
 };
 
 export default VideoService;

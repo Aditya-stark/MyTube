@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { PaginatedVideos, Video } from "../../types/VideoType";
 import VideoService from "../../services/VideoService";
 import { RootState } from "../../store/store";
+import { act } from "react";
 
 export const publishVideo = createAsyncThunk(
   "videos/publish",
@@ -26,7 +27,6 @@ export const getUserVideos = createAsyncThunk(
   async ({ sortBy }: { sortBy?: string }, { rejectWithValue }) => {
     try {
       const res = await VideoService.getUserVideos(undefined, sortBy);
-      console.log("Fetched user videos:", res);
       if (res.success) {
         return res.data;
       }
@@ -50,7 +50,6 @@ export const loadMoreUserVideos = createAsyncThunk(
         return { videos: [], hasMoreVideos: false, lastVideoId: null };
       }
       const res = await VideoService.getUserVideos(lastVideoId, sortBy);
-      console.log("Loading more user videos:", res);
       if (res.success) {
         return res.data;
       }
@@ -75,6 +74,47 @@ export const videoById = createAsyncThunk(
       throw rejectWithValue(res.message);
     } catch (error: any) {
       console.error("Error fetching video:", error);
+      return rejectWithValue(
+        error.response?.data.message || "Something went wrong"
+      );
+    }
+  }
+);
+
+//Update Video
+export const updateVideo = createAsyncThunk(
+  "videos/updateVideo",
+  async (
+    { videoId, videoData }: { videoId: string; videoData: FormData },
+    { rejectWithValue }
+  ) => {
+    try {
+      const res = await VideoService.updateVideoDetails(videoId, videoData);
+      if (res.success) {
+        return res.data;
+      }
+      return rejectWithValue(res.message);
+    } catch (error: any) {
+      console.error("Error updating video:", error);
+      return rejectWithValue(
+        error.response?.data.message || "Something went wrong"
+      );
+    }
+  }
+);
+
+// Delete Video
+export const deleteVideo = createAsyncThunk(
+  "videos/deleteVideo",
+  async (videoId: string, { rejectWithValue }) => {
+    try {
+      const res = await VideoService.deleteVideo(videoId);
+      if (res.success) {
+        return res.data;
+      }
+      return rejectWithValue(res.message);
+    } catch (error: any) {
+      console.error("Error deleting video:", error);
       return rejectWithValue(
         error.response?.data.message || "Something went wrong"
       );
@@ -162,7 +202,6 @@ const videoSlice = createSlice({
           state.videos.videos.push(...action.payload.videos);
           state.hasMoreVideos = action.payload.hasMoreVideos;
           state.lastVideoId = action.payload.lastVideoId || null;
-          console.log("Loaded more videos:", action.payload);
         }
       })
       .addCase(loadMoreUserVideos.rejected, (state, action) => {
@@ -176,12 +215,40 @@ const videoSlice = createSlice({
       .addCase(videoById.fulfilled, (state, action) => {
         state.isLoading = false;
         state.currentVideo = action.payload;
-        // console.log("Current video:", action.payload);
       })
       .addCase(videoById.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
         state.currentVideo = null;
+      })
+      .addCase(updateVideo.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateVideo.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.currentVideo = action.payload;
+        state.error = null;
+      })
+      .addCase(updateVideo.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        console.error("Error updating video:", action.payload);
+      })
+      .addCase(deleteVideo.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(deleteVideo.fulfilled, (state) => {
+        state.isLoading = false;
+        state.currentVideo = null; // Clear current video on successful deletion
+        state.error = null;
+        console.log("Video deleted successfully");
+      })
+      .addCase(deleteVideo.rejected, (state, acttion) => {
+        state.isLoading = false;
+        state.error = acttion.payload as string;
+        console.error("Error deleting video:", acttion.payload);
       });
   },
 });

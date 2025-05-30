@@ -1,5 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import { HiArrowNarrowRight } from "react-icons/hi";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../store/store";
+import { updateVideo } from "../../features/videos/videoSlice";
 
 interface VideoEditBoxPopupProps {
   isOpen: boolean;
@@ -11,9 +14,8 @@ const VideoEditBox: React.FC<VideoEditBoxPopupProps> = ({
   isOpen,
   onClose,
   editVideoData,
+
 }) => {
-  console.log("VideoEditBox rendered with editVideoData:", editVideoData);
-  //   const videoId = editVideoData?._id;
   const initialTitle = editVideoData?.title || "";
   const initialDescription = editVideoData?.description || "";
   const initialPublishStatus = editVideoData?.isPublished || false;
@@ -32,15 +34,18 @@ const VideoEditBox: React.FC<VideoEditBoxPopupProps> = ({
       document.body.style.overflow = "auto";
     };
   }, [isOpen]);
-
+  const videoId = editVideoData?._id || "";
   const [title, setTitle] = useState(initialTitle);
   const [description, setDescription] = useState(initialDescription);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(
     thumbnailURL
   );
-  const [publishStatus, setPublishStatus] = useState(initialPublishStatus);
+  const [publishStatus, setPublishStatus] = useState<boolean | null>(
+    initialPublishStatus
+  );
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
+  const dispatch = useDispatch<AppDispatch>();
 
   // Handle thumbnail selection
   const handleThumbnailSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,13 +68,29 @@ const VideoEditBox: React.FC<VideoEditBoxPopupProps> = ({
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData();
+
     formData.append("title", title);
     formData.append("description", description);
-    formData.append("isPublished", String(publishStatus));
+    formData.append("isPublished", publishStatus ? "true" : "false");
+
     if (thumbnail) {
       formData.append("thumbnail", thumbnail);
     }
-    // API call to update video details here
+
+    await dispatch(updateVideo({ videoId, videoData: formData }));
+    
+    // Clear all fields after submission
+    setTitle("");
+    setDescription("");
+    setThumbnail(null);
+    setThumbnailPreviewUrl("");
+    setPublishStatus(false);
+    if (thumbnailPreviewUrl) {
+      URL.revokeObjectURL(thumbnailPreviewUrl); // Clean up the object URL
+    }
+    if (videoURL) {
+      URL.revokeObjectURL(videoURL); // Clean up the object URL
+    }
     onClose();
   };
 
@@ -242,14 +263,19 @@ const VideoEditBox: React.FC<VideoEditBoxPopupProps> = ({
                     </label>
                     <select
                       id="publishStatus"
-                      value={publishStatus ? "published" : "unpublished"}
-                      onChange={(e) =>
-                        setPublishStatus(e.target.value === "published")
+                      name="publishStatus"
+                      value={
+                        publishStatus !== null ? String(publishStatus) : "false"
                       }
-                      className="w-48 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      onChange={(e) =>
+                        setPublishStatus(
+                          e.target.value === "true" ? true : false
+                        )
+                      }
+                      className="mt-1 block w-40 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     >
-                      <option value="public">Public</option>
-                      <option value="private">Private</option>
+                      <option value="true">Public</option>
+                      <option value="false">Private</option>
                     </select>
                     <div className="mb-10" />
                   </div>

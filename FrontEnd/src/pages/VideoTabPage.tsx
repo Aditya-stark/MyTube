@@ -1,14 +1,25 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../store/store";
 import UploadNewVideoPopUp from "../components/video/UploadNewVideoPopUp";
-import HomeTab from "../components/video/Tabs/HomeTab";
+import { getUserVideos } from "../features/videos/videoSlice";
+import VideoTab from "../components/video/Tabs/VideoTab";
 import { UserProfileCard } from "../components/UserProfileCard";
 import { useNavigate } from "react-router-dom";
 
-const UserProfile: React.FC = () => {
-  const user = useSelector((state: any) => state.auth.user);
+const VideoTabPage: React.FC = () => {
+  const user = useSelector((state: RootState) => state.auth.user);
+  const dispatch = useDispatch<AppDispatch>();
   const [isUploadPopupOpen, setIsUploadPopupOpen] = useState(false);
-  const navigate = useNavigate();
+  const {
+    videos,
+    isLoading,
+    isLoadingMore = false,
+  } = useSelector((state: RootState) => state.videos);
+
+  useEffect(() => {
+    dispatch(getUserVideos({}));
+  }, [dispatch, isUploadPopupOpen]);
 
   if (!user) {
     return (
@@ -18,8 +29,9 @@ const UserProfile: React.FC = () => {
     );
   }
 
-  // Tab state: 'home' is active for this page
-  const [activeTab, setActiveTab] = useState<"home" | "videos">("home");
+  // Tab state: 'videos' is active for this page
+  const [activeTab, setActiveTab] = useState<"home" | "videos">("videos");
+  const navigate = useNavigate ? useNavigate() : null;
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -29,9 +41,7 @@ const UserProfile: React.FC = () => {
       />
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          {/* User Profile Card */}
           <UserProfileCard user={user} />
-
           {/* Tabs for Home | My Videos */}
           <div className="mt-2">
             <div className="border-b border-gray-200">
@@ -42,7 +52,7 @@ const UserProfile: React.FC = () => {
                       ? "border-blue-500 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
-                  onClick={() => setActiveTab("home")}
+                  onClick={() => navigate && navigate("/")}
                   type="button"
                 >
                   Home
@@ -53,7 +63,7 @@ const UserProfile: React.FC = () => {
                       ? "border-blue-500 text-blue-600"
                       : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
-                  onClick={() => navigate("/videos")}
+                  onClick={() => setActiveTab("videos")}
                   type="button"
                 >
                   My Videos
@@ -62,7 +72,14 @@ const UserProfile: React.FC = () => {
             </div>
             {/* Tab Content */}
             <div className="pt-6">
-              {activeTab === "home" && <HomeTab user={user} />}
+              {activeTab === "videos" && (
+                <VideoTab
+                  videos={videos}
+                  isLoading={isLoading}
+                  isLoadingMore={isLoadingMore}
+                  setIsUploadPopupOpen={setIsUploadPopupOpen}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -71,4 +88,4 @@ const UserProfile: React.FC = () => {
   );
 };
 
-export default UserProfile;
+export default VideoTabPage;

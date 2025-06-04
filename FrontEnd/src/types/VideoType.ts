@@ -13,6 +13,7 @@ export interface Video {
     avatar: string;
     subscriberCount: number; // number of subscribers
   };
+  likesCount: number; // number of likes
   createdAt: string;
   updatedAt: string;
   __v: number;

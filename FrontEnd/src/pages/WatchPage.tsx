@@ -2,36 +2,72 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
 import { AppDispatch, RootState } from "../store/store";
-import { videoById } from "../features/videos/videoSlice";
+import { updateVideoLikeCount, videoById } from "../features/videos/videoSlice";
 import VideoPlayer from "../components/video/player/VideoPlayer";
 import type Player from "video.js/dist/types/player";
 import { FaRegThumbsDown, FaRegThumbsUp } from "react-icons/fa";
 import { format } from "timeago.js"; // For Ago Time Formatting 1 Day Ago
+import {
+  checkVideoLikeStatus,
+  toggleVideoLike,
+} from "../features/likes/likesSlice";
 
 export const WatchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get("vId");
   const dispatch = useDispatch<AppDispatch>();
-  const [player, setPlayer] = useState<Player | null>(null);
+  // const [player, setPlayer] = useState<Player | null>(null);
 
   const { currentVideo, isLoading } = useSelector(
     (state: RootState) => state.videos
   );
+  const { isCurrentVideoLiked } = useSelector(
+    (state: RootState) => state.likes
+  );
+
+  const [likeCount, setLikeCount] = useState<number>(0);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (videoId) {
       console.log("Fetching video with ID:", videoId);
       dispatch(videoById(videoId));
+      dispatch(checkVideoLikeStatus(videoId)); // Check if user has liked this video
     }
   }, [videoId, dispatch]);
 
+  // Update like count when video loads
+  useEffect(() => {
+    if (currentVideo) {
+      setLikeCount(currentVideo.likesCount);
+    }
+  }, [currentVideo]);
+
   const handlePlayerReady = (player: Player) => {
-    setPlayer(player);
     // Add any event listeners you want here
     player.on("ended", () => {
       console.log("Video ended");
       // You could show related videos or autoplay next
     });
+  };
+
+  const likeHandler = () => {
+    if (!currentVideo?._id) return;
+
+    dispatch(toggleVideoLike(currentVideo._id))
+      .unwrap()
+      .then((result) => {
+        // Also dispatch an action to update the like count in the video state
+        dispatch(
+          updateVideoLikeCount({ increment: result.isCurrentVideoLiked })
+        );
+        setLikeCount((prev) =>
+          result.isCurrentVideoLiked ? prev + 1 : prev - 1
+        );
+      })
+      .catch((error) => {
+        console.error("Error toggling like:", error);
+      });
   };
 
   if (isLoading) {
@@ -98,9 +134,22 @@ export const WatchPage: React.FC = () => {
                   </div>
 
                   <div className="flex space-x-3 sm:space-x-4 bg-gray-200 p-2 sm:p-3 rounded-3xl w-full sm:w-auto justify-center sm:justify-start">
-                    <button className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 group">
-                      <FaRegThumbsUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-blue-600" />
-                      <span className="text-xs sm:text-sm">26 Likes</span>
+                    <button
+                      className={`flex items-center space-x-1 ${
+                        isCurrentVideoLiked
+                          ? "text-blue-600"
+                          : "text-gray-700 hover:text-blue-600"
+                      } group`}
+                      onClick={likeHandler}
+                    >
+                      <FaRegThumbsUp
+                        className={`w-4 h-4 sm:w-5 sm:h-5 ${
+                          isCurrentVideoLiked
+                            ? "text-blue-600"
+                            : "text-gray-600 group-hover:text-blue-600"
+                        }`}
+                      />
+                      <span className="text-xs sm:text-sm">{likeCount}</span>
                     </button>
                     <button className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 group">
                       <FaRegThumbsDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-blue-600" />

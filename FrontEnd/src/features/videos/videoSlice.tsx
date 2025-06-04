@@ -1,8 +1,7 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { PaginatedVideos, Video } from "../../types/VideoType";
 import VideoService from "../../services/VideoService";
 import { RootState } from "../../store/store";
-import { act } from "react";
 
 export const publishVideo = createAsyncThunk(
   "videos/publish",
@@ -161,6 +160,15 @@ const videoSlice = createSlice({
       state.isPublishing = false;
       state.error = null;
     },
+    // Add a new action to update the like count
+    updateVideoLikeCount: (
+      state,
+      action: PayloadAction<{ increment: boolean }>
+    ) => {
+      if (state.currentVideo) {
+        state.currentVideo.likesCount += action.payload.increment ? 1 : -1;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -253,7 +261,11 @@ const videoSlice = createSlice({
   },
 });
 
-export const { clearVideoError, clearCurrentVideo, resetPublishState } =
-  videoSlice.actions;
+export const {
+  clearVideoError,
+  clearCurrentVideo,
+  resetPublishState,
+  updateVideoLikeCount,
+} = videoSlice.actions;
 
 export default videoSlice.reducer;

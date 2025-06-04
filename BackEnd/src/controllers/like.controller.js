@@ -19,7 +19,9 @@ const toggleVideoLikes = asyncHandler(async (req, res) => {
       likedBy: req.user._id,
     });
 
-    return res.status(200).json(new ApiResponse(200, {}, "Video unliked"));
+    return res
+      .status(200)
+      .json(new ApiResponse(200, { likeStatus: false }, "Video unliked"));
   } else {
     //Like the video
     await Like.create({
@@ -27,7 +29,9 @@ const toggleVideoLikes = asyncHandler(async (req, res) => {
       likedBy: req.user._id,
     });
 
-    return res.status(201).json(new ApiResponse(201, {}, "Video liked"));
+    return res
+      .status(201)
+      .json(new ApiResponse(201, { likeStatus: true }, "Video liked"));
   }
 });
 
@@ -88,9 +92,25 @@ const getLikedVideos = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, likedVideos, "Liked videos fetched"));
 });
 
+const getVideoLikeStatus = asyncHandler(async (req, res) => {
+  // Get the video from middleware
+  const video = req.video;
+
+  // Check if the user has liked the video
+  const isLiked = await Like.findOne({
+    video: video._id,
+    likedBy: req.user._id,
+  });
+
+  return res.status(200).json(
+    new ApiResponse(200, { isLiked: !!isLiked }, "Video like status fetched")
+  );
+});
+
 export {
   toggleVideoLikes,
   toggleCommentLikes,
   toggleTweetLikes,
   getLikedVideos,
+  getVideoLikeStatus,
 };

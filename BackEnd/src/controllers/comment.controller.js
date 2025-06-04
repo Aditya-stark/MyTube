@@ -7,44 +7,48 @@ import { ApiError } from "../utils/ApiError.js";
 const getVideoComments = asyncHandler(async (req, res) => {
   try {
     // Get VideoId from req.params
-    // Find all Comments of the Video using aggregation pipeline
+    // Get the page , limit , sortBy and sortType from the request
+    // Convert the page and limit to numbers
+    // Validate the page and limit
+    // Find all Comments by the videoId by aggregation pipeline
     // Match video (id in "Comment") to the "Video" collection
     // Sort and limit comments count
     // Lookup comment owner details from "User" collection
     // Project feilds we only need
     // Count total comments count for pagination
-
     // Get VideoId from req.params
-    const { videoId } = req.params;
-    const { page = 1, limit = 10 } = req.query;
 
-    const parsedPage = parseInt(page) || 1;
-    const parsedLimit = parseInt(limit) || 10;
-    const skip = (parsedPage - 1) * parsedLimit;
+    const { videoId } = req.params;
+    const { limit = 8, lastCommentId } = req.query;
+
+    const parsedLimit = parseInt(limit, 10);
 
     // Find all comments of the video using aggreation pipeline
     const result = await Comment.aggregate([
-      //Match video (id in "Comment") to the "Video" collection
+      // Match video (id in "Comment") to the "Video" collection
       {
         $match: {
           video: mongoose.Types.ObjectId.createFromHexString(videoId),
+          ...(lastCommentId && {
+            _id: {
+              $lt: mongoose.Types.ObjectId.createFromHexString(lastCommentId),
+            },
+          }),
         },
       },
       {
         $facet: {
           comments: [
+            // Sort comments by createdAt in descending order
             {
               $sort: {
                 createdAt: -1,
               },
             },
+            //Limit comments count
             {
-              $skip: skip,
+              $limit: parsedLimit + 1,
             },
-            {
-              $limit: parsedLimit,
-            },
-
             //Lookup comment owner details from "User" collection
             {
               $lookup: {
@@ -84,7 +88,12 @@ const getVideoComments = asyncHandler(async (req, res) => {
     ]);
 
     //Extract results from the facet operation
-    const comments = result[0].comments || [];
+    let comments = result[0].comments || [];
+    let hasMore = false;
+    if (comments.length > parsedLimit) {
+      comments = comments.slice(0, parsedLimit);
+      hasMore = true;
+    }
     const totalComments = result[0].totalCount[0]?.count || 0;
 
     return res.status(200).json(
@@ -92,12 +101,8 @@ const getVideoComments = asyncHandler(async (req, res) => {
         200,
         {
           comments,
-          pagination: {
-            totalPages: Math.ceil(totalComments / parsedLimit),
-            currentPage: parsedPage,
-            hasNextPage: skip + comments.length < totalComments,
-            hasPrevPage: parsedPage > 1,
-          },
+          totalComments,
+          hasMore,
         },
         "Comments fetched successfully"
       )

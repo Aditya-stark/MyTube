@@ -72,7 +72,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
                 updatedAt: 1,
                 ownerDetails: {
                   _id: 1,
-                  name: 1,
+                  fullName: 1,
                   email: 1,
                 },
               },
@@ -139,6 +139,7 @@ const addComment = asyncHandler(async (req, res) => {
     const videoId = req.video._id;
     // Get contents from req.body
     const { commentContent } = req.body;
+    console.log("Comment Content: ", commentContent);
     // Get userdId from req.user
     const ownerId = req.user._id;
 

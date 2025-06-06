@@ -7,6 +7,8 @@ export interface Comment {
     _id: string;
     fullName: string;
     avatar: string;
+    username: string;
+    email: string;
   };
 }
 

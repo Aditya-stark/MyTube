@@ -19,7 +19,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
     // Get VideoId from req.params
 
     const { videoId } = req.params;
-    const { limit = 8, lastCommentId } = req.query;
+    const { limit = 4, lastCommentId } = req.query;
 
     const parsedLimit = parseInt(limit, 10);
 
@@ -74,6 +74,8 @@ const getVideoComments = asyncHandler(async (req, res) => {
                   _id: 1,
                   fullName: 1,
                   email: 1,
+                  username: 1,
+                  avatar: 1,
                 },
               },
             },
@@ -95,6 +97,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
       hasMore = true;
     }
     const totalComments = result[0].totalCount[0]?.count || 0;
+    const lastCmtId = comments[comments.length - 1]?._id;
 
     return res.status(200).json(
       new ApiResponse(
@@ -103,6 +106,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
           comments,
           totalComments,
           hasMore,
+          lastCommentId: lastCmtId,
         },
         "Comments fetched successfully"
       )

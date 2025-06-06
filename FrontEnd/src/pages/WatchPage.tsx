@@ -11,14 +11,12 @@ import {
   checkVideoLikeStatus,
   toggleVideoLike,
 } from "../features/likes/likesSlice";
-import { addComment } from "../features/commentSlice";
-import { set } from "video.js/dist/types/tech/middleware";
+import { addComment, getComments } from "../features/commentSlice";
 
 export const WatchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get("vId");
   const dispatch = useDispatch<AppDispatch>();
-  // const [player, setPlayer] = useState<Player | null>(null);
 
   const { currentVideo, isLoading } = useSelector(
     (state: RootState) => state.videos
@@ -27,7 +25,7 @@ export const WatchPage: React.FC = () => {
     (state: RootState) => state.likes
   );
   const { user } = useSelector((state: RootState) => state.auth);
-  // const { comments } = useSelector((state: RootState) => state.comments);
+  const { comments } = useSelector((state: RootState) => state.comments);
 
   const [likeCount, setLikeCount] = useState<number>(0);
   const [comment, setComment] = useState<string>("");
@@ -38,6 +36,7 @@ export const WatchPage: React.FC = () => {
       console.log("Fetching video with ID:", videoId);
       dispatch(videoById(videoId));
       dispatch(checkVideoLikeStatus(videoId)); // Check if user has liked this video
+      dispatch(getComments(videoId)); // Fetch comments for the video
     }
   }, [videoId, dispatch]);
 
@@ -275,9 +274,42 @@ export const WatchPage: React.FC = () => {
                         </div>
                       </form>
                     </div>
-                    <p className="text-xs sm:text-sm text-gray-500">
-                      Comments will appear here
-                    </p>
+                    {/* Comments List */}
+                    {/* Here you would map through comments and display them */}
+                    <div className="space-y-3 sm:space-y-4">
+                      {comments.length > 0 ? (
+                        comments.map((comment) => (
+                          <div
+                            key={comment._id}
+                            className="flex items-start space-x-3"
+                          >
+                            <img
+                              src={
+                                comment.ownerDetails?.avatar ||
+                                "/default-avatar.png"
+                              }
+                              alt="Commenter Avatar"
+                              className="w-9 h-9 sm:w-11 sm:h-11 rounded-full object-cover border border-gray-300"
+                            />
+                            <div className="flex flex-col space-y-1">
+                              <p className="text-sm font-semibold">
+                                {comment.ownerDetails?.fullName}
+                              </p>
+                              <p className="text-xs text-gray-600">
+                                {comment.commentContent}
+                              </p>
+                              <span className="text-xs text-gray-400">
+                                {format(comment.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs sm:text-sm text-gray-500">
+                          No comments yet. Be the first to comment!
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </>

@@ -12,6 +12,7 @@ import {
   toggleVideoLike,
 } from "../features/likes/likesSlice";
 import { addComment, getComments } from "../features/commentSlice";
+import { CommentComponent } from "../components/comment/CommentComponent";
 
 export const WatchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -25,10 +26,11 @@ export const WatchPage: React.FC = () => {
     (state: RootState) => state.likes
   );
   const { user } = useSelector((state: RootState) => state.auth);
-  const { comments } = useSelector((state: RootState) => state.comments);
+  const { comments, totalComments } = useSelector(
+    (state: RootState) => state.comments
+  );
 
   const [likeCount, setLikeCount] = useState<number>(0);
-  const [comment, setComment] = useState<string>("");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -74,13 +76,8 @@ export const WatchPage: React.FC = () => {
       });
   };
 
-  //Comment Handler
-  const addCommentHandler = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const commentText = (
-      e.currentTarget.elements.namedItem("comment") as HTMLTextAreaElement
-    )?.value.trim();
-
+  // Refactored Comment Handler
+  const addCommentHandler = (commentText: string, reset: () => void) => {
     if (!commentText) {
       alert("Comment cannot be empty");
       return;
@@ -89,21 +86,18 @@ export const WatchPage: React.FC = () => {
       alert("Video not found");
       return;
     }
-
     dispatch(
       addComment({ videoId: currentVideo._id, commentData: commentText })
     )
       .unwrap()
       .then(() => {
-        // Optionally, you can clear the comment input after successful submission
-        setComment("");
+        reset();
+        dispatch(getComments(currentVideo._id)); // Refresh comments
       })
       .catch((error) => {
         console.error("Error adding comment:", error);
         alert("Failed to add comment. Please try again.");
       });
-
-    setComment("");
   };
 
   if (isLoading) {
@@ -233,85 +227,12 @@ export const WatchPage: React.FC = () => {
                 </div>
 
                 {/* Comment Section */}
-                <div className="mt-4">
-                  <h2 className="text-md sm:text-lg lg:text-xl font-bold mb-1 sm:mb-2 sm:ml-2">
-                    Comments
-                  </h2>
-                  {/* Add Comment */}
-                  <div className="space-y-3 sm:space-y-4 ">
-                    <div className="flex items-start space-x-3 w-full p-2">
-                      <img
-                        src={user?.avatar || "/default-avatar.png"}
-                        alt="userAvatar"
-                        className="w-9 h-9 sm:w-11 sm:h-11 rounded-full object-cover border border-gray-300"
-                      />
-                      <form
-                        className="flex-1 flex flex-col space-y-2"
-                        onSubmit={addCommentHandler}
-                      >
-                        <textarea
-                          name="comment"
-                          id="comment"
-                          className="w-full p-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm"
-                          rows={2}
-                          placeholder="Add a public comment..."
-                          value={comment}
-                          onChange={(e) => setComment(e.target.value)}
-                        ></textarea>
-                        <div className="flex justify-end space-x-2">
-                          <button
-                            type="button"
-                            className="px-4 py-1.5 text-sm rounded-full text-gray-700 hover:bg-gray-300 transition"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            type="submit"
-                            className="px-4 py-1.5 text-sm rounded-full bg-blue-600 text-white hover:bg-blue-700 transition font-semibold shadow"
-                          >
-                            Comment
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                    {/* Comments List */}
-                    {/* Here you would map through comments and display them */}
-                    <div className="space-y-3 sm:space-y-4">
-                      {comments.length > 0 ? (
-                        comments.map((comment) => (
-                          <div
-                            key={comment._id}
-                            className="flex items-start space-x-3"
-                          >
-                            <img
-                              src={
-                                comment.ownerDetails?.avatar ||
-                                "/default-avatar.png"
-                              }
-                              alt="Commenter Avatar"
-                              className="w-9 h-9 sm:w-11 sm:h-11 rounded-full object-cover border border-gray-300"
-                            />
-                            <div className="flex flex-col space-y-1">
-                              <p className="text-sm font-semibold">
-                                {comment.ownerDetails?.fullName}
-                              </p>
-                              <p className="text-xs text-gray-600">
-                                {comment.commentContent}
-                              </p>
-                              <span className="text-xs text-gray-400">
-                                {format(comment.createdAt)}
-                              </span>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-xs sm:text-sm text-gray-500">
-                          No comments yet. Be the first to comment!
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <CommentComponent
+                  totalComments={totalComments}
+                  comments={comments}
+                  user={user}
+                  addCommentHandler={addCommentHandler}
+                />
               </>
             )}
           </div>

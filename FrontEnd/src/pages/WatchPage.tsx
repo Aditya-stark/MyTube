@@ -34,7 +34,6 @@ export const WatchPage: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     if (videoId) {
-      console.log("Fetching video with ID:", videoId);
       dispatch(videoById(videoId));
       dispatch(checkVideoLikeStatus(videoId)); // Check if user has liked this video
       dispatch(getComments(videoId)); // Fetch comments for the video

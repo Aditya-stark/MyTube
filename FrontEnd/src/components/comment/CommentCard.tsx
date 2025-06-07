@@ -13,7 +13,7 @@ const CommentCard = (commentData: Comment) => {
         className="w-9 h-9 sm:w-11 sm:h-11 rounded-full object-cover border border-gray-300 mr-3"
       />
       <div>
-        <div className="flex items-center mb-1">
+        <div className="flex items-baseline mb-1">
           <span className="font-bold mr-2">{`@${username}`}</span>
           <span className="text-gray-500 text-xs">{format(createdAt)}</span>
         </div>

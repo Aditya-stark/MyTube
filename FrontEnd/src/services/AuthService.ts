@@ -75,7 +75,6 @@ export const AuthService = {
   logout: async () => {
     try {
       const res = await apiClient.post<LogoutResponse>("/users/logout");
-      console.log("res", res.data);
       return res.data;
     } catch (error) {
       console.log("error", error);
@@ -89,7 +88,6 @@ export const AuthService = {
       const res = await apiClient.get<CurrentUserResponse>(
         "/users/current-user"
       );
-      console.log("res", res.data);
       return res.data;
     } catch (error) {
       console.log("error", error);

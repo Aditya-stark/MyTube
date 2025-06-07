@@ -1,11 +1,18 @@
+import { useDispatch } from "react-redux";
 import CommentCard from "../comment/CommentCard";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { getMoreComments } from "../../features/commentSlice";
+import { AppDispatch } from "../../store/store";
 
 interface CommentComponentProps {
   totalComments: number;
   comments: any[];
   user: any;
   addCommentHandler: (comment: string, reset: () => void) => void;
+  hasMoreComments?: boolean;
+  isLoadingMore?: boolean;
+  videoId?: string;
+  lastCommentId?: string;
 }
 
 export const CommentComponent = ({
@@ -13,15 +20,46 @@ export const CommentComponent = ({
   comments,
   user,
   addCommentHandler,
+  hasMoreComments = false,
+  isLoadingMore = false,
+  videoId = "",
+  lastCommentId = "",
 }: CommentComponentProps) => {
   const [comment, setComment] = useState<string>("");
+  const loaderRef = useRef<HTMLDivElement>(null);
+  const dispatch = useDispatch<AppDispatch>();
 
+  // Handle comment submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = comment.trim();
     if (!trimmed) return;
     addCommentHandler(trimmed, () => setComment(""));
   };
+
+  //Observe the loader for infinite scroll
+  useEffect(() => {
+    if (!loaderRef.current || !hasMoreComments || isLoadingMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMoreComments && !isLoadingMore) {
+          dispatch(getMoreComments({ videoId, lastCommentId }));
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current);
+      }
+    };
+  }, [dispatch, hasMoreComments, isLoadingMore, videoId, lastCommentId]);
 
   return (
     <div className="mt-4">
@@ -66,7 +104,7 @@ export const CommentComponent = ({
             </div>
           </form>
         </div>
-        
+
         {/* Comments List */}
         <div className="space-y-3 sm:space-y-4">
           {comments.length > 0 ? (
@@ -79,6 +117,17 @@ export const CommentComponent = ({
             </p>
           )}
         </div>
+
+        {/* Loading More Comments Indicator */}
+        {comments.length > 0 && hasMoreComments && (
+          <div ref={loaderRef} className="flex justify-center items-center py-4">
+            {isLoadingMore ? (
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+            ) : (
+              <div className="text-gray-500 text-sm">Scroll for more comments</div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

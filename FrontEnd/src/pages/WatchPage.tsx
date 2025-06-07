@@ -26,9 +26,8 @@ export const WatchPage: React.FC = () => {
     (state: RootState) => state.likes
   );
   const { user } = useSelector((state: RootState) => state.auth);
-  const { comments, totalComments } = useSelector(
-    (state: RootState) => state.comments
-  );
+  const { comments, totalComments, hasMore, isLoadingMore, lastCommentId } =
+    useSelector((state: RootState) => state.comments);
 
   const [likeCount, setLikeCount] = useState<number>(0);
 
@@ -100,7 +99,7 @@ export const WatchPage: React.FC = () => {
       });
   };
 
-  if (isLoading) {
+  if (isLoading || !currentVideo) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -232,6 +231,10 @@ export const WatchPage: React.FC = () => {
                   comments={comments}
                   user={user}
                   addCommentHandler={addCommentHandler}
+                  hasMoreComments={hasMore}
+                  isLoadingMore={isLoadingMore}
+                  videoId={currentVideo._id}
+                  lastCommentId={lastCommentId ?? undefined}
                 />
               </>
             )}

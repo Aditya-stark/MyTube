@@ -6,98 +6,88 @@ import { ApiError } from "../utils/ApiError.js";
 
 const getVideoComments = asyncHandler(async (req, res) => {
   try {
-    // Get VideoId from req.params
-    // Get the page , limit , sortBy and sortType from the request
-    // Convert the page and limit to numbers
-    // Validate the page and limit
-    // Find all Comments by the videoId by aggregation pipeline
-    // Match video (id in "Comment") to the "Video" collection
-    // Sort and limit comments count
-    // Lookup comment owner details from "User" collection
-    // Project feilds we only need
-    // Count total comments count for pagination
-    // Get VideoId from req.params
-
     const { videoId } = req.params;
     const { limit = 4, lastCommentId } = req.query;
 
+    console.log("Fetching comments for video:", videoId);
+    console.log("lastCommentId:", lastCommentId);
+    console.log("limit:", limit);
+
     const parsedLimit = parseInt(limit, 10);
 
-    // Find all comments of the video using aggreation pipeline
-    const result = await Comment.aggregate([
-      // Match video (id in "Comment") to the "Video" collection
+    // Build match condition
+    const matchCondition = {
+      video: mongoose.Types.ObjectId.createFromHexString(videoId),
+    };
+
+    // Add pagination condition if lastCommentId is provided
+    if (lastCommentId) {
+      matchCondition._id = {
+        $lt: mongoose.Types.ObjectId.createFromHexString(lastCommentId),
+      };
+    }
+
+    // Get total comments count for this video (without pagination)
+    const totalComments = await Comment.countDocuments({
+      video: mongoose.Types.ObjectId.createFromHexString(videoId),
+    });
+
+    // Get comments with pagination
+    const comments = await Comment.aggregate([
       {
-        $match: {
-          video: mongoose.Types.ObjectId.createFromHexString(videoId),
-          ...(lastCommentId && {
-            _id: {
-              $lt: mongoose.Types.ObjectId.createFromHexString(lastCommentId),
-            },
-          }),
+        $match: matchCondition,
+      },
+      // Sort comments by createdAt in descending order
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
+      // Get one extra to check if there are more comments
+      {
+        $limit: parsedLimit + 1,
+      },
+      // Lookup comment owner details from "User" collection
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "ownerDetails",
         },
       },
       {
-        $facet: {
-          comments: [
-            // Sort comments by createdAt in descending order
-            {
-              $sort: {
-                createdAt: -1,
-              },
-            },
-            //Limit comments count
-            {
-              $limit: parsedLimit + 1,
-            },
-            //Lookup comment owner details from "User" collection
-            {
-              $lookup: {
-                from: "users",
-                localField: "owner",
-                foreignField: "_id",
-                as: "ownerDetails",
-              },
-            },
-            {
-              $unwind: "$ownerDetails",
-            },
-
-            //HERE WE CAN ADD COMMENT LINK COUNT AND FETCH COMMENT--> COMMENTS DATA (AGGERGATION) (COMPLEX THING🥲)
-
-            // Project feilds we only need
-            {
-              $project: {
-                commentContent: 1,
-                createdAt: 1,
-                updatedAt: 1,
-                ownerDetails: {
-                  _id: 1,
-                  fullName: 1,
-                  email: 1,
-                  username: 1,
-                  avatar: 1,
-                },
-              },
-            },
-          ],
-          totalCount: [
-            {
-              $count: "count",
-            },
-          ],
+        $unwind: "$ownerDetails",
+      },
+      // Project fields we only need
+      {
+        $project: {
+          commentContent: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          ownerDetails: {
+            _id: 1,
+            fullName: 1,
+            email: 1,
+            username: 1,
+            avatar: 1,
+          },
         },
       },
     ]);
 
-    //Extract results from the facet operation
-    let comments = result[0].comments || [];
+    // Check if there are more comments
     let hasMore = false;
     if (comments.length > parsedLimit) {
-      comments = comments.slice(0, parsedLimit);
+      comments.pop(); // Remove the extra comment
       hasMore = true;
     }
-    const totalComments = result[0].totalCount[0]?.count || 0;
-    const lastCmtId = comments[comments.length - 1]?._id;
+    const lastCmtId =
+      comments.length > 0 ? comments[comments.length - 1]._id : null;
+
+    console.log("Returning comments count:", comments.length);
+    console.log("hasMore:", hasMore);
+    console.log("lastCmtId:", lastCmtId);
 
     return res.status(200).json(
       new ApiResponse(

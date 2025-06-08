@@ -16,15 +16,17 @@ export const commentService = {
       console.error("Error adding comment:", error);
       throw error;
     }
-  },
-  // Get comments for a video
+  }, // Get comments for a video
   getComments: async (videoId: string, lastCommentId?: string) => {
     try {
-      let url = `/comments/video/${videoId}`;
-      // If lastCommentId is provided, append it as a query parameter
       const params = new URLSearchParams();
-      if (lastCommentId) params.append("lastCommentId", lastCommentId);
-      url += `?${params.toString()}`;
+      if (lastCommentId) {
+        params.append("lastCommentId", lastCommentId);
+      }
+      const queryString = params.toString();
+      const url = `/comments/video/${videoId}${
+        queryString ? `?${queryString}` : ""
+      }`;
 
       const res = await apiClient.get(url);
       if (!res.data.success) {

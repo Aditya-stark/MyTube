@@ -138,8 +138,23 @@ const commentSlice = createSlice({
       })
       .addCase(getMoreComments.fulfilled, (state, action) => {
         state.isLoadingMore = false;
+
         if (action.payload.comments.length > 0) {
-          state.comments.push(...action.payload.comments);
+          // Get existing comment IDs to prevent duplicates
+          const existingIds = new Set(
+            state.comments.map((comment: Comment) => comment._id)
+          );
+
+          // Filter out any comments that already exist
+          const newComments = action.payload.comments.filter(
+            (comment: Comment) => !existingIds.has(comment._id)
+          );
+
+          // Only add new comments
+          if (newComments.length > 0) {
+            state.comments.push(...newComments);
+          }
+
           state.hasMore = action.payload.hasMore;
           state.lastCommentId = action.payload.lastCommentId || null;
         }

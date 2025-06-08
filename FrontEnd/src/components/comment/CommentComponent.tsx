@@ -109,7 +109,11 @@ export const CommentComponent = ({
         <div className="space-y-3 sm:space-y-4">
           {comments.length > 0 ? (
             comments.map((comment) => (
-              <CommentCard key={comment._id} {...comment} />
+              <CommentCard
+                key={comment._id}
+                commentData={comment}
+                user={user}
+              />
             ))
           ) : (
             <p className="text-xs sm:text-sm text-gray-500">
@@ -120,11 +124,16 @@ export const CommentComponent = ({
 
         {/* Loading More Comments Indicator */}
         {comments.length > 0 && hasMoreComments && (
-          <div ref={loaderRef} className="flex justify-center items-center py-4">
+          <div
+            ref={loaderRef}
+            className="flex justify-center items-center py-4"
+          >
             {isLoadingMore ? (
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
             ) : (
-              <div className="text-gray-500 text-sm">Scroll for more comments</div>
+              <div className="text-gray-500 text-sm">
+                Scroll for more comments
+              </div>
             )}
           </div>
         )}

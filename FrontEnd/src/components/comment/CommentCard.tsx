@@ -1,9 +1,20 @@
 import { Comment } from "../../types/CommentType";
 import { format } from "timeago.js";
+import { useState } from "react";
+import { ResponseUser } from "../../types/AuthType";
+import { BsThreeDotsVertical } from "react-icons/bs";
 
-const CommentCard = (commentData: Comment) => {
+interface CommentCardProps {
+  commentData: Comment;
+  user: ResponseUser;
+}
+
+const CommentCard = ({ commentData, user }: CommentCardProps) => {
   const { commentContent, createdAt, ownerDetails } = commentData;
   const { username, avatar } = ownerDetails;
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const isOwner = user._id === ownerDetails._id;
 
   return (
     <div className="flex items-center mb-4 ">
@@ -19,6 +30,27 @@ const CommentCard = (commentData: Comment) => {
         </div>
         <div className="text-base">{commentContent}</div>
       </div>
+
+      {isOwner && (
+        <div className="ml-auto relative">
+          <button
+            onClick={() => setMenuOpen((prev) => !prev)}
+            className="p-1 rounded-full hover:bg-gray-200"
+          >
+            <BsThreeDotsVertical size={15} />
+          </button>
+          {menuOpen && (
+            <div className="absolute right-0 mt-1 w-20 bg-white border rounded shadow z-10 text-sm">
+                <button className="block w-full text-left px-2 py-1 hover:bg-gray-100 rounded">
+                Edit
+                </button>
+              <button className="block w-full text-left px-2 py-1 hover:bg-gray-100 rounded text-red-600">
+                Delete
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

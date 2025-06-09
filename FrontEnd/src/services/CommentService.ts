@@ -16,7 +16,8 @@ export const commentService = {
       console.error("Error adding comment:", error);
       throw error;
     }
-  }, // Get comments for a video
+  },
+  // Get comments for a video
   getComments: async (videoId: string, lastCommentId?: string) => {
     try {
       const params = new URLSearchParams();
@@ -38,6 +39,37 @@ export const commentService = {
       throw error;
     }
   },
+  // Edit a comment
+  editComment: async (editCommentId: string, editComment: string) => {
+    try {
+      const res = await apiClient.patch(`/comments/${editCommentId}`, {
+        commentContent: editComment,
+      });
+      if (!res.data.success) {
+        throw new Error(res.data.message || "Failed to edit comment");
+      }
+      return res.data;
+    } catch (error) {
+      console.error("Error editing comment:", error);
+      throw error;
+    }
+  },
+  // Delete a comment
+  deleteComment: async (commentId: string) => {
+    try {
+      const res = await apiClient.delete(`/comments/${commentId}`);
+      if (!res.data.success) {
+        throw new Error(res.data.message || "Failed to delete comment");
+      }
+      return res.data;
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      throw error;
+    }
+  },
+
+  
+  
 };
 
 export default commentService;

@@ -3,6 +3,10 @@ import { format } from "timeago.js";
 import { useState } from "react";
 import { ResponseUser } from "../../types/AuthType";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../store/store";
+import { deleteComment } from "../../features/commentSlice";
+import toast from "react-hot-toast";
 
 interface CommentCardProps {
   commentData: Comment;
@@ -15,6 +19,19 @@ const CommentCard = ({ commentData, user }: CommentCardProps) => {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const isOwner = user._id === ownerDetails._id;
+  const dispatch = useDispatch<AppDispatch>();
+
+  const deleteCommentHandler = () => {
+    dispatch(deleteComment(commentData._id))
+      .unwrap()
+      .then(() => {
+        toast.success("Comment deleted successfully");
+        setMenuOpen(false);
+      })
+      .catch((error) => {
+        console.error("Failed to delete comment:", error);
+      });
+  };
 
   return (
     <div className="flex items-center mb-4 ">
@@ -41,10 +58,13 @@ const CommentCard = ({ commentData, user }: CommentCardProps) => {
           </button>
           {menuOpen && (
             <div className="absolute right-0 mt-1 w-20 bg-white border rounded shadow z-10 text-sm">
-                <button className="block w-full text-left px-2 py-1 hover:bg-gray-100 rounded">
+              <button className="block w-full text-left px-2 py-1 hover:bg-gray-100 rounded">
                 Edit
-                </button>
-              <button className="block w-full text-left px-2 py-1 hover:bg-gray-100 rounded text-red-600">
+              </button>
+              <button
+                className="block w-full text-left px-2 py-1 hover:bg-gray-100 rounded text-red-600"
+                onClick={deleteCommentHandler}
+              >
                 Delete
               </button>
             </div>

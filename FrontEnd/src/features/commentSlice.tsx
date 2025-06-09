@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import commentService from "../services/CommentService";
 import { Comment } from "../types/CommentType";
+import { access } from "fs";
 
 export const addComment = createAsyncThunk(
   "comments/addComment",
@@ -57,6 +58,53 @@ export const getMoreComments = createAsyncThunk(
       return rejectWithValue(res.message);
     } catch (error: any) {
       console.error("Error fetching more comments:", error);
+      return rejectWithValue(
+        error.response?.data.message || "Something went wrong"
+      );
+    }
+  }
+);
+
+// Edit comment action
+export const editComment = createAsyncThunk(
+  "comments/editComment",
+  async (
+    {
+      editCommentId,
+      editComment,
+    }: { editCommentId: string; editComment: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const res = await commentService.editComment(editCommentId, editComment);
+      if (res.success) {
+        return res.data;
+      }
+      return rejectWithValue(res.message);
+    } catch (error: any) {
+      console.error("Error editing comment:", error);
+      return rejectWithValue(
+        error.response?.data.message || "Something went wrong"
+      );
+    }
+  }
+);
+
+// Delete comment action
+export const deleteComment = createAsyncThunk(
+  "comments/deleteComment",
+  async (commentId: string, { rejectWithValue }) => {
+    try {
+      const res = await commentService.deleteComment(commentId);
+      if (res.success) {
+        return {
+          ...res,
+          deletedCommentId: commentId,
+        };
+      }
+      return rejectWithValue(res.message);
+    } catch (error: any) {
+      console.error("Error deleting comment:", error);
       return rejectWithValue(
         error.response?.data.message || "Something went wrong"
       );
@@ -161,6 +209,44 @@ const commentSlice = createSlice({
       })
       .addCase(getMoreComments.rejected, (state, action) => {
         state.isLoadingMore = false;
+        state.error = action.payload as string;
+      })
+      .addCase(editComment.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(editComment.fulfilled, (state, action) => {
+        state.loading = false;
+        const updatedComment = action.payload;
+        const index = state.comments.findIndex(
+          (comment) => comment._id === updatedComment._id
+        );
+        if (index !== -1) {
+          state.comments[index].commentContent = updatedComment.commentContent;
+        }
+      })
+      .addCase(editComment.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(deleteComment.pending, (state) => {
+        state.deletingComment = true;
+        state.error = null;
+      })
+      .addCase(deleteComment.fulfilled, (state, action) => {
+        state.deletingComment = false;
+        const deletedCommentId = action.payload.deletedCommentId;
+        state.comments = state.comments.filter(
+          (comment) => comment._id !== deletedCommentId
+        );
+        state.totalComments -= 1;
+        if (state.comments.length === 0) {
+          state.hasMore = false;
+          state.lastCommentId = null;
+        }
+      })
+      .addCase(deleteComment.rejected, (state, action) => {
+        state.deletingComment = false;
         state.error = action.payload as string;
       });
   },

@@ -27,11 +27,11 @@ router
   .route("/tweet/like/:tweetId")
   .post(verifyJWT, verifiedTweet, toggleTweetLikes);
 
+// Add new route for like status
 router
   .route("/video/like-status/:videoId")
   .get(verifyJWT, verifiedVideo, getVideoLikeStatus);
 
-// Add new route for comment like status
 router
   .route("/comment/like-status/:commentId")
   .get(verifyJWT, verifiedComment, getCommentLikeStatus);

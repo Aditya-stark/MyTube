@@ -15,6 +15,7 @@ import UserProfile from "./pages/UserProfile";
 import VideoTabPage from "./pages/VideoTabPage";
 import HeaderNav from "./components/HeaderNav";
 import UploadNewVideoPopUp from "./components/video/UploadNewVideoPopUp";
+import TweetsTabPage from "./pages/TweetsTabPage";
 
 function LayoutWithHeader() {
   const [isUploadPopupOpen, setIsUploadPopupOpen] = useState(false);
@@ -67,6 +68,7 @@ function App() {
             <Route path="/" element={<UserProfile />} />
             <Route path="/edit-profile" element={<UpdateProfile />} />
             <Route path="/videos" element={<VideoTabPage />} />
+            <Route path="/tweets" element={<TweetsTabPage />} />
           </Route>
         </Route>
       </Routes>

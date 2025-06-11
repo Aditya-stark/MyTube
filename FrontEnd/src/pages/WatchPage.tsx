@@ -10,6 +10,7 @@ import { format } from "timeago.js"; // For Ago Time Formatting 1 Day Ago
 import {
   checkVideoLikeStatus,
   toggleVideoLike,
+  checkCommentLikeStatus,
 } from "../features/likes/likesSlice";
 import { addComment, getComments } from "../features/commentSlice";
 import { CommentComponent } from "../components/comment/CommentComponent";
@@ -35,8 +36,19 @@ export const WatchPage: React.FC = () => {
     window.scrollTo(0, 0);
     if (videoId) {
       dispatch(videoById(videoId));
-      dispatch(checkVideoLikeStatus(videoId)); // Check if user has liked this video
-      dispatch(getComments(videoId)); // Fetch comments for the video
+      dispatch(checkVideoLikeStatus(videoId));
+      dispatch(getComments(videoId)).then((result) => {
+        // Optionally check like status for each comment
+        if (result.payload?.comments) {
+          result.payload.comments.forEach(
+            (comment: Comment & { _id: string }) => {
+              if (comment._id) {
+                dispatch(checkCommentLikeStatus(comment._id));
+              }
+            }
+          );
+        }
+      });
     }
   }, [videoId, dispatch]);
 

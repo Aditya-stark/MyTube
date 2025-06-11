@@ -21,4 +21,30 @@ export const LikesService = {
     const res = await apiClient.get(`/likes/video/like-status/${videoId}`);
     return res.data;
   },
+
+  // Toggle Comment Like
+  toggleCommentLike: async (commentId: string) => {
+    try {
+      const res = await apiClient.post(`/likes/comment/like/${commentId}`);
+      if (!res.data.success) {
+        throw new Error(res.data.message || "Failed to toggle comment like");
+      }
+      console.log("Comment like toggled successfully:", res.data);
+      return res.data;
+    } catch (error) {
+      console.error("Error toggling comment like:", error);
+      throw error;
+    }
+  },
+
+  // Get Comment Like Status
+  getCommentLikeStatus: async (commentId: string) => {
+    try {
+      const res = await apiClient.get(`/likes/comment/like-status/${commentId}`);
+      return res.data;
+    } catch (error) {
+      console.error("Error getting comment like status:", error);
+      throw error;
+    }
+  },
 };

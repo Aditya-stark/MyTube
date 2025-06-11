@@ -10,6 +10,8 @@ export interface Comment {
     username: string;
     email: string;
   };
+  likesCount?: number;
+  isLiked?: boolean;
 }
 
 export interface PaginatedComments {

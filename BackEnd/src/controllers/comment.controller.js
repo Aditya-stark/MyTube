@@ -8,10 +8,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
   try {
     const { videoId } = req.params;
     const { limit = 4, lastCommentId } = req.query;
-
-    console.log("Fetching comments for video:", videoId);
-    console.log("lastCommentId:", lastCommentId);
-    console.log("limit:", limit);
+    const userId = req.user?._id; // Get current user ID
 
     const parsedLimit = parseInt(limit, 10);
 
@@ -32,7 +29,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
       video: mongoose.Types.ObjectId.createFromHexString(videoId),
     });
 
-    // Get comments with pagination
+    // Get comments with pagination and likes information
     const comments = await Comment.aggregate([
       {
         $match: matchCondition,
@@ -59,12 +56,35 @@ const getVideoComments = asyncHandler(async (req, res) => {
       {
         $unwind: "$ownerDetails",
       },
+      // Lookup likes for each comment
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "comment",
+          as: "likes",
+        },
+      },
+      // Add likes count and user's like status
+      {
+        $addFields: {
+          likesCount: { $size: "$likes" },
+          isLiked: userId ? {
+            $in: [
+              mongoose.Types.ObjectId.createFromHexString(userId),
+              "$likes.likedBy"
+            ]
+          } : false,
+        },
+      },
       // Project fields we only need
       {
         $project: {
           commentContent: 1,
           createdAt: 1,
           updatedAt: 1,
+          likesCount: 1,
+          isLiked: 1,
           ownerDetails: {
             _id: 1,
             fullName: 1,
@@ -84,10 +104,6 @@ const getVideoComments = asyncHandler(async (req, res) => {
     }
     const lastCmtId =
       comments.length > 0 ? comments[comments.length - 1]._id : null;
-
-    console.log("Returning comments count:", comments.length);
-    console.log("hasMore:", hasMore);
-    console.log("lastCmtId:", lastCmtId);
 
     return res.status(200).json(
       new ApiResponse(

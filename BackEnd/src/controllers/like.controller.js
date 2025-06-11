@@ -35,7 +35,7 @@ const toggleVideoLikes = asyncHandler(async (req, res) => {
   }
 });
 
-const toggleCommentLikes = asyncHandler(async (res, req) => {
+const toggleCommentLikes = asyncHandler(async (req, res) => {
   const isCommentLiked = await Like.findOne({
     comment: req.comment._id,
     likedBy: req.user._id,
@@ -48,7 +48,14 @@ const toggleCommentLikes = asyncHandler(async (res, req) => {
       likedBy: req.user._id,
     });
 
-    return res.status(200).json(new ApiResponse(200, {}, "Comment unliked"));
+    // Get updated likes count
+    const likesCount = await Like.countDocuments({
+      comment: req.comment._id,
+    });
+
+    return res.status(200).json(
+      new ApiResponse(200, { likeStatus: false, likesCount }, "Comment unliked")
+    );
   } else {
     // Like the comment
     await Like.create({
@@ -56,7 +63,14 @@ const toggleCommentLikes = asyncHandler(async (res, req) => {
       likedBy: req.user._id,
     });
 
-    return res.status(201).json(new ApiResponse(201, {}, "Comment liked"));
+    // Get updated likes count
+    const likesCount = await Like.countDocuments({
+      comment: req.comment._id,
+    });
+
+    return res.status(201).json(
+      new ApiResponse(201, { likeStatus: true, likesCount }, "Comment liked")
+    );
   }
 });
 
@@ -107,10 +121,31 @@ const getVideoLikeStatus = asyncHandler(async (req, res) => {
   );
 });
 
+const getCommentLikeStatus = asyncHandler(async (req, res) => {
+  // Get the comment from middleware
+  const comment = req.comment;
+
+  // Check if the user has liked the comment
+  const isLiked = await Like.findOne({
+    comment: comment._id,
+    likedBy: req.user._id,
+  });
+
+  // Get total likes count for this comment
+  const likesCount = await Like.countDocuments({
+    comment: comment._id,
+  });
+
+  return res.status(200).json(
+    new ApiResponse(200, { isLiked: !!isLiked, likesCount }, "Comment like status fetched")
+  );
+});
+
 export {
   toggleVideoLikes,
   toggleCommentLikes,
   toggleTweetLikes,
   getLikedVideos,
   getVideoLikeStatus,
+  getCommentLikeStatus,
 };

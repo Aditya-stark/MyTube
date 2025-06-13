@@ -17,12 +17,12 @@ const getVideoComments = asyncHandler(async (req, res) => {
       video: mongoose.Types.ObjectId.createFromHexString(videoId),
     };
 
-    // Add pagination condition if lastCommentId is provided
-    if (lastCommentId) {
-      matchCondition._id = {
-        $lt: mongoose.Types.ObjectId.createFromHexString(lastCommentId),
-      };
-    }
+      // Add pagination condition if lastCommentId is provided
+      if (lastCommentId) {
+        matchCondition._id = {
+          $lt: mongoose.Types.ObjectId.createFromHexString(lastCommentId),
+        };
+      }
 
     // Get total comments count for this video (without pagination)
     const totalComments = await Comment.countDocuments({

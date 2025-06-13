@@ -4,6 +4,7 @@ import { RootState } from "../store/store";
 import UploadNewVideoPopUp from "../components/video/UploadNewVideoPopUp";
 import { UserProfileCard } from "../components/UserProfileCard";
 import NavigationTabs from "../components/NavigationTabs";
+import TweetTab from "../components/tweet/TweetTab";
 
 const TweetsTabPage: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -28,11 +29,10 @@ const TweetsTabPage: React.FC = () => {
           <UserProfileCard user={user} />
           {/* Navigation Tabs */}
           <NavigationTabs />
-
           {/* Tab Content */}
-          <div className="mt-2">
-            <div className="border-b border-gray-200"></div>
-            <div>This Tweets Page</div>
+          <div className="min-h-screen flex flex-col rounded-lg mt-6">
+            <h2 className="text-2xl font-bold mb-6 text-gray-800">My Tweets</h2>
+            <TweetTab user={user} />
           </div>
         </div>
       </div>

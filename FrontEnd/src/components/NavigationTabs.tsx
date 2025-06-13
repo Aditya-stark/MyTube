@@ -24,7 +24,7 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({ className = "" }) => {
     },
     {
       id: "videos",
-      label: "My Videos", 
+      label: "My Videos",
       path: "/videos",
     },
     {
@@ -37,7 +37,7 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({ className = "" }) => {
   // Determine active tab based on current path
   const getActiveTab = () => {
     const currentPath = location.pathname;
-    const activeTab = tabs.find(tab => tab.path === currentPath);
+    const activeTab = tabs.find((tab) => tab.path === currentPath);
     return activeTab?.id || "home";
   };
 

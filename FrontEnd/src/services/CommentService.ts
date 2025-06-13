@@ -8,7 +8,7 @@ export const commentService = {
         commentContent: commentData,
       });
 
-      if (!res.data.success) {
+      if (!res.data.success) {  
         throw new Error(res.data.message || "Failed to add comment");
       }
       return res.data;
@@ -68,7 +68,7 @@ export const commentService = {
     }
   },
 
-  
+
   
 };
 

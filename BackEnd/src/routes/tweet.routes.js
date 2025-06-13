@@ -17,11 +17,11 @@ const router = Router();
 //Create Tweet
 router.route("/").post(verifyJWT, createTweet);
 
+//Get a User All Tweet
+router.route("/user").get(verifyJWT, getUserTweets);
+
 //Get a particular tweet
 router.route("/:tweetId").get(verifiedTweet, getParticularTweet);
-
-//Get a User All Tweet
-router.route("/user/:userId").get(verifyJWT, getUserTweets);
 
 //Tweet Update and Delete Operations
 router

@@ -57,25 +57,14 @@ const getParticularTweet = asyncHandler(async (req, res) => {
   }
 });
 
+// Get all tweets of a user with pagination
 const getUserTweets = asyncHandler(async (req, res) => {
   try {
-    // Get UserId from params
-    // Find all tweets of the user using aggregation pipeline
-    // Match the owner (user) in tweet collection
-    // Sort by creation date (newest first)
-    // Skip and limit tweets for pagination
-    // Lookup owner details from users
-    // Lookup likes and comments count
-    // Project only fields we need
-    // Count total tweets for pagination info
-
-    // Get UserId from params
-    const { userId } = req.params;
-    const { page = 1, limit = 10 } = req.query;
-
-    const parsedPage = parseInt(page) || 1;
+    const { limit = 4, lastTweetId } = req.query;
+    const userId = req.user?._id.toString();
+    console.log("User ID:", userId);
+    
     const parsedLimit = parseInt(limit) || 10;
-    const skip = (parsedPage - 1) * parsedLimit;
 
     // Find all tweets of the user using aggregation pipeline
     const tweets = await Tweet.aggregate([
@@ -83,6 +72,13 @@ const getUserTweets = asyncHandler(async (req, res) => {
       {
         $match: {
           owner: mongoose.Types.ObjectId.createFromHexString(userId),
+          ...(lastTweetId
+            ? {
+                _id: {
+                  $lt: mongoose.Types.ObjectId.createFromHexString(lastTweetId),
+                },
+              }
+            : {}),
         },
       },
       // Sort by creation date (newest first)
@@ -91,14 +87,10 @@ const getUserTweets = asyncHandler(async (req, res) => {
           createdAt: -1,
         },
       },
-      // Skip and limit for pagination
       {
-        $skip: skip,
+        $limit: parsedLimit + 1,
       },
-      {
-        $limit: parsedLimit,
-      },
-      //Lookup owner details
+      // Lookup owner details
       {
         $lookup: {
           from: "users",
@@ -110,11 +102,20 @@ const getUserTweets = asyncHandler(async (req, res) => {
       {
         $unwind: "$ownerDetails",
       },
-      // Lookup likes and count likes and comments
+      // Lookup all likes for this tweet (needed for isLiked check)
       {
         $lookup: {
           from: "likes",
-          let: { tweetId: "_id" },
+          localField: "_id",
+          foreignField: "tweet",
+          as: "likes",
+        },
+      },
+      // Lookup likes count using pipeline
+      {
+        $lookup: {
+          from: "likes",
+          let: { tweetId: "$_id" },
           pipeline: [
             {
               $match: {
@@ -128,7 +129,6 @@ const getUserTweets = asyncHandler(async (req, res) => {
           as: "likesCount",
         },
       },
-      //HERE WE CAN ADD COMMENTS COUNT AND FETCH COMMENTS DATA (AGGERGATION) (COMPLEX THING🥲)
 
       // Project only fields we need
       {
@@ -148,25 +148,39 @@ const getUserTweets = asyncHandler(async (req, res) => {
               else: 0,
             },
           },
+          isLiked: userId
+            ? {
+                $in: [
+                  mongoose.Types.ObjectId.createFromHexString(userId),
+                  "$likes.likedBy",
+                ],
+              }
+            : false,
         },
       },
     ]);
 
-    //Count total tweets for pagination info
-    const totalTweets = await Tweet.countDocuments({ owner: userId });
+    // Count total tweets for pagination info
+    const totalTweets = await Tweet.countDocuments({ 
+      owner: mongoose.Types.ObjectId.createFromHexString(userId) 
+    });
 
-    //Return the tweets
+    let hasMore = false;
+    if (tweets.length > parsedLimit) {
+      tweets.pop(); // Remove the extra tweet
+      hasMore = true; // Indicate that there are more tweets
+    }
+    const lastTwetId = tweets.length > 0 ? tweets[tweets.length - 1]._id : null;
+
+    // Return the tweets
     return res.status(200).json(
       new ApiResponse(
         200,
         {
           tweets,
-          pagination: {
-            totalPages: Math.ceil(totalTweets / parsedLimit),
-            currentPage: parsedPage,
-            hasNextPage: skip + tweets.length < totalTweets,
-            hasPreviousPage: parsedPage > 1,
-          },
+          totalTweets,
+          hasMore,
+          lastTweetId : lastTwetId,
         },
         "User tweets fetched successfully"
       )
@@ -175,7 +189,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
     console.log("Error fetching user tweets", error);
     return res
       .status(500)
-      .json(new ApiError(500, "Error while fecthing the tweets"));
+      .json(new ApiError(500, "Error while fetching the tweets")); // Fixed typo: fecthing -> fetching
   }
 });
 

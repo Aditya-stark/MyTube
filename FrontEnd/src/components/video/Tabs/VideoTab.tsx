@@ -44,7 +44,7 @@ const VideoTab: React.FC<VideoTabProps> = ({
   // Fetch videos when sortBy changes
   useEffect(() => {
     dispatch(getUserVideos({ sortBy }));
-  }, [dispatch, sortBy, editPopupOpen ]);
+  }, [dispatch, sortBy, editPopupOpen]);
 
   useEffect(() => {
     // Only set up observer if we have videos and there are more to load
@@ -85,11 +85,10 @@ const VideoTab: React.FC<VideoTabProps> = ({
     <div className="min-h-screen flex flex-col  rounded-lg">
       {/* Header section with title */}
       <h2 className="text-2xl font-bold mb-4 text-gray-800">My Videos</h2>
-
       {/* Sort buttons section */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-1 mb-4">
         <button
-          className={`px-4 py-2 rounded-md transition-colors ${
+          className={`px-3 py-1  rounded transition-colors ${
             sortBy === "latest"
               ? "bg-blue-600 text-white"
               : "bg-gray-200 hover:bg-gray-300 text-gray-800"
@@ -99,7 +98,7 @@ const VideoTab: React.FC<VideoTabProps> = ({
           Latest
         </button>
         <button
-          className={`px-4 py-2 rounded-md transition-colors ${
+          className={`px-3 py-1 rounded transition-colors ${
             sortBy === "most-viewed"
               ? "bg-blue-600 text-white"
               : "bg-gray-200 hover:bg-gray-300 text-gray-800"
@@ -109,7 +108,7 @@ const VideoTab: React.FC<VideoTabProps> = ({
           Most Viewed
         </button>
         <button
-          className={`px-4 py-2 rounded-md transition-colors ${
+          className={`px-3 py-1 rounded transition-colors ${
             sortBy === "oldest"
               ? "bg-blue-600 text-white"
               : "bg-gray-200 hover:bg-gray-300 text-gray-800"

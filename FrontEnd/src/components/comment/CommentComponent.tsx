@@ -18,7 +18,7 @@ interface CommentComponentProps {
 export const CommentComponent = ({
   totalComments,
   comments,
-  user,
+  user, 
   addCommentHandler,
   hasMoreComments = false,
   isLoadingMore = false,

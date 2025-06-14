@@ -140,6 +140,8 @@ const getUserTweets = asyncHandler(async (req, res) => {
             _id: "$ownerDetails._id",
             username: "$ownerDetails.username",
             avatar: "$ownerDetails.avatar",
+            fullName: "$ownerDetails.fullName",
+            email: "$ownerDetails.email",
           },
           likesCount: {
             $cond: {

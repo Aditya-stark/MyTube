@@ -19,6 +19,61 @@ export const addTweet = createAsyncThunk(
   }
 );
 
+export const getUserInitialTweets = createAsyncThunk(
+  "tweets/getUserInitialTweets",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await TweetService.getUserTweets();
+      if (res.success) {
+        return res.data;
+      }
+      return rejectWithValue(res.message || "Failed to fetch initial tweets");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data.message || "Failed to fetch initial tweets"
+      );
+    }
+  }
+);
+
+export const updateTweet = createAsyncThunk(
+  "tweets/updateTweet",
+  async (
+    { tweetId, content }: { tweetId: string; content: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const res = await TweetService.updateTweet(tweetId, content);
+      console.log("Update tweet response:", res);
+      if (res.success) {
+        return res.data;
+      }
+      return rejectWithValue(res.message || "Failed to update tweet");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data.message || "Failed to update tweet"
+      );
+    }
+  }
+);
+
+export const deleteTweet = createAsyncThunk(
+  "tweets/deleteTweet",
+  async (tweetId: string, { rejectWithValue }) => {
+    try {
+      const res = await TweetService.deleteTweet(tweetId);
+      if (res.success) {
+        return tweetId; // Return the tweet ID for deletion
+      }
+      return rejectWithValue(res.message || "Failed to delete tweet");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data.message || "Failed to delete tweet"
+      );
+    }
+  }
+);
+
 interface TweetState {
   tweets: Tweet[];
   loading: boolean;
@@ -27,6 +82,7 @@ interface TweetState {
   isAddingTweet: boolean;
   isLoadingMore: boolean;
   lastTweetId: string | null;
+  totalTweets?: number;
 }
 
 const initialState: TweetState = {
@@ -37,6 +93,7 @@ const initialState: TweetState = {
   isAddingTweet: false,
   isLoadingMore: false,
   lastTweetId: null,
+  totalTweets: 0,
 };
 
 const tweetSlice = createSlice({
@@ -61,6 +118,63 @@ const tweetSlice = createSlice({
       .addCase(addTweet.rejected, (state, action) => {
         state.loading = false;
         state.isAddingTweet = false;
+        state.error = action.payload as string;
+      })
+      .addCase(getUserInitialTweets.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.tweets = [];
+        state.hasMore = false;
+        state.lastTweetId = null;
+      })
+      .addCase(getUserInitialTweets.fulfilled, (state, action) => {
+        state.loading = false;
+        state.tweets = action.payload.tweets;
+        state.hasMore = action.payload.hasMore;
+        state.lastTweetId = action.payload.lastTweetId;
+        state.totalTweets = action.payload.totalTweets;
+      })
+      .addCase(getUserInitialTweets.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+        state.tweets = [];
+        state.hasMore = false;
+        state.lastTweetId = null;
+      })
+      .addCase(updateTweet.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateTweet.fulfilled, (state, action) => {
+        state.loading = false;
+        const updatedTweet = action.payload.content;
+        const tweetIndex = state.tweets.findIndex(
+          (tweet) => tweet._id === action.payload._id
+        );
+        if (tweetIndex !== -1) {
+          state.tweets[tweetIndex].content = updatedTweet;
+        }
+      })
+      .addCase(updateTweet.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(deleteTweet.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteTweet.fulfilled, (state, action) => {
+        state.loading = false;
+        const tweetId = action.meta.arg;
+        state.tweets = state.tweets.filter((tweet) => tweet._id !== tweetId);
+        state.totalTweets = state.totalTweets ? state.totalTweets - 1 : 0;
+        if (state.tweets.length === 0) {
+          state.hasMore = false;
+          state.lastTweetId = null;
+        }
+      })
+      .addCase(deleteTweet.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload as string;
       });
   },

@@ -3,7 +3,7 @@ export interface Tweet {
   content: string;
   createdAt: string;
   updatedAt: string;
-  ownerDetails: {
+  owner: {
     _id: string;
     fullName: string;
     avatar: string;

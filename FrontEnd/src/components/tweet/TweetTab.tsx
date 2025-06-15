@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ResponseUser } from "../../types/AuthType";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
-import { addTweet, getUserInitialTweets } from "../../features/tweetSlice";
+import {
+  addTweet,
+  getUserInitialTweets,
+  getUserMoreTweets,
+} from "../../features/tweetSlice";
 import { AppDispatch, RootState } from "../../store/store";
 import { Tweet } from "../../types/TweetType";
 import TweetCard from "./TweetCard";
@@ -13,8 +17,10 @@ interface TweetTabProps {
 
 const TweetTab = ({ user }: TweetTabProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { tweets, loading } = useSelector((state: RootState) => state.tweets);
+  const { tweets, loading, hasMore, isLoadingMore, lastTweetId, totalTweets } =
+    useSelector((state: RootState) => state.tweets);
   const [tweetContent, setTweetContent] = useState<string>("");
+  const loaderRef = useRef<HTMLDivElement>(null);
 
   // Fetch initial tweets when component mounts
   useEffect(() => {
@@ -26,19 +32,42 @@ const TweetTab = ({ user }: TweetTabProps) => {
       });
   }, [dispatch]);
 
-  // Handle tweet submission
+  // Observer for the loader for infinite scroll
+  useEffect(() => {
+    if (!loaderRef.current || !hasMore || isLoadingMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+          dispatch(getUserMoreTweets(lastTweetId || ""));
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(loaderRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [dispatch, hasMore, isLoadingMore, lastTweetId]);
+
+  // Handle tweet submission - SAME PATTERN AS COMMENTS
   const tweetSubmitHandler = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmedTweet = tweetContent.trim();
+
     if (!trimmedTweet) {
       toast.error("Tweet cannot be empty!");
       return;
     }
+
     dispatch(addTweet(trimmedTweet))
       .unwrap()
       .then(() => {
         setTweetContent("");
         toast.success("Tweet added successfully!");
+        dispatch(getUserInitialTweets());
       })
       .catch((error) => {
         console.error("Error adding tweet:", error);
@@ -47,52 +76,76 @@ const TweetTab = ({ user }: TweetTabProps) => {
   };
 
   return (
-    <div className="flex justify-start min-h-screen ">
+    <div className="flex justify-start min-h-screen">
       <div className="w-full max-w-3xl">
-        <div className="flex items-start space-x-2 w-full p-2 bg-white rounded-md shadow">
+        {/* Tweet Compose Form */}
+        <div className="flex items-start space-x-2 w-full p-4 bg-white rounded-md shadow mb-6">
+          <img
+            src={user?.avatar || "/default-avatar.png"}
+            alt="userAvatar"
+            className="w-10 h-10 rounded-full object-cover border border-gray-300"
+          />
           <form
-            className="flex-1 flex flex-col space-y-1"
+            className="flex-1 flex flex-col space-y-3"
             onSubmit={tweetSubmitHandler}
           >
-            <div className="flex items-center space-x-2 mb-1">
-              <img
-                src={user?.avatar || "/default-avatar.png"}
-                alt="userAvatar"
-                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-gray-300"
-              />
-              <h2 className="text-base font-bold text-gray-800">
-                {user?.fullName || "User"}
-              </h2>
-            </div>
             <textarea
               name="tweet"
               id="tweet"
-              className="w-full p-2 rounded-md resize-none focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white text-sm"
-              rows={2}
-              placeholder="Tweet an update to your followers..."
+              className="w-full p-3 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm min-h-[80px]"
+              placeholder="What's happening?"
               value={tweetContent}
               onChange={(e) => setTweetContent(e.target.value)}
-            ></textarea>
-            <div className="flex justify-end m-2">
+            />
+
+            {/*Submit button */}
+            <div className="flex justify-between items-center">
+              <div className="flex-1" />
               <button
                 type="submit"
-                className="px-4 py-2 text-xs rounded-full bg-blue-600 text-white hover:bg-blue-700 transition font-semibold shadow"
+                className="px-6 py-2 text-sm rounded-full bg-blue-600 text-white hover:bg-blue-700 transition font-semibold shadow disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={!tweetContent.trim() || loading}
               >
-                Tweet
+                {loading ? "Posting..." : "Tweet"}
               </button>
             </div>
           </form>
         </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center mt-4">
+        {/* Tweets List */}
+        {loading && tweets.length === 0 ? (
+          <div className="flex items-center justify-center mt-8">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
         ) : (
-          <div className="space-y-4 mt-6">
-            {tweets.map((tweet: Tweet) => (
-              <TweetCard key={tweet._id} {...tweet} />
-            ))}
+          <div className="space-y-4">
+            {tweets.length > 0 ? (
+              <>
+                {tweets.map((tweet: Tweet) => (
+                  <TweetCard key={tweet._id} {...tweet} />
+                ))}
+
+                {/* Infinite scroll loader */}
+                {hasMore && (
+                  <div ref={loaderRef} className="flex justify-center py-4">
+                    {isLoadingMore ? (
+                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                    ) : (
+                      <div className="text-gray-500 text-sm">
+                        Load more tweets...
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <p className="text-lg">No tweets yet</p>
+                <p className="text-sm mt-2">
+                  Share your first thought with the world!
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>

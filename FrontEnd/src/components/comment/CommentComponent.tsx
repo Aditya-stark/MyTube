@@ -18,7 +18,7 @@ interface CommentComponentProps {
 export const CommentComponent = ({
   totalComments,
   comments,
-  user, 
+  user,
   addCommentHandler,
   hasMoreComments = false,
   isLoadingMore = false,
@@ -40,7 +40,6 @@ export const CommentComponent = ({
   //Observe the loader for infinite scroll
   useEffect(() => {
     if (!loaderRef.current || !hasMoreComments || isLoadingMore) return;
-
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMoreComments && !isLoadingMore) {
@@ -49,15 +48,9 @@ export const CommentComponent = ({
       },
       { threshold: 0.1 }
     );
-
-    if (loaderRef.current) {
-      observer.observe(loaderRef.current);
-    }
-
+    observer.observe(loaderRef.current);
     return () => {
-      if (loaderRef.current) {
-        observer.unobserve(loaderRef.current);
-      }
+      observer.disconnect();
     };
   }, [dispatch, hasMoreComments, isLoadingMore, videoId, lastCommentId]);
 

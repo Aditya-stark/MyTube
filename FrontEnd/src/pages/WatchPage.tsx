@@ -63,10 +63,10 @@ export const WatchPage: React.FC = () => {
     // Add any event listeners you want here
     player.on("ended", () => {
       console.log("Video ended");
-      // You could show related videos or autoplay next
     });
   };
 
+  // Refactored Like Handler
   const likeHandler = () => {
     if (!currentVideo?._id) return;
 

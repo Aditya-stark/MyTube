@@ -36,6 +36,23 @@ export const getUserInitialTweets = createAsyncThunk(
   }
 );
 
+export const getUserMoreTweets = createAsyncThunk(
+  "tweets/getUserMoreTweets",
+  async (lastTweetId: string, { rejectWithValue }) => {
+    try {
+      const res = await TweetService.getUserTweets(lastTweetId);
+      if (res.success) {
+        return res.data;
+      }
+      return rejectWithValue(res.message || "Failed to fetch more tweets");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data.message || "Failed to fetch more tweets"
+      );
+    }
+  }
+);
+
 export const updateTweet = createAsyncThunk(
   "tweets/updateTweet",
   async (
@@ -114,6 +131,7 @@ const tweetSlice = createSlice({
       .addCase(addTweet.fulfilled, (state) => {
         state.loading = false;
         state.isAddingTweet = false;
+        
       })
       .addCase(addTweet.rejected, (state, action) => {
         state.loading = false;
@@ -176,6 +194,17 @@ const tweetSlice = createSlice({
       .addCase(deleteTweet.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(getUserMoreTweets.pending, (state) => {
+        state.isLoadingMore = true;
+        state.error = null;
+      })
+      .addCase(getUserMoreTweets.fulfilled, (state, action) => {
+        state.isLoadingMore = false;
+        const newTweets = action.payload.tweets;
+        state.tweets = [...state.tweets, ...newTweets];
+        state.hasMore = action.payload.hasMore;
+        state.lastTweetId = action.payload.lastTweetId;
       });
   },
 });

@@ -24,13 +24,23 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({ className = "" }) => {
     },
     {
       id: "videos",
-      label: "My Videos",
+      label: "Videos",
       path: "/videos",
     },
     {
+      id: "playlists",
+      label: "Playlists",
+      path: "/playlists",
+    },
+    {
       id: "tweets",
-      label: "My Tweets",
+      label: "Tweets",
       path: "/tweets",
+    },
+    {
+      id: "following",
+      label: "Following",
+      path: "/following",
     },
   ];
 

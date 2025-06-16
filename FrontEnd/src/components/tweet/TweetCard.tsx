@@ -63,19 +63,20 @@ const TweetCard = (tweet: Tweet) => {
   };
 
   return (
-    <div className="space-y-4">
-      <div
-        key={tweet._id}
-        className="p-4 bg-white rounded-lg shadow hover:shadow-lg transition"
-      >
-        <div className="flex items-start space-x-3 mb-2">
-          <img
-            src={tweet.owner.avatar || "/default-avatar.png"}
-            alt="userAvatar"
-            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-gray-300"
-          />
-          <div className="flex-1">
-            <div className="flex items-center space-x-2 mb-0.5">
+    <div className="p-4 bg-white rounded-lg shadow hover:shadow-lg transition">
+      <div className="flex items-start space-x-3">
+        {/* Avatar */}
+        <img
+          src={tweet.owner.avatar || "/default-avatar.png"}
+          alt="userAvatar"
+          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-gray-300"
+        />
+
+        {/* Main content area - takes full remaining width */}
+        <div className="flex-1 min-w-0">
+          {/* Header with name, time */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center space-x-2">
               <h2 className="text-sm font-bold text-gray-800">
                 {tweet.owner.fullName || "User"}
               </h2>
@@ -83,42 +84,9 @@ const TweetCard = (tweet: Tweet) => {
                 {format(tweet.createdAt)}
               </span>
             </div>
-            {isEditing ? (
-              <form
-                className="flex-1 flex flex-col space-y-1"
-                onSubmit={submitHandler}
-              >
-                <textarea
-                  name="tweet"
-                  id="tweet"
-                  className="w-full p-2 rounded-md resize-none border-1 border-gray-300 focus:border-0 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white text-sm"
-                  rows={2}
-                  placeholder="Edit your tweet..."
-                  value={editText}
-                  onChange={(e) => setEditText(e.target.value)}
-                ></textarea>
-                <div className="flex justify-end m-2 space-x-2">
-                  <button
-                    type="button"
-                    className="px-4 py-2 text-xs rounded-full text-grey-600 hover:bg-gray-200 transition font-semibold hover:shadow"
-                    onClick={() => setIsEditing(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 text-xs rounded-full bg-blue-600 text-white hover:bg-blue-700 transition font-semibold shadow"
-                  >
-                    Update
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <p className="text-sm text-gray-700">{tweet.content}</p>
-            )}
-          </div>
-          {!isEditing && (
-            <div className="flex-1 flex justify-end">
+
+            {/* Menu button */}
+            {!isEditing && (
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setMenuOpen((prev) => !prev)}
@@ -146,7 +114,55 @@ const TweetCard = (tweet: Tweet) => {
                   </div>
                 )}
               </div>
-            </div>
+            )}
+          </div>
+
+          {/* Tweet content and Edit Tweet*/}
+          {isEditing ? (
+            <form onSubmit={submitHandler} className="w-full">
+              <textarea
+                name="tweet"
+                id="tweet"
+                className="w-full p-3 rounded-md resize-none border border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white text-sm"
+                rows={3}
+                placeholder="Edit your tweet..."
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                maxLength={280}
+              />
+              <div className="flex justify-between items-center mt-2">
+                <span
+                  className={`text-xs ${
+                    editText.length > 250 ? "text-red-500" : "text-gray-500"
+                  }`}
+                >
+                  {editText.length}/280 characters
+                </span>
+                <div className="flex space-x-2">
+                  <button
+                    type="button"
+                    className="px-4 py-2 text-xs rounded-full text-gray-600 hover:bg-gray-200 transition font-semibold"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setEditText(tweet.content);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 text-xs rounded-full bg-blue-600 text-white hover:bg-blue-700 transition font-semibold shadow disabled:bg-gray-400"
+                    disabled={!editText.trim() || editText === tweet.content}
+                  >
+                    Update
+                  </button>
+                </div>
+              </div>
+            </form>
+          ) : (
+            <p className="text-sm text-gray-700 leading-relaxed break-words pr-8">
+              {tweet.content}
+            </p>
           )}
         </div>
       </div>

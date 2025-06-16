@@ -24,7 +24,7 @@ const HeaderNav: React.FC<{
 
   return (
     <nav className="bg-white sticky top-0 z-50">
-      <div className=" mx-auto px-3 lg:px-3">
+      <div className=" mx-auto px-3 lg:px-2">
         <div className="flex justify-between h-16">
           <div className="flex items-center space-x-4">
             {/* Hamburger Menu - Only show on pages that have sidebar */}

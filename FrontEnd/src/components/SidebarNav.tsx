@@ -56,7 +56,7 @@ const SidebarNav: React.FC = () => {
       }`}
     >
       {/* Navigation Items */}
-      <nav className="py-4">
+      <nav>
         {sidebarItems.map((item) => {
           const IconComponent = item.icon;
           return (
@@ -65,7 +65,7 @@ const SidebarNav: React.FC = () => {
               onClick={() => handleNavigation(item.path)}
               className={`w-full flex items-center px-4 py-3 text-left hover:bg-gray-100 transition-colors ${
                 isActive(item.path)
-                  ? "bg-blue-50 border-r-4 border-blue-500 text-blue-600"
+                  ? "text-blue-600"
                   : "text-gray-700"
               }`}
               title={!isExpanded ? item.label : undefined} // Show tooltip when collapsed

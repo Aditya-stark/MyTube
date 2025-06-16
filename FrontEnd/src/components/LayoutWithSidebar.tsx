@@ -1,6 +1,7 @@
 import React from "react";
 import { useLocation } from "react-router";
 import SideBarNav from "./SidebarNav";
+import { useSidebar } from "../contexts/SidebarContext"; // Add this import
 
 interface LayoutWithSidebarProps {
   children: React.ReactNode;
@@ -8,6 +9,8 @@ interface LayoutWithSidebarProps {
 
 const LayoutWithSidebar: React.FC<LayoutWithSidebarProps> = ({ children }) => {
   const location = useLocation();
+  const { isOpen } = useSidebar(); // Get sidebar state
+
   const hideSidebarPages = [
     "/watch",
     "/login",
@@ -21,9 +24,13 @@ const LayoutWithSidebar: React.FC<LayoutWithSidebarProps> = ({ children }) => {
     <div className="flex">
       {shouldShowSidebar && <SideBarNav />}
       <main
-        className={`flex-1 ${
-          shouldShowSidebar ? "ml-16" : ""
-        } transition-all duration-300`}
+        className={`flex-1 transition-all duration-300 ${
+          shouldShowSidebar
+            ? isOpen
+              ? "ml-58"
+              : "ml-16"
+            : ""
+        }`}
       >
         {children}
       </main>

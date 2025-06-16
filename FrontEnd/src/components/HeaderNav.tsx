@@ -18,9 +18,7 @@ const HeaderNav: React.FC<{
     "/register",
     "/forgot-password",
   ];
-  const shouldShowSidebar = !hideSidebarPages.some((page) =>
-    location.pathname.startsWith(page)
-  );
+  const shouldShowSidebar = !hideSidebarPages.includes(location.pathname);
 
   return (
     <nav className="bg-white sticky top-0 z-50">

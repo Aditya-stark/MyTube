@@ -17,12 +17,12 @@ import HeaderNav from "./components/HeaderNav";
 import UploadNewVideoPopUp from "./components/video/UploadNewVideoPopUp";
 import TweetsTabPage from "./pages/TweetsTabPage";
 import LayoutWithSidebar from "./components/LayoutWithSidebar";
-import { SidebarProvider } from "./contexts/SidebarContext"; // Add this import
+import { SidebarProvider } from "./contexts/SidebarContext";
 
 function LayoutWithHeader() {
   const [isUploadPopupOpen, setIsUploadPopupOpen] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
-  
+
   const handleLogout = () => {
     dispatch(logout());
   };
@@ -55,7 +55,7 @@ function App() {
   }, [dispatch]);
 
   return (
-    <SidebarProvider> {/* Wrap everything with SidebarProvider */}
+    <SidebarProvider>
       <Toaster position="top-center" />
       <Routes>
         {/* Public routes without header and sidebar */}
@@ -74,10 +74,16 @@ function App() {
             <Route path="/edit-profile" element={<UpdateProfile />} />
             <Route path="/videos" element={<VideoTabPage />} />
             <Route path="/tweets" element={<TweetsTabPage />} />
-            <Route path="/feed/subscriptions" element={<div>Subscriptions Page</div>} />
+            <Route
+              path="/feed/subscriptions"
+              element={<div>Subscriptions Page</div>}
+            />
             <Route path="/feed/history" element={<div>History Page</div>} />
             <Route path="/feed/playlists" element={<div>Playlists Page</div>} />
-            <Route path="/feed/liked-videos" element={<div>Liked Videos Page</div>} />
+            <Route
+              path="/feed/liked-videos"
+              element={<div>Liked Videos Page</div>}
+            />
             <Route path="/feed/videos" element={<div>Liked Videos Page</div>} />
           </Route>
         </Route>

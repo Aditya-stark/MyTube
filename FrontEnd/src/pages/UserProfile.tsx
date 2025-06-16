@@ -23,17 +23,15 @@ const UserProfile: React.FC = () => {
         isOpen={isUploadPopupOpen}
         onClose={() => setIsUploadPopupOpen(false)}
       />
-      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          {/* User Profile Card */}
-          <UserProfileCard user={user} />
+      <div className="px-4 py-6">
+        {/* User Profile Card */}
+        <UserProfileCard user={user} />
 
-          {/* Use Navigation Tabs */}
-          <NavigationTabs />
+        {/* Use Navigation Tabs */}
+        <NavigationTabs />
 
-          <div className="pt-6">
-            <HomeTab user={user} />
-          </div>
+        <div className="pt-6">
+          <HomeTab user={user} />
         </div>
       </div>
     </div>

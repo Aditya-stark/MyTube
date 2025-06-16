@@ -1,16 +1,43 @@
 import React from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
+import { HiMenu } from "react-icons/hi"; // Add this import
+import { useSidebar } from "../contexts/SidebarContext"; // Add this import
 
 const HeaderNav: React.FC<{
   onUploadClick?: () => void;
   onLogoutClick?: () => void;
 }> = ({ onUploadClick, onLogoutClick }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { toggleSidebar } = useSidebar();
+
+  // Pages where sidebar should NOT be shown (same logic as before)
+  const hideSidebarPages = [
+    "/watch",
+    "/login",
+    "/register",
+    "/forgot-password",
+  ];
+  const shouldShowSidebar = !hideSidebarPages.some((page) =>
+    location.pathname.startsWith(page)
+  );
+
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="bg-white sticky top-0 z-50">
+      <div className=" mx-auto px-3 lg:px-3">
         <div className="flex justify-between h-16">
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+            {/* Hamburger Menu - Only show on pages that have sidebar */}
+            {shouldShowSidebar && (
+              <button
+                onClick={toggleSidebar}
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Toggle sidebar"
+              >
+                <HiMenu className="w-6 h-6 text-gray-600" />
+              </button>
+            )}
+
             <div
               className="text-xl font-bold text-blue-600 cursor-pointer select-none"
               onClick={() => navigate("/")}
@@ -18,6 +45,7 @@ const HeaderNav: React.FC<{
               MyTube
             </div>
           </div>
+
           <div className="flex items-center">
             <div className="ml-3 relative">
               <div className="flex items-center space-x-4">

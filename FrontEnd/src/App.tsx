@@ -16,13 +16,17 @@ import VideoTabPage from "./pages/VideoTabPage";
 import HeaderNav from "./components/HeaderNav";
 import UploadNewVideoPopUp from "./components/video/UploadNewVideoPopUp";
 import TweetsTabPage from "./pages/TweetsTabPage";
+import LayoutWithSidebar from "./components/LayoutWithSidebar";
+import { SidebarProvider } from "./contexts/SidebarContext"; // Add this import
 
 function LayoutWithHeader() {
   const [isUploadPopupOpen, setIsUploadPopupOpen] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
+  
   const handleLogout = () => {
     dispatch(logout());
   };
+
   return (
     <>
       <HeaderNav
@@ -33,7 +37,9 @@ function LayoutWithHeader() {
         isOpen={isUploadPopupOpen}
         onClose={() => setIsUploadPopupOpen(false)}
       />
-      <Outlet />
+      <LayoutWithSidebar>
+        <Outlet />
+      </LayoutWithSidebar>
     </>
   );
 }
@@ -42,7 +48,6 @@ function App() {
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    // Check if we have a token in localStorage
     const token = localStorage.getItem("token");
     if (token) {
       dispatch(currentUser());
@@ -50,14 +55,14 @@ function App() {
   }, [dispatch]);
 
   return (
-    <>
+    <SidebarProvider> {/* Wrap everything with SidebarProvider */}
       <Toaster position="top-center" />
       <Routes>
-        {/* Public routes without header */}
+        {/* Public routes without header and sidebar */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
-        {/* All other routes with header */}
+        {/* All other routes with header and conditional sidebar */}
         <Route element={<LayoutWithHeader />}>
           {/* UnProtected Routes */}
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -69,10 +74,15 @@ function App() {
             <Route path="/edit-profile" element={<UpdateProfile />} />
             <Route path="/videos" element={<VideoTabPage />} />
             <Route path="/tweets" element={<TweetsTabPage />} />
+            <Route path="/feed/subscriptions" element={<div>Subscriptions Page</div>} />
+            <Route path="/feed/history" element={<div>History Page</div>} />
+            <Route path="/feed/playlists" element={<div>Playlists Page</div>} />
+            <Route path="/feed/liked-videos" element={<div>Liked Videos Page</div>} />
+            <Route path="/feed/videos" element={<div>Liked Videos Page</div>} />
           </Route>
         </Route>
       </Routes>
-    </>
+    </SidebarProvider>
   );
 }
 

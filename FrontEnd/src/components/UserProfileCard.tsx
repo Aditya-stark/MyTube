@@ -29,7 +29,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
               alt="Cover"
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/10"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-black/0"></div>
           </div>
         ) : (
           <div className="h-full w-full bg-gradient-to-r from-blue-600 to-blue-800"></div>
@@ -54,7 +54,9 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
             <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 break-words">
               {user.fullName}
             </h1>
-            <p className="text-xs sm:text-sm text-gray-500 mb-1 sm:mb-2">@{user.username}</p>
+            <p className="text-xs sm:text-sm text-gray-500 mb-1 sm:mb-2">
+              @{user.username}
+            </p>
 
             {/* Stats Section */}
             <div className="flex flex-wrap gap-1 sm:gap-2 md:gap-0 md:space-x-4 mb-2 sm:mb-3">
@@ -62,19 +64,25 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
                 <span className="font-bold text-blue-600 mr-1">
                   {subscribersCount.toLocaleString()}
                 </span>
-                <span className="text-xxs sm:text-xs text-gray-500">subscribers</span>
+                <span className="text-xxs sm:text-xs text-gray-500">
+                  subscribers
+                </span>
               </div>
               <div className="flex items-center text-xs sm:text-sm">
                 <span className="font-bold text-blue-600 mr-1">
                   {subscribedToCount.toLocaleString()}
                 </span>
-                <span className="text-xxs sm:text-xs text-gray-500">subscribed</span>
+                <span className="text-xxs sm:text-xs text-gray-500">
+                  subscribed
+                </span>
               </div>
               <div className="flex items-center text-xs sm:text-sm">
                 <span className="font-bold text-blue-600 mr-1">
                   {videosCount.toLocaleString()}
                 </span>
-                <span className="text-xxs sm:text-xs text-gray-500">videos</span>
+                <span className="text-xxs sm:text-xs text-gray-500">
+                  videos
+                </span>
               </div>
             </div>
           </div>
@@ -116,7 +124,9 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
               d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
             />
           </svg>
-          <span className="text-gray-700 truncate max-w-[180px] sm:max-w-[220px] md:max-w-none">{user.email}</span>
+          <span className="text-gray-700 truncate max-w-[180px] sm:max-w-[220px] md:max-w-none">
+            {user.email}
+          </span>
         </div>
         <div className="flex items-center text-xs sm:text-sm">
           <svg

@@ -7,10 +7,12 @@ import {
   getUserVideos,
   loadMoreUserVideos,
 } from "../../../features/videos/videoSlice";
-import { AppDispatch } from "../../../store/store";
+import { AppDispatch, RootState } from "../../../store/store";
+
+import { PaginatedVideos } from "../../../types/VideoType";
 
 interface VideoTabProps {
-  videos: any;
+  videos: PaginatedVideos | null;
   isLoading: boolean;
   isLoadingMore: boolean;
   setIsUploadPopupOpen: (open: boolean) => void;
@@ -24,6 +26,7 @@ const VideoTab: React.FC<VideoTabProps> = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const hasMoreVideos = useSelector((state: any) => state.videos.hasMoreVideos);
+  const user = useSelector((state: RootState) => state.auth.user);
   const loaderRef = useRef<HTMLDivElement>(null);
 
   // Add sortBy state
@@ -125,15 +128,19 @@ const VideoTab: React.FC<VideoTabProps> = ({
           </div>
         ) : videos && videos.videos && videos.videos.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-            {videos.videos.map((video: any) => (
-              <VideoCard
-                key={video._id}
-                video={video}
-                isOwner={true}
-                onEdit={handleEditClick}
-                onDelete={handleDeleteVideo}
-              />
-            ))}
+            {videos.videos.map(
+              (video: any) => (
+                (
+                  <VideoCard
+                    key={video._id}
+                    video={video}
+                    isOwner={video.owner._id === user?._id}
+                    onEdit={handleEditClick}
+                    onDelete={handleDeleteVideo}
+                  />
+                )
+              )
+            )}
           </div>
         ) : (
           <div className="h-full flex flex-col justify-center items-center py-10">

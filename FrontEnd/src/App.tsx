@@ -18,6 +18,7 @@ import UploadNewVideoPopUp from "./components/video/UploadNewVideoPopUp";
 import TweetsTabPage from "./pages/TweetsTabPage";
 import LayoutWithSidebar from "./components/LayoutWithSidebar";
 import { SidebarProvider } from "./contexts/SidebarContext";
+import PlayListTabPage from "./pages/PlayListTab";
 
 function LayoutWithHeader() {
   const [isUploadPopupOpen, setIsUploadPopupOpen] = useState(false);
@@ -74,6 +75,7 @@ function App() {
             <Route path="/edit-profile" element={<UpdateProfile />} />
             <Route path="/videos" element={<VideoTabPage />} />
             <Route path="/tweets" element={<TweetsTabPage />} />
+            <Route path="/playlists" element={<PlayListTabPage />} />
             <Route
               path="/feed/subscriptions"
               element={<div>Subscriptions Page</div>}

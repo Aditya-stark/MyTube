@@ -9,7 +9,7 @@ interface LayoutWithSidebarProps {
 
 const LayoutWithSidebar: React.FC<LayoutWithSidebarProps> = ({ children }) => {
   const location = useLocation();
-  const { isOpen } = useSidebar(); // Get sidebar state
+  const { isOpen, isMobile } = useSidebar(); // Get sidebar state
 
   const hideSidebarPages = [
     "/watch",
@@ -25,11 +25,7 @@ const LayoutWithSidebar: React.FC<LayoutWithSidebarProps> = ({ children }) => {
       {shouldShowSidebar && <SideBarNav />}
       <main
         className={`flex-1 transition-all duration-300 ${
-          shouldShowSidebar
-            ? isOpen
-              ? "ml-58"
-              : "ml-16"
-            : ""
+          shouldShowSidebar && !isMobile ? (isOpen ? "ml-52" : "ml-16") : ""
         }`}
       >
         {children}

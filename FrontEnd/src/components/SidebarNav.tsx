@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   HiHome,
@@ -7,6 +7,7 @@ import {
   HiCollection,
   HiVideoCamera,
   HiHeart,
+  HiX,
 } from "react-icons/hi";
 import { useSidebar } from "../contexts/SidebarContext";
 
@@ -18,7 +19,7 @@ interface SidebarItem {
 }
 
 const SidebarNav: React.FC = () => {
-  const { isOpen } = useSidebar();
+  const { isOpen, closeSidebar, isMobile } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -53,50 +54,66 @@ const SidebarNav: React.FC = () => {
 
   const handleNavigation = (path: string) => {
     navigate(path);
-  };
-
-  const isActive = (path: string) => {
-    return location.pathname === path;
+    if (isMobile) {
+      closeSidebar(); // Close sidebar on mobile after navigation
+    }
   };
 
   return (
-    <div
-      className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white shadow-lg  z-40 ${
-        isOpen ? "w-58" : "w-16"
-      }`}
-    >
-      {/* Navigation Items */}
-      <nav>
-        {sidebarItems.map((item) => {
-          const IconComponent = item.icon;
-          return (
-            <button
-              key={item.id}
-              onClick={() => handleNavigation(item.path)}
-              className={`w-full flex items-center px-4 py-3 text-left hover:bg-gray-100 transition-colors ${
-                isActive(item.path) ? "text-blue-600" : "text-gray-700"
-              }`}
-              title={!isOpen ? item.label : undefined} 
-            >
-              <IconComponent
-                className={`w-6 h-6 ${
-                  isActive(item.path) ? "text-blue-600" : "text-gray-600"
+    <>
+      {/* Mobile Backdrop */}
+      {isMobile && isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 backdrop-blur lg:hidden"
+          onClick={closeSidebar}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white shadow-lg z-50 ${
+          isMobile
+            ? // Mobile behavior - overlay
+              `w-64 ${isOpen ? "translate-x-0" : "-translate-x-full"}`
+            : // Desktop behavior - fixed with width change
+              `${isOpen ? "w-52" : "w-16"} translate-x-0`
+        }`}
+      >
+        {/* Navigation Items */}
+        <nav>
+          {sidebarItems.map((item) => {
+            const IconComponent = item.icon;
+            const isActive = location.pathname === item.path;
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavigation(item.path)}
+                className={`w-full flex items-center px-4 py-3 text-left hover:bg-gray-100 transition-colors ${
+                  isActive ? "text-blue-600" : "text-gray-700"
                 }`}
-              />
-              {isOpen && (
-                <span
-                  className={`ml-4 font-medium ${
-                    isActive(item.path) ? "text-blue-600" : "text-gray-700"
+                title={!isOpen ? item.label : undefined}
+              >
+                <IconComponent
+                  className={`w-6 h-6 ${
+                    isActive ? "text-blue-600" : "text-gray-600"
                   }`}
-                >
-                  {item.label}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </nav>
-    </div>
+                />
+                {isOpen && (
+                  <span
+                    className={`ml-4 font-medium ${
+                      isActive ? "text-blue-600" : "text-gray-700"
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+    </>
   );
 };
 

@@ -12,6 +12,7 @@ const createPlaylist = asyncHandler(async (req, res) => {
   const playlist = await Playlist.create({
     name,
     description,
+    video: [],
     owner: req.user._id,
   });
 
@@ -22,8 +23,11 @@ const createPlaylist = asyncHandler(async (req, res) => {
 
 const getUserPlaylists = asyncHandler(async (req, res) => {
   const playlists = await Playlist.find({ owner: req.user._id })
-    .populate("video", "title thumbnail views ")
-    .populate("owner", "username avatar");
+    .populate({
+      path: "video",
+      populate: { path: "owner", select: "_id username avatar fullName" },
+    })
+    .populate("owner", "_id username avatar fullName email");
   return res
     .status(200)
     .json(new ApiResponse(200, playlists, "User playlists"));

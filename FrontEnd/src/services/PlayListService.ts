@@ -1,0 +1,49 @@
+import apiClient from "../api/apiClient";
+
+export const PlayListService = {
+  createPlaylist: async (playlistData: {
+    name: string;
+    description: string;
+  }) => {
+    try {
+      const res = await apiClient.post("/playlists/", playlistData);
+      if (res.data.success) {
+        return res.data;
+      }
+      throw new Error(res.data.message || "Failed to create playlist");
+    } catch (error: any) {
+      console.error("Error creating playlist:", error);
+      throw error;
+    }
+  },
+
+  // Add a video to a playlist
+  addVideoToPlaylist: async (playlistId: string, videoId: string) => {
+    try {
+      const res = await apiClient.post(
+        `/playlists/${playlistId}/videos/${videoId}`
+      );
+      if (res.data.success) {
+        return res.data;
+      }
+      throw new Error(res.data.message || "Failed to add video to playlist");
+    } catch (error: any) {
+      console.error("Error adding video to playlist:", error);
+      throw error;
+    }
+  },
+
+  // Get all playlists for a user
+  getUserPlaylists: async () => {
+    try {
+      const res = await apiClient.get("/playlists/");
+      if (res.data.success) {
+        return res.data;
+      }
+      throw new Error(res.data.message || "Failed to fetch user playlists");
+    } catch (error: any) {
+      console.error("Error fetching user playlists:", error);
+      throw error;
+    }
+  },
+};

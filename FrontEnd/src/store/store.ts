@@ -4,6 +4,7 @@ import videoSlice from "../features/videos/videoSlice";
 import likesSlice from "../features/likes/likesSlice";
 import commentSlice from "../features/commentSlice";
 import tweetsSlice from "../features/tweetSlice";
+import playlistSlice from "../features/playlistSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     likes: likesSlice,
     comments: commentSlice,
     tweets: tweetsSlice,
+    playlists: playlistSlice,
   },
 });
 

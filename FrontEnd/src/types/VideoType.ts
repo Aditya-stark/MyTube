@@ -11,7 +11,8 @@ export interface Video {
     _id: string;
     fullName: string;
     avatar: string;
-    subscriberCount: number; // number of subscribers
+    username?: string;
+    subscriberCount?: number; // number of subscribers
   };
   likesCount: number; // number of likes
   createdAt: string;

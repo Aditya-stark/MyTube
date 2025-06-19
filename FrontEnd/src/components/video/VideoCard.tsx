@@ -3,6 +3,7 @@ import { format } from "timeago.js";
 import { useNavigate } from "react-router-dom";
 import { MdEdit, MdDelete, MdPlaylistAdd } from "react-icons/md";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import PlaylistPopUp from "../playlist/PlaylistPopUp";
 
 interface VideoCardProps {
   video: {
@@ -17,7 +18,6 @@ interface VideoCardProps {
   isOwner?: boolean;
   onEdit?: (video: any) => void;
   onDelete?: (videoId: string) => void;
-  onSaveToPlaylist?: (videoId: string) => void;
 }
 
 const VideoCard: React.FC<VideoCardProps> = ({
@@ -25,9 +25,9 @@ const VideoCard: React.FC<VideoCardProps> = ({
   isOwner = false,
   onEdit,
   onDelete,
-  onSaveToPlaylist,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [playlistPopupOpen, setPlaylistPopupOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -73,7 +73,7 @@ const VideoCard: React.FC<VideoCardProps> = ({
   const handleSaveToPlaylist = (e: React.MouseEvent) => {
     e.stopPropagation();
     setMenuOpen(false);
-    if (onSaveToPlaylist) onSaveToPlaylist(video._id);
+    setPlaylistPopupOpen(true);
   };
 
   const handleVideoClick = () => {
@@ -174,6 +174,13 @@ const VideoCard: React.FC<VideoCardProps> = ({
           </span>
         </div>
       </div>
+      {/* Playlist Popup */}
+      {playlistPopupOpen && (
+        <PlaylistPopUp
+          videoId={video._id}
+          onClose={() => setPlaylistPopupOpen(false)}
+        />
+      )}
     </div>
   );
 };

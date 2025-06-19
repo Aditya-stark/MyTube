@@ -71,7 +71,7 @@ const SidebarNav: React.FC = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white shadow-lg z-50 ${
+        className={`fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white shadow-lg z-40 ${
           isMobile
             ? // Mobile behavior - overlay
               `w-64 ${isOpen ? "translate-x-0" : "-translate-x-full"}`

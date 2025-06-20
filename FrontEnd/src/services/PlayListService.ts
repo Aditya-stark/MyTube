@@ -33,6 +33,24 @@ export const PlayListService = {
     }
   },
 
+  // Remove a video from a playlist
+  removeVideoFromPlaylist: async (playlistId: string, videoId: string) => {
+    try {
+      const res = await apiClient.delete(
+        `/playlists/${playlistId}/videos/${videoId}`
+      );
+      if (res.data.success) {
+        return res.data;
+      }
+      throw new Error(
+        res.data.message || "Failed to remove video from playlist"
+      );
+    } catch (error: any) {
+      console.error("Error removing video from playlist:", error);
+      throw error;
+    }
+  },
+
   // Get all playlists for a user
   getUserPlaylists: async () => {
     try {

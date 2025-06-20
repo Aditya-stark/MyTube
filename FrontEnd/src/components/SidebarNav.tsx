@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   HiHome,
@@ -7,7 +7,6 @@ import {
   HiCollection,
   HiVideoCamera,
   HiHeart,
-  HiX,
 } from "react-icons/hi";
 import { useSidebar } from "../contexts/SidebarContext";
 

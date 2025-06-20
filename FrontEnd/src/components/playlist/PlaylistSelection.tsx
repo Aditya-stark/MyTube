@@ -1,7 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserPlaylists } from "../../features/playlistSlice";
+import {
+  addVideoToPlaylist,
+  getUserPlaylists,
+  removeVideoFromPlaylist,
+} from "../../features/playlistSlice";
 import { AppDispatch, RootState } from "../../store/store";
+import toast from "react-hot-toast";
 
 interface PlaylistSelectionProps {
   setIsNewPlaylist: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,23 +21,81 @@ const PlaylistSelection: React.FC<PlaylistSelectionProps> = ({
   const { playlists, loading } = useSelector(
     (state: RootState) => state.playlists
   );
+  const [checkedPlaylists, setCheckedPlaylists] = useState<
+    Record<string, boolean>
+  >({});
 
+  // Fetching user playlists on component mount
   useEffect(() => {
-    dispatch(getUserPlaylists())
-      .unwrap()
-      .then(() => {
-        console.log("Playlists fetched successfully");
-      })
-      .catch((error) => {
-        console.error("Failed to fetch playlists:", error);
-      });
+    dispatch(getUserPlaylists());
   }, [dispatch]);
+
+  // Updating the checked playlist with initial state if video is in playlists
+  useEffect(() => {
+    if (videoId && playlists.length > 0) {
+      const initialCheckedState: Record<string, boolean> = {};
+      playlists.forEach((playlist) => {
+        initialCheckedState[playlist._id] = isVideoInPlaylist(
+          playlist,
+          videoId
+        );
+      });
+
+      setCheckedPlaylists(initialCheckedState);
+    }
+  }, [videoId, playlists]);
 
   // Helper function to check if video exists in playlist
   const isVideoInPlaylist = (playlist: any, videoId: string): boolean =>
     playlist.video.some(
       (video: any) => video === videoId || (video && video._id === videoId)
     );
+
+  // Handle checkbox change
+  const handleCheckboxChange = (
+    playlistId: string,
+    isCurrentlyChecked: boolean
+  ) => {
+    if (!videoId) return;
+
+    // Toggle the state of the checkbox
+    setCheckedPlaylists({
+      ...checkedPlaylists,
+      [playlistId]: !isCurrentlyChecked,
+    });
+
+    // API call to add/remove
+    if (!isCurrentlyChecked) {
+      //Add video to playlist
+      dispatch(addVideoToPlaylist({ playlistId, videoId }))
+        .unwrap()
+        .then(() => {
+          toast.success("Video added to playlist successfully");
+          dispatch(getUserPlaylists());
+        })
+        .catch(() => {
+          setCheckedPlaylists({
+            ...checkedPlaylists,
+            [playlistId]: false,
+          });
+          toast.error("Failed to add video to playlist");
+        });
+    } else {
+      // Remove video from playlist
+      dispatch(removeVideoFromPlaylist({ playlistId, videoId }))
+        .unwrap()
+        .then(() => {
+          toast.success("Video removed from playlist successfully");
+        })
+        .catch(() => {
+          setCheckedPlaylists({
+            ...checkedPlaylists,
+            [playlistId]: true,
+          });
+          toast.error("Failed to remove video from playlist");
+        });
+    }
+  };
 
   return (
     <div className="text-sm">
@@ -53,15 +116,14 @@ const PlaylistSelection: React.FC<PlaylistSelectionProps> = ({
                   <input
                     type="checkbox"
                     className="accent-blue-500 w-4 h-4"
-                    checked={
-                      videoId ? isVideoInPlaylist(playlist, videoId) : false
-                    }
+                    checked={checkedPlaylists[playlist._id] || false}
                     onChange={() => {
-                      console.log(
-                        `Toggle video ${videoId} in playlist ${playlist._id}`
+                      handleCheckboxChange(
+                        playlist._id,
+                        checkedPlaylists[playlist._id] || false
                       );
                     }}
-                  />{" "}
+                  />
                   <div className="flex justify-between w-full">
                     <span>{playlist.name}</span>
                     <span>

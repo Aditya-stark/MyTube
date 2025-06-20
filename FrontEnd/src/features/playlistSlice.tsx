@@ -42,12 +42,37 @@ export const addVideoToPlaylist = createAsyncThunk(
     try {
       const res = await PlayListService.addVideoToPlaylist(playlistId, videoId);
       if (res.success) {
-        console.log("Video added to playlist successfully:", res);
         return res.data;
       }
       return rejectWithValue(res.message || "Failed to add video to playlist");
     } catch (error: any) {
       console.error("Error adding video to playlist:", error);
+      return rejectWithValue(
+        error.response?.data.message || "Something went wrong"
+      );
+    }
+  }
+);
+
+export const removeVideoFromPlaylist = createAsyncThunk(
+  "playlists/removeVideoFromPlaylist",
+  async (
+    { playlistId, videoId }: { playlistId: string; videoId: string },
+    { rejectWithValue }
+  ) => {
+    try {
+      const res = await PlayListService.removeVideoFromPlaylist(
+        playlistId,
+        videoId
+      );
+      if (res.success) {
+        return res.data;
+      }
+      return rejectWithValue(
+        res.message || "Failed to remove video from playlist"
+      );
+    } catch (error: any) {
+      console.error("Error removing video from playlist:", error);
       return rejectWithValue(
         error.response?.data.message || "Something went wrong"
       );
@@ -133,6 +158,30 @@ const playlistSlice = createSlice({
         state.error = null;
       })
       .addCase(getUserPlaylists.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(removeVideoFromPlaylist.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(removeVideoFromPlaylist.fulfilled, (state, action) => {
+        state.loading = false;
+        state.playlists = state.playlists.map((playlist) => {
+          if (playlist._id === action.meta.arg.playlistId) {
+            return {
+              ...playlist,
+              video: playlist.video.filter(
+                (video) => video._id !== action.meta.arg.videoId
+              ),
+            };
+          } else {
+            return playlist;
+          }
+        });
+        state.error = null;
+      })
+      .addCase(removeVideoFromPlaylist.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

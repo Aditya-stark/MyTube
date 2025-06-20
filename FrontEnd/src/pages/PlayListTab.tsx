@@ -1,13 +1,21 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../store/store";
 import UploadNewVideoPopUp from "../components/video/UploadNewVideoPopUp";
 import { UserProfileCard } from "../components/UserProfileCard";
 import NavigationTabs from "../components/NavigationTabs";
+import { getUserPlaylists } from "../features/playlistSlice";
+import PlaylistCard from "../components/playlist/PlaylistCard";
 
 const PlayListTabPage: React.FC = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const [isUploadPopupOpen, setIsUploadPopupOpen] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const { playlists } = useSelector((state: RootState) => state.playlists);
+
+  useEffect(() => {
+    dispatch(getUserPlaylists());
+  }, [dispatch]);
 
   if (!user) {
     return (
@@ -33,7 +41,15 @@ const PlayListTabPage: React.FC = () => {
             <h2 className="text-2xl font-bold mb-6 text-gray-800">
               My Playlists
             </h2>
-            {/* PlayList */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6  gap-2">
+              {playlists.length > 0 ? (
+                playlists.map((playlist) => (
+                  <PlaylistCard key={playlist._id} playlist={playlist} />
+                ))
+              ) : (
+                <p className="text-gray-500">No playlists found.</p>
+              )}
+            </div>
           </div>
         </div>
       </div>

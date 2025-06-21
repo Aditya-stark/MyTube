@@ -64,4 +64,18 @@ export const PlayListService = {
       throw error;
     }
   },
+
+  // Get a specific playlist by ID
+  getPlaylistById: async (playlistId: string) => {
+    try {
+      const res = await apiClient.get(`/playlists/${playlistId}`);
+      if (res.data.success) {
+        console.log("Playlist fetched successfully:", res.data);
+        return res.data;
+      }
+    } catch (error: any) {
+      console.error("Error fetching playlist by ID:", error);
+      throw error;
+    }
+  },
 };

@@ -98,8 +98,27 @@ export const getUserPlaylists = createAsyncThunk(
   }
 );
 
+export const getPlaylistById = createAsyncThunk(
+  "playlists/getPlaylistById",
+  async (playlistId: string, { rejectWithValue }) => {
+    try {
+      const res = await PlayListService.getPlaylistById(playlistId);
+      if (res.success) {
+        console.log("Fetched playlist:", res.data);
+        return res.data;
+      }
+    } catch (error: any) {
+      console.error("Error fetching playlist by ID:", error);
+      return rejectWithValue(
+        error.response?.data.message || "Something went wrong"
+      );
+    }
+  }
+);
+
 interface PlaylistState {
-  playlists: Playlist[];
+  playlists: Playlist[] | [];
+  currentPlaylist?: Playlist | null;
   loading: boolean;
   error: string | null;
   totalPlaylists: number;
@@ -107,6 +126,7 @@ interface PlaylistState {
 
 const initialState: PlaylistState = {
   playlists: [],
+  currentPlaylist: null,
   loading: false,
   error: null,
   totalPlaylists: 0,
@@ -184,6 +204,21 @@ const playlistSlice = createSlice({
       .addCase(removeVideoFromPlaylist.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(getPlaylistById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getPlaylistById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentPlaylist = action.payload;
+        state.error = null;
+      })
+      .addCase(getPlaylistById.rejected, (state, action) => {
+        state.loading = false;
+        state.currentPlaylist = null;
+        state.error = action.payload as string;
+        console.error("Error fetching playlist by ID:", action.payload);
       });
   },
 });

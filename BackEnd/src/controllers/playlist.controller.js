@@ -34,9 +34,20 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
 });
 
 const getPlayListById = asyncHandler(async (req, res) => {
+  const playlist = req.playlist;
+
+  // We need to populate the owner and video Fields
+  await playlist.populate([
+    { path: "owner", select: "_id username avatar fullName email" },
+    {
+      path: "video",
+      populate: { path: "owner", select: "_id username avatar fullName" },
+    },
+  ]);
+
   return res
     .status(200)
-    .json(new ApiResponse(200, req.playlist, "Playlist fetched"));
+    .json(new ApiResponse(200, playlist, "Playlist fetched"));
 });
 
 const addVideoToPlaylist = asyncHandler(async (req, res) => {

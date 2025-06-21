@@ -19,6 +19,7 @@ import TweetsTabPage from "./pages/TweetsTabPage";
 import LayoutWithSidebar from "./components/LayoutWithSidebar";
 import { SidebarProvider } from "./contexts/SidebarContext";
 import PlayListTabPage from "./pages/PlayListTab";
+import PlaylistListPage from "./pages/PlaylistListPage";
 
 function LayoutWithHeader() {
   const [isUploadPopupOpen, setIsUploadPopupOpen] = useState(false);
@@ -68,6 +69,7 @@ function App() {
           {/* UnProtected Routes */}
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/watch" element={<WatchPage />} />
+          <Route path="/playlist" element={<PlaylistListPage />} />
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>

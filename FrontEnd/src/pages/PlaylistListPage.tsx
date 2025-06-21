@@ -1,18 +1,20 @@
 import { useDispatch, useSelector } from "react-redux";
-import { useSearchParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { AppDispatch, RootState } from "../store/store";
 import { useEffect } from "react";
 import { getPlaylistById } from "../features/playlistSlice";
+import { format } from "timeago.js";
 
 const PlaylistListPage = () => {
   const [searchParams] = useSearchParams();
   const playlistId = searchParams.get("list");
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   const { currentPlaylist, loading } = useSelector(
     (state: RootState) => state.playlists
   );
-  
+
   useEffect(() => {
     window.scrollTo(0, 0);
     if (!playlistId) {
@@ -34,7 +36,7 @@ const PlaylistListPage = () => {
   const owner = currentPlaylist.owner;
 
   return (
-    <div className="flex flex-col md:flex-row w-full min-h-screen bg-base-100">
+    <div className="flex flex-col md:flex-row w-full min-h-screen bg-base-100 p-4">
       {/* Left: Playlist Info */}
       <div className="md:w-1/4 w-full p-4 flex flex-col items-left bg-gradient-to-b from-blue-600 via-blue-400  to-white rounded-t-2xl ">
         {firstVideo && firstVideo.thumbnail && (
@@ -62,22 +64,41 @@ const PlaylistListPage = () => {
         )}
       </div>
       {/* Right: Videos List */}
-      <div className="md:w-3/4 w-full p-4 flex flex-col gap-2">
+      <div className="md:w-3/4 w-full p-1 flex flex-col">
         {currentPlaylist.video && currentPlaylist.video.length > 0 ? (
           currentPlaylist.video.map((video: any) => (
             <div
               key={video._id}
-              className="w-full bg-base-200 rounded-lg p-4 flex gap-4 items-center"
+              className="w-full bg-base-200 rounded-lg p-2 flex gap-4 items-top hover:cursor-pointer hover:bg-gray-200"
+              onClick={() => navigate(`/watch?vId=${video._id}`)}
             >
-              <img
-                src={video.thumbnail}
-                alt={video.title}
-                className="w-32 h-20 object-cover rounded-md"
-              />
+              <div className="flex flex-col items-center justify-center text-gray-500">
+                <span>{currentPlaylist.video.indexOf(video) + 1}</span>
+              </div>
+              {/* Thumbnail Image with time duration*/}
+              <div className="relative w-56 min-w-[224px] aspect-video cursor-pointer group">
+                <img
+                  src={video.thumbnail}
+                  alt={video.title}
+                  className="absolute h-full w-full object-cover rounded-lg group-hover:brightness-90 transition"
+                />
+                {/* Duration Badge */}
+                <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-0.5 rounded">
+                  {Math.floor(video.duration / 60)
+                    .toString()
+                    .padStart(2, "0")}
+                  :
+                  {Math.floor(video.duration % 60)
+                    .toString()
+                    .padStart(2, "0")}
+                </div>
+              </div>
+
               <div className="flex flex-col">
                 <h3 className="text-lg font-semibold">{video.title}</h3>
-                <span className="text-sm text-gray-500">
-                  {video.owner?.fullName}
+                <span className="text-xs text-gray-500 ">
+                  {video.owner?.fullName} • {video.views} views • {""}
+                  {format(video.createdAt)}
                 </span>
               </div>
             </div>

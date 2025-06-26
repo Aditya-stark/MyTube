@@ -1,7 +1,7 @@
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "./store/store";
 import { useEffect, useState } from "react";
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 import { currentUser, logout } from "./features/auth/authSlice";
 import { Toaster } from "react-hot-toast";
 import { WatchPage } from "./pages/WatchPage";
@@ -71,24 +71,29 @@ function App() {
           <Route path="/watch" element={<WatchPage />} />
           <Route path="/playlist" element={<PlaylistListPage />} />
 
-          {/* Protected Routes */}
+          {/* User profile routes (both for viewing other users and yourself) */}
+          <Route path="/:username" element={<UserProfile />} />
+          <Route path="/:username/videos" element={<VideoTabPage />} />
+          <Route path="/:username/playlists" element={<PlayListTabPage />} />
+          <Route path="/:username/tweets" element={<TweetsTabPage />} />
+          <Route path="/:username/following" element={<h1>Following</h1>} />
+
+          {/* Protected Routes - Don't use separate paths */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/" element={<UserProfile />} />
+            {/* Redirect root to the logged-in user's profile */}
+            <Route path="/" element={<h1>Home Page</h1>} />
             <Route path="/edit-profile" element={<UpdateProfile />} />
-            <Route path="/videos" element={<VideoTabPage />} />
-            <Route path="/tweets" element={<TweetsTabPage />} />
-            <Route path="/playlists" element={<PlayListTabPage />} />
+
+            {/* Keep these feed-specific routes */}
             <Route
               path="/feed/subscriptions"
               element={<div>Subscriptions Page</div>}
             />
             <Route path="/feed/history" element={<div>History Page</div>} />
-            <Route path="/feed/playlists" element={<div>Playlists Page</div>} />
             <Route
               path="/feed/liked-videos"
               element={<div>Liked Videos Page</div>}
             />
-            <Route path="/feed/videos" element={<div>Liked Videos Page</div>} />
           </Route>
         </Route>
       </Routes>

@@ -7,6 +7,7 @@
  */
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
+  ChannelProfileData,
   LoginFormData,
   RegisterFormData,
   ResponseUser,
@@ -288,6 +289,23 @@ export const updateUserCoverImage = createAsyncThunk(
   }
 );
 
+// Get User By Username
+export const getUserByUsername = createAsyncThunk(
+  "auth/getUserByUsername",
+  async (username: string, { rejectWithValue }) => {
+    try {
+      const res = await AuthService.getUserByUsername(username);
+      if (res?.success) {
+        return res.data;
+      }
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Get User By Username Failed at State"
+      );
+    }
+  }
+);
+
 const initialState: UserState = {
   user: null as ResponseUser | null,
   isAuthenticated: false,
@@ -295,6 +313,7 @@ const initialState: UserState = {
   error: null,
   isOTPSent: false,
   isPasswordReset: false,
+  channelProfileData: null as ChannelProfileData | null,
 };
 
 const authSlice = createSlice({
@@ -443,6 +462,19 @@ const authSlice = createSlice({
         state.user = action.payload?.data || null;
       })
       .addCase(updateUserCoverImage.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      //Get User By Username
+      .addCase(getUserByUsername.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getUserByUsername.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.channelProfileData = action.payload || null;
+      })
+      .addCase(getUserByUsername.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });

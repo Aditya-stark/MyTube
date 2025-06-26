@@ -1,5 +1,7 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
 
 interface Tab {
   id: string;
@@ -9,46 +11,69 @@ interface Tab {
 
 interface NavigationTabsProps {
   className?: string;
+  username?: string;
 }
 
-const NavigationTabs: React.FC<NavigationTabsProps> = ({ className = "" }) => {
+const NavigationTabs: React.FC<NavigationTabsProps> = ({ 
+  className = "", 
+  username 
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useSelector((state: RootState) => state.auth);
+  
+  // Always use username in paths with @ prefix
+  // If no username is provided, use the logged-in user's username
+  const profileUsername = username || user?.username || "";
 
-  // Define your tabs configuration
+  // Define tabs with /@username format
   const tabs: Tab[] = [
     {
       id: "home",
       label: "Home",
-      path: "/",
+      path: `/@${profileUsername}`,
     },
     {
       id: "videos",
       label: "Videos",
-      path: "/videos",
+      path: `/@${profileUsername}/videos`,
     },
     {
       id: "playlists",
       label: "Playlists",
-      path: "/playlists",
+      path: `/@${profileUsername}/playlists`,
     },
     {
       id: "tweets",
       label: "Tweets",
-      path: "/tweets",
+      path: `/@${profileUsername}/tweets`,
     },
     {
       id: "following",
       label: "Following",
-      path: "/following",
+      path: `/@${profileUsername}/following`,
     },
   ];
 
-  // Determine active tab based on current path
+  // Update active tab logic for @username path format
   const getActiveTab = () => {
     const currentPath = location.pathname;
-    const activeTab = tabs.find((tab) => tab.path === currentPath);
-    return activeTab?.id || "home";
+    
+    // Check if we're on a username profile path with @ prefix
+    if (profileUsername && currentPath.includes(`/@${profileUsername}`)) {
+      const pathSegments = currentPath.split('/');
+      // In /@username/section format, section is at index 2
+      const section = pathSegments.length > 2 ? pathSegments[2] : '';
+      
+      // If no section (just /@username), it's the home tab
+      if (!section) return "home";
+      
+      // Otherwise find the tab that matches the section
+      const activeTab = tabs.find(tab => tab.path.endsWith(`/${section}`));
+      return activeTab?.id || "home";
+    }
+    
+    return "home"; // Default
   };
 
   const activeTabId = getActiveTab();

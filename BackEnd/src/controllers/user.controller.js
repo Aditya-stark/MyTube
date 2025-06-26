@@ -10,6 +10,7 @@ import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import nodemailer from "nodemailer";
 import crypto from "crypto";
+import { create } from "domain";
 
 // Method for generating access and refresh tokens
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -302,7 +303,7 @@ const updateAccountUserDetails = asyncHandler(async (req, res) => {
 
   if (existingUser) {
     throw new ApiError(409, "Email or username already exists");
-  } 
+  }
 
   //Find user and update by METHOD findByIdAndUpdate
   const user = await User.findByIdAndUpdate(
@@ -400,26 +401,21 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
   //Here we are using aggregation pipeline to get the user channel profile data with some extra fields. Aggregation pipeline is used to perform some operations on the data before returning it.
   const channel = await User.aggregate([
     {
-      //STAGE_1: Match (Finding) the user with the username in the database
+      // STAGE_1: Match (Finding) the user with the username in the database
       $match: {
         username: username?.toLowerCase(),
       },
     },
-    //STAGE_2: To Find Subscribers
-    // The Subscription collection will look like this:
-    // {
-    //    subscriber: "userId",
-    //    channel: "channelId"
-    // }
+    // STAGE_2: To Find Subscribers
     {
       $lookup: {
-        from: "subscription", //subscription collection main se data chahiye
-        localField: "_id", //User Collection main buhot saare users honge toh particular user ki id se hum data find karenge subscription collection main channel ke andar
-        foreignField: "channel", //So foreginField channel hoga aur jitne bhi channel main user ki id match hongi woh saari data hume mil jayega
-        as: "subscribers", //aur kaise save karenge as "subscribers"
+        from: "subscription",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscribers",
       },
     },
-    //STAGE_3: To Find SubscribedTo Channels
+    // STAGE_3: To Find SubscribedTo Channels
     {
       $lookup: {
         from: "subscription",
@@ -428,6 +424,16 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         as: "subscribedTo",
       },
     },
+    // STAGE_4: To Find Videos of the Channel
+    {
+      $lookup: {
+        from: "videos",
+        localField: "_id",
+        foreignField: "owner",
+        as: "videos",
+      },
+    },
+    // STAGE_5: Adding Extra Fields like Video Count and Subscribers Count
     {
       $addFields: {
         subscribersCount: {
@@ -443,6 +449,9 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
             else: false,
           },
         },
+        totalVideosCount: {
+          $size: { $ifNull: ["$videos", []] },
+        },
       },
     },
     {
@@ -455,6 +464,9 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         avatar: 1,
         coverImage: 1,
         email: 1,
+        totalVideosCount: 1,
+        createdAt: 1,
+        updatedAt: 1,
       },
     },
   ]);

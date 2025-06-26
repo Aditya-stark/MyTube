@@ -193,4 +193,15 @@ export const AuthService = {
       throw error;
     }
   },
+
+  // Get User By Username (for the other user's profile page)
+  getUserByUsername: async (username: string) => {
+    try {
+      const res = await apiClient.get(`/users/${username}`);
+      if (res.data.success) return res.data;
+    } catch (error) {
+      console.log("error", error);
+      throw error;
+    }
+  },
 };

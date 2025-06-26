@@ -24,6 +24,23 @@ export interface ResponseUser {
   updatedAt: string;
 }
 
+// Channel Profile Data
+export interface ChannelProfileData {
+  _id: string;
+  username: string;
+  email: string;
+  fullName: string;
+  avatar: string;
+  coverImage: string | null;
+  watchHistory: string[];
+  subscriberCount: number;
+  channelSubcribedToCount: number;
+  isSubcribed: boolean;
+  totalVideosCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 //Response Types
 
 //Register Response (NO TOKEN)
@@ -93,6 +110,7 @@ export interface UserState {
   error: string | null;
   isOTPSent: boolean;
   isPasswordReset: boolean;
+  channelProfileData: ChannelProfileData | null;
 }
 
 // Error Response

@@ -127,7 +127,6 @@ const getAllVideos = asyncHandler(async (req, res) => {
 });
 
 // Get all videos by userId
-
 const getAllVideosByUserId = asyncHandler(async (req, res) => {
   // Get the userId from the request parameters
   // Get the page , limit , sortBy and sortType from the request

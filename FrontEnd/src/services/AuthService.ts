@@ -197,7 +197,10 @@ export const AuthService = {
   // Get User By Username (for the other user's profile page)
   getUserByUsername: async (username: string) => {
     try {
-      const res = await apiClient.get(`/users/${username}`);
+      // Always clean username to remove @ if present
+      const cleanUsername = username.startsWith('@') ? username.substring(1) : username;
+      
+      const res = await apiClient.get(`/users/${cleanUsername}`);
       if (res.data.success) return res.data;
     } catch (error) {
       console.log("error", error);

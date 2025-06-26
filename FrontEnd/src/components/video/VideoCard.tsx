@@ -86,12 +86,9 @@ const VideoCard: React.FC<VideoCardProps> = ({
   };
 
   return (
-    <div
-      className="bg-gray-100 overflow-visible cursor-pointer mb-1 relative"
-      onClick={handleVideoClick}
-    >
+    <div className="bg-gray-100 overflow-visible cursor-pointer mb-1 relative">
       {/* Video Thumbnail*/}
-      <div className="relative pb-[56.25%]">
+      <div className="relative pb-[56.25%]" onClick={handleVideoClick}>
         <img
           src={video.thumbnail}
           alt={video.title}
@@ -110,7 +107,7 @@ const VideoCard: React.FC<VideoCardProps> = ({
       </div>
 
       {/* Video Info */}
-      <div className="pt-2">
+      <div className="pt-2" onClick={handleVideoClick}>
         <div className="flex items-start justify-between">
           {/* Title */}
           <div className="text-sm font-medium text-gray-900 line-clamp-2 cursor-pointer">

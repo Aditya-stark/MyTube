@@ -21,11 +21,18 @@ export const publishVideo = createAsyncThunk(
   }
 );
 
-export const getUserVideos = createAsyncThunk(
+export const getVideosByUsername = createAsyncThunk(
   "videos/getUserVideos",
-  async ({ sortBy }: { sortBy?: string }, { rejectWithValue }) => {
+  async (
+    { username, sortBy }: { username: string; sortBy?: string },
+    { rejectWithValue }
+  ) => {
     try {
-      const res = await VideoService.getUserVideos(undefined, sortBy);
+      const res = await VideoService.getVideosByUsername(
+        username,
+        undefined,
+        sortBy
+      );
       if (res.success) {
         return res.data;
       }
@@ -48,7 +55,7 @@ export const loadMoreUserVideos = createAsyncThunk(
       if (!lastVideoId) {
         return { videos: [], hasMoreVideos: false, lastVideoId: null };
       }
-      const res = await VideoService.getUserVideos(lastVideoId, sortBy);
+      const res = await VideoService.getVideosByUsername(lastVideoId, sortBy);
       if (res.success) {
         return res.data;
       }
@@ -185,17 +192,17 @@ const videoSlice = createSlice({
         state.isPublishing = false;
         state.error = action.payload as string;
       })
-      .addCase(getUserVideos.pending, (state) => {
+      .addCase(getVideosByUsername.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(getUserVideos.fulfilled, (state, action) => {
+      .addCase(getVideosByUsername.fulfilled, (state, action) => {
         state.isLoading = false;
         state.videos = action.payload;
         state.hasMoreVideos = action.payload.hasMoreVideos;
         state.lastVideoId = action.payload.lastVideoId || null;
       })
-      .addCase(getUserVideos.rejected, (state, action) => {
+      .addCase(getVideosByUsername.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
         state.videos = null;

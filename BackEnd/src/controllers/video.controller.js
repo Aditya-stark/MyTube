@@ -8,6 +8,7 @@ import {
   uploadThumbnailToCloudinary,
 } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
+import { User } from "../models/user.model.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   // Extract query parameters from the request (page, limit, query, sortBy, sortType, userId)
@@ -128,20 +129,24 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
 // Get all videos by userId
 const getAllVideosByUserId = asyncHandler(async (req, res) => {
-  // Get the userId from the request parameters
-  // Get the page , limit , sortBy and sortType from the request
-  // Convert the page and limit to numbers
-  // Validate the page and limit
-  // Validate the sortBy and sortType
-  // Find all videos by the userId
-  // Construct sorting options based on sortBy and sortType
-  // Fetch videos from the database with applied filters, pagination and sorting
-  // Handle cases where no videos are found and return an appropriate response
-  // Return the paginated list of videos along with metadata (total count, current page, total pages)
-  // Handle any errors and send an appropriate error response
+  // Get username from either params or query
+  const usernameFromParams = req.params.username;
+  const username = usernameFromParams;
 
-  // Get the userId from req.user
-  const userId = req.user._id;
+  // Check if username is provided
+  if (!username) {
+    return res
+      .status(400)
+      .json(new ApiError(400, "Username is required to fetch videos"));
+  }
+
+  // Find user by username
+  const user = await User.findOne({ username: username.toLowerCase() });
+  if (!user) {
+    return res.status(404).json(new ApiError(404, "User not found"));
+  }
+
+  const userId = user._id;
 
   // Get the page , limit , sortBy and sortType from the request
   const { limit = 8, lastVideoId, sortBy, sortType } = req.query;

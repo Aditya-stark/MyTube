@@ -15,8 +15,6 @@ const UserProfile: React.FC = () => {
   const { channelProfileData, isLoading, error } = useSelector(
     (state: RootState) => state.auth
   );
-  const { user: currentUser } = useSelector((state: RootState) => state.auth);
-  const isOwner = channelProfileData?.username === currentUser?.username;
   useEffect(() => {
     if (username) {
       dispatch(getUserByUsername(username));

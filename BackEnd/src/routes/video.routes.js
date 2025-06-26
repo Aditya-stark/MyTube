@@ -18,7 +18,7 @@ const router = Router();
 router.route("/getVideos").get(getAllVideos);
 
 //Get All Videos of the user
-router.route("/videos").get(verifyJWT, getAllVideosByUserId);
+router.route("/user/:username").get(getAllVideosByUserId);
 
 //Publish a video
 router.route("/publish").post(

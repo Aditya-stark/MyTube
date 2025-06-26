@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import UploadNewVideoPopUp from "../components/video/UploadNewVideoPopUp";
-import { getUserVideos } from "../features/videos/videoSlice";
+import { getVideosByUsername } from "../features/videos/videoSlice";
 import VideoTab from "../components/video/Tabs/VideoTab";
 import { UserProfileCard } from "../components/UserProfileCard";
 import NavigationTabs from "../components/NavigationTabs";
+import { useParams } from "react-router-dom";
+import { getUserByUsername } from "../features/auth/authSlice";
 
 const VideoTabPage: React.FC = () => {
-  const user = useSelector((state: RootState) => state.auth.user);
   const dispatch = useDispatch<AppDispatch>();
   const [isUploadPopupOpen, setIsUploadPopupOpen] = useState(false);
   const {
@@ -16,18 +17,14 @@ const VideoTabPage: React.FC = () => {
     isLoading,
     isLoadingMore = false,
   } = useSelector((state: RootState) => state.videos);
+  const { username } = useParams<{ username: string }>();
 
   useEffect(() => {
-    dispatch(getUserVideos({}));
-  }, [dispatch, isUploadPopupOpen]);
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+    if (username) {
+      dispatch(getUserByUsername(username));
+      dispatch(getVideosByUsername({ username: username }));
+    }
+  }, [username, dispatch]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -37,7 +34,7 @@ const VideoTabPage: React.FC = () => {
       />
       <div className="max-w-8xl mx-0 sm:mx-5 lg:mx-10  sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <UserProfileCard/>
+          <UserProfileCard />
 
           {/* Navigation Tabs */}
           <NavigationTabs />
@@ -45,6 +42,7 @@ const VideoTabPage: React.FC = () => {
           {/* Tab Content */}
           <div className="pt-6">
             <VideoTab
+              username={username || ""}
               videos={videos}
               isLoading={isLoading}
               isLoadingMore={isLoadingMore}

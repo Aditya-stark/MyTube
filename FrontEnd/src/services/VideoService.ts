@@ -43,18 +43,27 @@ export const VideoService = {
   },
 
   // Get user Videos
-  getUserVideos: async (lastVideoId?: string, sortBy?: string) => {
+  getVideosByUsername: async (
+    username: string,
+    lastVideoId?: string,
+    sortBy?: string
+  ) => {
     try {
-      let url = "/videos/videos";
+      // Always clean username to remove @ if present
+      const cleanUsername = username.startsWith('@') ? username.substring(1) : username;
+      
+      // Use clean username in URL
+      let url = `/videos/user/${cleanUsername}`;
+      
       const params = new URLSearchParams();
       if (lastVideoId) params.append("lastVideoId", lastVideoId);
       if (sortBy) params.append("sortBy", sortBy);
-      url += `?${params.toString()}`;
+      if (params.toString()) url += `?${params.toString()}`;
 
       const res = await apiClient.get(url);
       return res.data;
     } catch (error) {
-      console.error("Error fetching user videos:", error);
+      console.error("Error fetching videos by username:", error);
       throw error;
     }
   },

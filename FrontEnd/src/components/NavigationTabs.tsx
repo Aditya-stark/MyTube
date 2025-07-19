@@ -11,20 +11,17 @@ interface Tab {
 
 interface NavigationTabsProps {
   className?: string;
-  username?: string;
 }
 
-const NavigationTabs: React.FC<NavigationTabsProps> = ({ 
-  className = "", 
-  username 
-}) => {
+const NavigationTabs: React.FC<NavigationTabsProps> = ({ className = "" }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useSelector((state: RootState) => state.auth);
-  
+
   // Always use username in paths with @ prefix
-  // If no username is provided, use the logged-in user's username
-  const profileUsername = username || user?.username || "";
+  // If no username is provided, use the param from the URL or fallback to user's username
+  const paramUsername = location.pathname.split("/")[1].replace("@", "");
+  const profileUsername = paramUsername || user?.username || "";
 
   // Define tabs with /@username format
   const tabs: Tab[] = [
@@ -58,21 +55,21 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
   // Update active tab logic for @username path format
   const getActiveTab = () => {
     const currentPath = location.pathname;
-    
+
     // Check if we're on a username profile path with @ prefix
     if (profileUsername && currentPath.includes(`/@${profileUsername}`)) {
-      const pathSegments = currentPath.split('/');
+      const pathSegments = currentPath.split("/");
       // In /@username/section format, section is at index 2
-      const section = pathSegments.length > 2 ? pathSegments[2] : '';
-      
+      const section = pathSegments.length > 2 ? pathSegments[2] : "";
+
       // If no section (just /@username), it's the home tab
       if (!section) return "home";
-      
+
       // Otherwise find the tab that matches the section
-      const activeTab = tabs.find(tab => tab.path.endsWith(`/${section}`));
+      const activeTab = tabs.find((tab) => tab.path.endsWith(`/${section}`));
       return activeTab?.id || "home";
     }
-    
+
     return "home"; // Default
   };
 

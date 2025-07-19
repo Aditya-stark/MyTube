@@ -116,6 +116,26 @@ export const getPlaylistById = createAsyncThunk(
   }
 );
 
+export const getPlaylistsByUsername = createAsyncThunk(
+  "playlists/getPlaylistsByUsername",
+  async (username: string, { rejectWithValue }) => {
+    try {
+      const res = await PlayListService.getPlaylistsByUsername(username);
+      if (res.success) {
+        return res.data;
+      }
+      return rejectWithValue(
+        res.message || "Failed to fetch playlists by username"
+      );
+    } catch (error: any) {
+      console.error("Error fetching playlists by username:", error);
+      return rejectWithValue(
+        error.response?.data.message || "Something went wrong"
+      );
+    }
+  }
+);
+
 interface PlaylistState {
   playlists: Playlist[] | [];
   currentPlaylist?: Playlist | null;
@@ -219,6 +239,21 @@ const playlistSlice = createSlice({
         state.currentPlaylist = null;
         state.error = action.payload as string;
         console.error("Error fetching playlist by ID:", action.payload);
+      })
+      .addCase(getPlaylistsByUsername.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getPlaylistsByUsername.fulfilled, (state, action) => {
+        state.loading = false;
+        state.playlists = action.payload;
+        state.totalPlaylists = action.payload.length;
+        state.error = null;
+      })
+      .addCase(getPlaylistsByUsername.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+        console.error("Error fetching playlists by username:", action.payload);
       });
   },
 });

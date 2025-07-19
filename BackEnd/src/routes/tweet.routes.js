@@ -18,7 +18,7 @@ const router = Router();
 router.route("/").post(verifyJWT, createTweet);
 
 //Get a User All Tweet
-router.route("/user").get(verifyJWT, getUserTweets);
+router.route("/user/:username").get(getUserTweets);
 
 //Get a particular tweet
 router.route("/:tweetId").get(verifiedTweet, getParticularTweet);

@@ -16,9 +16,9 @@ export const TweetService = {
   },
 
   // Fetch tweets for the user
-  getUserTweets: async (lastTweetId?: string) => {
+  getUserTweets: async (username: string, lastTweetId?: string) => {
     try {
-      let url = "/tweets/user";
+      let url = `/tweets/user/${username}`;
       if (lastTweetId) {
         url += `?lastTweetId=${lastTweetId}`;
       }

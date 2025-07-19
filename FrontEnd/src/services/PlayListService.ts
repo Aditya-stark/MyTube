@@ -78,4 +78,24 @@ export const PlayListService = {
       throw error;
     }
   },
+
+  // Get playlists by username
+  getPlaylistsByUsername: async (username: string) => {
+    try {
+      const cleanUsername = username.startsWith("@")
+        ? username.substring(1)
+        : username;
+
+      const res = await apiClient.get(`/playlists/username/${cleanUsername}`);
+      if (res.data.success) {
+        return res.data;
+      }
+      throw new Error(
+        res.data.message || "Failed to fetch playlists by username"
+      );
+    } catch (error: any) {
+      console.error("Error fetching playlists by username:", error);
+      throw error;
+    }
+  },
 };

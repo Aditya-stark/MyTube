@@ -26,7 +26,7 @@ const TweetsTabPage: React.FC = () => {
       />
       <div className="max-w-8xl mx-0 sm:mx-5 lg:mx-10  sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <UserProfileCard user={user} />
+          <UserProfileCard />
           {/* Navigation Tabs */}
           <NavigationTabs />
           {/* Tab Content */}

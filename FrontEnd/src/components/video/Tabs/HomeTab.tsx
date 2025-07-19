@@ -2,7 +2,7 @@ import React from "react";
 import { ChannelProfileData } from "../../../types/AuthType";
 
 const HomeTab: React.FC<{ user: ChannelProfileData }> = ({ user }) => {
-  console.log("HomeTab user", user);
+
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       {/* Video Stats */}

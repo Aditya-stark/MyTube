@@ -2,6 +2,8 @@ import React from "react";
 import { useNavigate, useLocation } from "react-router";
 import { HiMenu } from "react-icons/hi"; // Add this import
 import { useSidebar } from "../contexts/SidebarContext"; // Add this import
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
 
 const HeaderNav: React.FC<{
   onUploadClick?: () => void;
@@ -19,6 +21,7 @@ const HeaderNav: React.FC<{
     "/forgot-password",
   ];
   const shouldShowSidebar = !hideSidebarPages.includes(location.pathname);
+  const { user, isLoading } = useSelector((state: RootState) => state.auth);
 
   return (
     <nav className="bg-white sticky top-0 z-50">
@@ -78,6 +81,32 @@ const HeaderNav: React.FC<{
                   >
                     Logout
                   </button>
+                )}
+                {isLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-10 h-10 bg-gray-300 rounded-full animate-pulse"></div>
+                   
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    {user?.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt="User Avatar"
+                        className="w-10 h-10 rounded-full cursor-pointer object-cover"
+                        onClick={() => navigate(`/${user.username}`)}
+                      />
+                    ) : (
+                      <div
+                        className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer"
+                        onClick={() => navigate(`/${user?.username}`)}
+                      >
+                        <span className="text-gray-600 text-sm">
+                          {user?.username?.[0]?.toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

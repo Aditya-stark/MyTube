@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { Tweet } from "../models/tweet.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
+import { User } from "../models/user.model.js";
 
 const createTweet = asyncHandler(async (req, res) => {
   try {
@@ -60,10 +61,16 @@ const getParticularTweet = asyncHandler(async (req, res) => {
 // Get all tweets of a user with pagination
 const getUserTweets = asyncHandler(async (req, res) => {
   try {
+    const { username } = req.params;
     const { limit = 4, lastTweetId } = req.query;
-    const userId = req.user?._id.toString();
-    console.log("User ID:", userId);
-    
+
+    // Find the user by username first
+    const user = await User.findOne({ username: username.toLowerCase() });
+    if (!user) {
+      return res.status(404).json(new ApiError(404, "User not found"));
+    }
+    const userId = user._id.toString();
+
     const parsedLimit = parseInt(limit) || 10;
 
     // Find all tweets of the user using aggregation pipeline
@@ -163,8 +170,8 @@ const getUserTweets = asyncHandler(async (req, res) => {
     ]);
 
     // Count total tweets for pagination info
-    const totalTweets = await Tweet.countDocuments({ 
-      owner: mongoose.Types.ObjectId.createFromHexString(userId) 
+    const totalTweets = await Tweet.countDocuments({
+      owner: mongoose.Types.ObjectId.createFromHexString(userId),
     });
 
     let hasMore = false;
@@ -182,7 +189,7 @@ const getUserTweets = asyncHandler(async (req, res) => {
           tweets,
           totalTweets,
           hasMore,
-          lastTweetId : lastTwetId,
+          lastTweetId: lastTwetId,
         },
         "User tweets fetched successfully"
       )

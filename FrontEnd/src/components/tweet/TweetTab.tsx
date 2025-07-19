@@ -10,6 +10,8 @@ import {
 import { AppDispatch, RootState } from "../../store/store";
 import { Tweet } from "../../types/TweetType";
 import TweetCard from "./TweetCard";
+import { useParams } from "react-router";
+import { getUserByUsername } from "../../features/auth/authSlice";
 
 interface TweetTabProps {
   user: ResponseUser;
@@ -17,20 +19,28 @@ interface TweetTabProps {
 
 const TweetTab = ({ user }: TweetTabProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { tweets, loading, hasMore, isLoadingMore, lastTweetId, totalTweets } =
-    useSelector((state: RootState) => state.tweets);
+  const { tweets, loading, hasMore, isLoadingMore, lastTweetId } = useSelector(
+    (state: RootState) => state.tweets
+  );
   const [tweetContent, setTweetContent] = useState<string>("");
   const loaderRef = useRef<HTMLDivElement>(null);
+  const { username } = useParams<{ username?: string }>();
+  const cleanUsername = username?.startsWith("@")
+    ? username.slice(1)
+    : username;
 
   // Fetch initial tweets when component mounts
   useEffect(() => {
-    dispatch(getUserInitialTweets())
-      .unwrap()
-      .catch((error) => {
-        console.error("Error fetching initial tweets:", error);
-        toast.error("Failed to load tweets. Please try again.");
-      });
-  }, [dispatch]);
+    if (cleanUsername) {
+      dispatch(getUserByUsername(cleanUsername));
+      dispatch(getUserInitialTweets(cleanUsername))
+        .unwrap()
+        .catch((error) => {
+          console.error("Error fetching initial tweets:", error);
+          toast.error("Failed to load tweets. Please try again.");
+        });
+    }
+  }, [dispatch, username, user]);
 
   // Observer for the loader for infinite scroll
   useEffect(() => {
@@ -38,8 +48,18 @@ const TweetTab = ({ user }: TweetTabProps) => {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
-          dispatch(getUserMoreTweets(lastTweetId || ""));
+        if (
+          entries[0].isIntersecting &&
+          hasMore &&
+          !isLoadingMore &&
+          cleanUsername
+        ) {
+          dispatch(
+            getUserMoreTweets({
+              username: cleanUsername,
+              lastTweetId: lastTweetId || "",
+            })
+          );
         }
       },
       { threshold: 0.1 }
@@ -67,7 +87,10 @@ const TweetTab = ({ user }: TweetTabProps) => {
       .then(() => {
         setTweetContent("");
         toast.success("Tweet added successfully!");
-        dispatch(getUserInitialTweets());
+
+        if (cleanUsername) {
+          dispatch(getUserInitialTweets(cleanUsername));
+        }
       })
       .catch((error) => {
         console.error("Error adding tweet:", error);
@@ -79,38 +102,41 @@ const TweetTab = ({ user }: TweetTabProps) => {
     <div className="flex justify-start min-h-screen">
       <div className="w-full max-w-3xl">
         {/* Tweet Compose Form */}
-        <div className="flex items-start space-x-2 w-full p-4 bg-white rounded-md shadow mb-6">
-          <img
-            src={user?.avatar || "/default-avatar.png"}
-            alt="userAvatar"
-            className="w-10 h-10 rounded-full object-cover border border-gray-300"
-          />
-          <form
-            className="flex-1 flex flex-col space-y-3"
-            onSubmit={tweetSubmitHandler}
-          >
-            <textarea
-              name="tweet"
-              id="tweet"
-              className="w-full p-3 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm min-h-[80px]"
-              placeholder="What's happening?"
-              value={tweetContent}
-              onChange={(e) => setTweetContent(e.target.value)}
+        {/* User is the Owner than show Form  */}
+        {user.username === cleanUsername && (
+          <div className="flex items-start space-x-2 w-full p-4 bg-white rounded-md shadow mb-6">
+            <img
+              src={user?.avatar || "/default-avatar.png"}
+              alt="userAvatar"
+              className="w-10 h-10 rounded-full object-cover border border-gray-300"
             />
+            <form
+              className="flex-1 flex flex-col space-y-3"
+              onSubmit={tweetSubmitHandler}
+            >
+              <textarea
+                name="tweet"
+                id="tweet"
+                className="w-full p-3 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm min-h-[80px]"
+                placeholder="What's happening?"
+                value={tweetContent}
+                onChange={(e) => setTweetContent(e.target.value)}
+              />
 
-            {/*Submit button */}
-            <div className="flex justify-between items-center">
-              <div className="flex-1" />
-              <button
-                type="submit"
-                className="px-6 py-2 text-sm rounded-full bg-blue-600 text-white hover:bg-blue-700 transition font-semibold shadow disabled:bg-gray-400 disabled:cursor-not-allowed"
-                disabled={!tweetContent.trim() || loading}
-              >
-                {loading ? "Posting..." : "Tweet"}
-              </button>
-            </div>
-          </form>
-        </div>
+              {/*Submit button */}
+              <div className="flex justify-between items-center">
+                <div className="flex-1" />
+                <button
+                  type="submit"
+                  className="px-6 py-2 text-sm rounded-full bg-blue-600 text-white hover:bg-blue-700 transition font-semibold shadow disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  disabled={!tweetContent.trim() || loading}
+                >
+                  {loading ? "Posting..." : "Tweet"}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {/* Tweets List */}
         {loading && tweets.length === 0 ? (
@@ -141,9 +167,6 @@ const TweetTab = ({ user }: TweetTabProps) => {
             ) : (
               <div className="text-center py-12 text-gray-500">
                 <p className="text-lg">No tweets yet</p>
-                <p className="text-sm mt-2">
-                  Share your first thought with the world!
-                </p>
               </div>
             )}
           </div>

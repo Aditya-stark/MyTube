@@ -8,6 +8,7 @@ import {
   getUserPlaylists,
   removeVideoFromPlaylist,
   updatePlaylist,
+  getPlaylistByUsername,
 } from "../controllers/playlist.controller.js";
 import { verifiedPlaylist } from "../middlewares/playlist.middleware.js";
 import { verifiedVideo } from "../middlewares/video.middleware.js";
@@ -24,6 +25,8 @@ router
   .get(verifiedPlaylist, getPlayListById)
   .patch(verifyJWT, verifiedPlaylist, updatePlaylist)
   .delete(verifyJWT, verifiedPlaylist, deletePlaylist);
+
+router.route("/username/:username").get(getPlaylistByUsername);
 
 router
   .route("/:playlistId/videos/:videoId")

@@ -1,4 +1,5 @@
 import { Playlist } from "../models/playlist.model.js";
+import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -31,6 +32,28 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, playlists, "User playlists"));
+});
+
+const getPlaylistByUsername = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+
+  // Find the user by username first
+  const user = await User.findOne({ username: username.toLowerCase() });
+  if (!user) {
+    return res.status(404).json(new ApiError(404, "User not found"));
+  }
+
+  // Now find playlists by user._id
+  const playlists = await Playlist.find({ owner: user._id })
+    .populate({
+      path: "video",
+      populate: { path: "owner", select: "_id username avatar fullName" },
+    })
+    .populate("owner", "_id username avatar fullName email");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, playlists, "Playlists by username"));
 });
 
 const getPlayListById = asyncHandler(async (req, res) => {
@@ -120,4 +143,5 @@ export {
   removeVideoFromPlaylist,
   deletePlaylist,
   updatePlaylist,
+  getPlaylistByUsername,
 };

@@ -21,9 +21,9 @@ export const addTweet = createAsyncThunk(
 
 export const getUserInitialTweets = createAsyncThunk(
   "tweets/getUserInitialTweets",
-  async (_, { rejectWithValue }) => {
+  async (username: string, { rejectWithValue }) => {
     try {
-      const res = await TweetService.getUserTweets();
+      const res = await TweetService.getUserTweets(username);
       if (res.success) {
         return res.data;
       }
@@ -38,9 +38,12 @@ export const getUserInitialTweets = createAsyncThunk(
 
 export const getUserMoreTweets = createAsyncThunk(
   "tweets/getUserMoreTweets",
-  async (lastTweetId: string, { rejectWithValue }) => {
+  async (
+    { username, lastTweetId }: { username: string; lastTweetId?: string },
+    { rejectWithValue }
+  ) => {
     try {
-      const res = await TweetService.getUserTweets(lastTweetId);
+      const res = await TweetService.getUserTweets(username, lastTweetId);
       if (res.success) {
         return res.data;
       }
@@ -131,7 +134,6 @@ const tweetSlice = createSlice({
       .addCase(addTweet.fulfilled, (state) => {
         state.loading = false;
         state.isAddingTweet = false;
-        
       })
       .addCase(addTweet.rejected, (state, action) => {
         state.loading = false;

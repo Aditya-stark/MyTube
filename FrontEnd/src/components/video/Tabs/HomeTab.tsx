@@ -47,7 +47,7 @@ const HomeTab: React.FC<{ user: ChannelProfileData }> = ({ user }) => {
                 Total Subscribers
               </dt>
               <dd className="text-3xl font-extrabold text-blue-600">
-                {user.subscriberCount || 0}
+                {user.subscribersCount || 0}
               </dd>
             </div>
           </div>

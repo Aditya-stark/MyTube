@@ -409,7 +409,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     // STAGE_2: To Find Subscribers
     {
       $lookup: {
-        from: "subscription",
+        from: "subscriptions",
         localField: "_id",
         foreignField: "channel",
         as: "subscribers",
@@ -418,7 +418,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     // STAGE_3: To Find SubscribedTo Channels
     {
       $lookup: {
-        from: "subscription",
+        from: "subscriptions",
         localField: "_id",
         foreignField: "subscriber",
         as: "subscribedTo",
@@ -649,6 +649,7 @@ const passwordResetOTP = asyncHandler(async (req, res) => {
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   console.log("OTP:", otp);
 
+  // Hashed OTP to store in the database and expires in 10 minutes
   const hashedOTP = crypto.createHash("sha256").update(otp).digest("hex");
   user.passwordResetOTP = hashedOTP;
   user.passwordRestOTPExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
@@ -666,6 +667,8 @@ const passwordResetOTP = asyncHandler(async (req, res) => {
         pass: process.env.EMAIL_PASSWORD,
       },
     });
+
+    console.log("Transporter configured successfully:");
 
     //Send email
     await transporter.sendMail({
@@ -685,6 +688,7 @@ const passwordResetOTP = asyncHandler(async (req, res) => {
         </div>
       `,
     });
+    console.log("OTP sent to user's email successfully");
 
     return res
       .status(200)

@@ -50,7 +50,7 @@ const HeaderNav: React.FC<{
           <div className="flex items-center">
             <div className="ml-3 relative">
               <div className="flex items-center space-x-4">
-                {onUploadClick && (
+                {onUploadClick && user && (
                   <button
                     onClick={onUploadClick}
                     className="bg-blue-500 hover:bg-blue-600 text-white opacity-50 hover:opacity-80 rounded-full p-2 pr-4 flex items-center justify-center transition-colors"
@@ -74,39 +74,55 @@ const HeaderNav: React.FC<{
                     <p className="ml-1 text-sm font-medium">Upload</p>
                   </button>
                 )}
-                {onLogoutClick && (
+                {/* If User is logout out show login Button and if already logged in show logout button */}
+                {user ? (
+                  <>
+                    {onLogoutClick && (
+                      <button
+                        onClick={onLogoutClick}
+                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+                      >
+                        Logout
+                      </button>
+                    )}
+                  </>
+                ) : (
                   <button
-                    onClick={onLogoutClick}
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium"
+                    onClick={() => navigate("/login")}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium"
                   >
-                    Logout
+                    Login
                   </button>
                 )}
-                {isLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-10 h-10 bg-gray-300 rounded-full animate-pulse"></div>
-                   
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-2">
-                    {user?.avatar ? (
-                      <img
-                        src={user.avatar}
-                        alt="User Avatar"
-                        className="w-10 h-10 rounded-full cursor-pointer object-cover"
-                        onClick={() => navigate(`/${user.username}`)}
-                      />
+
+                {user && (
+                  <>
+                    {isLoading ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="w-10 h-10 bg-gray-300 rounded-full animate-pulse"></div>
+                      </div>
                     ) : (
-                      <div
-                        className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer"
-                        onClick={() => navigate(`/${user?.username}`)}
-                      >
-                        <span className="text-gray-600 text-sm">
-                          {user?.username?.[0]?.toUpperCase()}
-                        </span>
+                      <div className="flex items-center space-x-2">
+                        {user?.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt="User Avatar"
+                            className="w-10 h-10 rounded-full cursor-pointer object-cover"
+                            onClick={() => navigate(`/${user.username}`)}
+                          />
+                        ) : (
+                          <div
+                            className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer"
+                            onClick={() => navigate(`/${user?.username}`)}
+                          >
+                            <span className="text-gray-600 text-sm">
+                              {user?.username?.[0]?.toUpperCase()}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     )}
-                  </div>
+                  </>
                 )}
               </div>
             </div>

@@ -33,9 +33,9 @@ export interface ChannelProfileData {
   avatar: string;
   coverImage: string | null;
   watchHistory: string[];
-  subscriberCount: number;
+  subscribersCount: number;
   channelSubcribedToCount: number;
-  isSubcribed: boolean;
+  isSubscribed: boolean;
   totalVideosCount: number;
   createdAt: string;
   updatedAt: string;

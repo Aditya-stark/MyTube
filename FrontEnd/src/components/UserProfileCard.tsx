@@ -1,13 +1,30 @@
 import { Link } from "react-router-dom";
 import { FiEdit2 } from "react-icons/fi";
-import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../store/store";
+import { toggleSubscription } from "../features/subscriptionSlice";
+import { getUserByUsername } from "../features/auth/authSlice";
 
 export const UserProfileCard = () => {
   const { channelProfileData, user: currentUser } = useSelector(
     (state: RootState) => state.auth
   );
   const isOwner = channelProfileData?.username === currentUser?.username;
+  const dispatch = useDispatch<AppDispatch>();
+  const handleSubscriptionToggle = async () => {
+    if (!channelProfileData) return;
+
+    if (!currentUser) {
+      alert("Please log in to subscribe.");
+      return;
+    }
+    try {
+      await dispatch(toggleSubscription(channelProfileData._id)).unwrap();
+      dispatch(getUserByUsername(channelProfileData.username));
+    } catch (error) {
+      console.error("Error toggling subscription:", error);
+    }
+  };
 
   if (!channelProfileData) {
     return (
@@ -61,7 +78,7 @@ export const UserProfileCard = () => {
             <div className="flex flex-wrap gap-1 sm:gap-2 md:gap-0 md:space-x-4 mb-2 sm:mb-3">
               <div className="flex items-center text-xs sm:text-sm">
                 <span className="font-bold text-blue-600 mr-1">
-                  {channelProfileData.subscriberCount || 0}
+                  {channelProfileData.subscribersCount}
                 </span>
                 <span className="text-xxs sm:text-xs text-gray-500">
                   subscribers
@@ -97,12 +114,18 @@ export const UserProfileCard = () => {
                 <span className="md:inline hidden">Edit Profile</span>
                 <span className="inline md:hidden">Edit</span>
               </Link>
-            ) : channelProfileData.isSubcribed ? (
-              <button className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 border border-transparent text-xs sm:text-sm font-medium rounded-full text-white bg-gray-400 hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 shadow-sm transition-colors">
+            ) : channelProfileData.isSubscribed ? (
+              <button
+                className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 border border-transparent text-xs sm:text-sm font-medium rounded-full text-white bg-gray-400 hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 shadow-sm transition-colors"
+                onClick={handleSubscriptionToggle}
+              >
                 Subscribed
               </button>
             ) : (
-              <button className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 border border-transparent text-xs sm:text-sm font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-colors">
+              <button
+                className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 border border-transparent text-xs sm:text-sm font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-colors"
+                onClick={handleSubscriptionToggle}
+              >
                 Subscribe
               </button>
             )}

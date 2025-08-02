@@ -9,8 +9,12 @@ import {
   updatedVideo,
 } from "../controllers/video.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import {
+  verifyJWT,
+  watchHistoryOptionalJWT,
+} from "../middlewares/auth.middleware.js";
 import { verifiedVideo } from "../middlewares/video.middleware.js";
+import { watchHistory } from "../middlewares/watchHistory.middleware.js";
 
 const router = Router();
 
@@ -30,7 +34,7 @@ router.route("/publish").post(
   publishAVideo
 );
 //Get Video by Id
-router.route("/:videoId").get(getVideoById);
+router.route("/:videoId").get(watchHistoryOptionalJWT, getVideoById);
 
 //Update Video
 router

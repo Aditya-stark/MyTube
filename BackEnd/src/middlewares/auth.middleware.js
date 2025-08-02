@@ -49,3 +49,27 @@ export const verifiedUser = asyncHandler(async (req, res, next) => {
     throw new ApiError(401, "ERROR" + error.message);
   }
 });
+
+export const watchHistoryOptionalJWT = asyncHandler(async (req, res, next) => {
+  try {
+    const token =
+      req.cookies?.accessToken || req.headers.authorization?.split(" ")[1];
+    if (token) {
+      try {
+        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        const user = await User.findById(decodedToken?._id).select(
+          "-password -refreshToken"
+        );
+        if (user) {
+          req.user = user;
+        }
+      } catch (err) {
+        // Invalid token, treat as guest
+        req.user = undefined;
+      }
+    }
+    next();
+  } catch (error) {
+    next(); // Always call next, never throw
+  }
+});

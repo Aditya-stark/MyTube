@@ -374,6 +374,13 @@ const getVideoById = asyncHandler(async (req, res) => {
     // Increment the view count of the video in the database
     await Video.findByIdAndUpdate(videoId, { $inc: { views: 1 } });
 
+    if (req.user && req.user._id) {
+      console.log("User is authenticated, adding to watch history");
+      await User.findByIdAndUpdate(req.user._id, {
+        $addToSet: { watchHistory: videoId },
+      });
+    }
+
     // Return the video details along with the owner details
     return res.status(200).json(new ApiResponse(200, videoData, "Video Found"));
   } catch (error) {

@@ -375,9 +375,13 @@ const getVideoById = asyncHandler(async (req, res) => {
     await Video.findByIdAndUpdate(videoId, { $inc: { views: 1 } });
 
     if (req.user && req.user._id) {
-      console.log("User is authenticated, adding to watch history");
+      // Remove the video if it already exists in the history
       await User.findByIdAndUpdate(req.user._id, {
-        $addToSet: { watchHistory: videoId },
+        $pull: { watchHistory: videoId },
+      });
+      // Add the video to the end of the history
+      await User.findByIdAndUpdate(req.user._id, {
+        $push: { watchHistory: videoId },
       });
     }
 

@@ -382,7 +382,7 @@ const getVideoById = asyncHandler(async (req, res) => {
       });
       // Add the video to the START of the history
 
-      await User.findByIdAndUpdate(req.user._id, {
+      await User.findByIdAndUpdate(req.user._id, {  
         $push: { watchHistory: { $each: [objectId], $position: 0 } },
       });
     }

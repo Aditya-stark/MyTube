@@ -487,30 +487,45 @@ const getWatchHistory = asyncHandler(async (req, res) => {
   const user = await User.aggregate([
     //STEP_1: Match the user id in mongodb with user id in watchHistory collection
     {
-      //will match the user id in mongodb with user id in watchHistory collection. createFromHexString is used to convert string id to object id which mongodb uses to find the data
-
       $match: {
-        _id: mongoose.Types.ObjectId.createFromHexString(req.user?._id.toString()),
+        _id: mongoose.Types.ObjectId.createFromHexString(
+          req.user?._id.toString()
+        ),
       },
     },
-    //STEP_2: Lookup the video details from video collection using watchHistory
-    //Here watchHistory in user model is an array of video ids. So we are using $lookup to get the video details from video collection using video id from watchHistory. secondly in each video there is owner field which is user id. we are using $lookup to get the owner(user) details from user collection using owner id from video collection. lastly owner field is filter out using $project to get only required fields from owner(user) collection
+    //STEP_2: Add index to watchHistory to preserve order
+    {
+      $addFields: {
+        watchHistoryWithIndex: {
+          $map: {
+            input: { $range: [0, { $size: "$watchHistory" }] },
+            as: "index",
+            in: {
+              videoId: { $arrayElemAt: ["$watchHistory", "$$index"] },
+              originalIndex: "$$index",
+            },
+          },
+        },
+      },
+    },
+    //STEP_3: Unwind to lookup each video individually
+    {
+      $unwind: "$watchHistoryWithIndex",
+    },
+    //STEP_4: Lookup video details
     {
       $lookup: {
         from: "videos",
-        localField: "watchHistory",
+        localField: "watchHistoryWithIndex.videoId",
         foreignField: "_id",
-        as: "watchHistory",
-        //add more pipeline to get owner details (nested pipeline)
+        as: "videoDetails",
         pipeline: [
           {
-            //get owner details from user collection
             $lookup: {
               from: "users",
               localField: "owner",
               foreignField: "_id",
               as: "owner",
-              //more nested pipeline to filter the owner details
               pipeline: [
                 {
                   $project: {
@@ -532,6 +547,47 @@ const getWatchHistory = asyncHandler(async (req, res) => {
         ],
       },
     },
+    //STEP_5: Add the original index to video details
+    {
+      $addFields: {
+        "videoDetails.originalIndex": "$watchHistoryWithIndex.originalIndex",
+      },
+    },
+    //STEP_6: Group back to reconstruct the user document
+    {
+      $group: {
+        _id: "$_id",
+        username: { $first: "$username" },
+        email: { $first: "$email" },
+        fullName: { $first: "$fullName" },
+        avatar: { $first: "$avatar" },
+        coverImage: { $first: "$coverImage" },
+        watchHistory: {
+          $push: {
+            $arrayElemAt: ["$videoDetails", 0],
+          },
+        },
+      },
+    },
+    //STEP_7: Sort watchHistory by original index to preserve order
+    {
+      $addFields: {
+        watchHistory: {
+          $map: {
+            input: {
+              $sortArray: {
+                input: "$watchHistory",
+                sortBy: { originalIndex: 1 },
+              },
+            },
+            as: "video",
+            in: {
+              $mergeObjects: ["$$video", { originalIndex: "$$REMOVE" }],
+            },
+          },
+        },
+      },
+    },
   ]);
 
   return res
@@ -539,7 +595,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(
         200,
-        user[0].watchHistory,
+        user[0]?.watchHistory || [],
         "Watch History Fetched Successfully"
       )
     );

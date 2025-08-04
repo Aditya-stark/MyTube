@@ -376,12 +376,14 @@ const getVideoById = asyncHandler(async (req, res) => {
 
     if (req.user && req.user._id) {
       // Remove the video if it already exists in the history
+      const objectId = new mongoose.Types.ObjectId(videoId);
       await User.findByIdAndUpdate(req.user._id, {
-        $pull: { watchHistory: videoId },
+        $pull: { watchHistory: objectId },
       });
-      // Add the video to the end of the history
+      // Add the video to the START of the history
+
       await User.findByIdAndUpdate(req.user._id, {
-        $push: { watchHistory: videoId },
+        $push: { watchHistory: { $each: [objectId], $position: 0 } },
       });
     }
 

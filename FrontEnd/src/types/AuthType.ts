@@ -111,6 +111,9 @@ export interface UserState {
   isOTPSent: boolean;
   isPasswordReset: boolean;
   channelProfileData: ChannelProfileData | null;
+  watchHistory: string[];
+  isWatchHistoryLoading: boolean;
+  isWatchHistoryError: string | null;
 }
 
 // Error Response

@@ -198,10 +198,24 @@ export const AuthService = {
   getUserByUsername: async (username: string) => {
     try {
       // Always clean username to remove @ if present
-      const cleanUsername = username.startsWith('@') ? username.substring(1) : username;
-      
+      const cleanUsername = username.startsWith("@")
+        ? username.substring(1)
+        : username;
+
       const res = await apiClient.get(`/users/${cleanUsername}`);
       if (res.data.success) return res.data;
+    } catch (error) {
+      console.log("error", error);
+      throw error;
+    }
+  },
+
+  //Get Watch history
+  getWatchHistory: async () => {
+    try {
+      const res = await apiClient.get("/users/watch/history");
+      if (res.data.success) return res.data;
+      throw new Error("Failed to fetch watch history ");
     } catch (error) {
       console.log("error", error);
       throw error;

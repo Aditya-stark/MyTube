@@ -17,6 +17,7 @@ import {
 import { AuthService } from "../../services/AuthService";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../utils/firebase.utils";
+import { act } from "react";
 
 export const login = createAsyncThunk(
   "auth/login",
@@ -306,6 +307,25 @@ export const getUserByUsername = createAsyncThunk(
   }
 );
 
+// Watch History Management
+export const getWatchHistory = createAsyncThunk(
+  "auth/getWatchHistory",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await AuthService.getWatchHistory();
+
+      if (res?.success) {
+        console.log("Watch History Slice:", res.data);
+        return res.data;
+      }
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Get Watch History Failed at State"
+      );
+    }
+  }
+);
+
 const initialState: UserState = {
   user: null as ResponseUser | null,
   isAuthenticated: false,
@@ -314,6 +334,9 @@ const initialState: UserState = {
   isOTPSent: false,
   isPasswordReset: false,
   channelProfileData: null as ChannelProfileData | null,
+  watchHistory: [],
+  isWatchHistoryLoading: false,
+  isWatchHistoryError: null,
 };
 
 const authSlice = createSlice({
@@ -477,6 +500,18 @@ const authSlice = createSlice({
       .addCase(getUserByUsername.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      .addCase(getWatchHistory.pending, (state) => {
+        state.isWatchHistoryLoading = true;
+        state.isWatchHistoryError = null;
+      })
+      .addCase(getWatchHistory.fulfilled, (state, action) => {
+        state.isWatchHistoryLoading = false;
+        state.watchHistory = action.payload || [];
+      })
+      .addCase(getWatchHistory.rejected, (state, action) => {
+        state.isWatchHistoryLoading = false;
+        state.isWatchHistoryError = action.payload as string;
       });
   },
 });

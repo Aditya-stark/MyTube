@@ -58,7 +58,7 @@ router
 router.route("/:username").get( getUserChannelProfile);
 
 //Get Watch History
-router.route("/history").get(verifyJWT, getWatchHistory);
+router.route("/watch/history").get(verifyJWT, getWatchHistory);
 
 // Google Login
 router.route("/google-login").post(googleLogin);

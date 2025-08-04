@@ -1,7 +1,7 @@
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "./store/store";
 import { useEffect, useState } from "react";
-import { Routes, Route, Outlet, Navigate } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 import { currentUser, logout } from "./features/auth/authSlice";
 import { Toaster } from "react-hot-toast";
 import { WatchPage } from "./pages/WatchPage";
@@ -20,6 +20,7 @@ import LayoutWithSidebar from "./components/LayoutWithSidebar";
 import { SidebarProvider } from "./contexts/SidebarContext";
 import PlayListTabPage from "./pages/PlayListTab";
 import PlaylistListPage from "./pages/PlaylistListPage";
+import WatchHistory from "./pages/WatchHistory";
 
 function LayoutWithHeader() {
   const [isUploadPopupOpen, setIsUploadPopupOpen] = useState(false);
@@ -89,7 +90,7 @@ function App() {
               path="/feed/subscriptions"
               element={<div>Subscriptions Page</div>}
             />
-            <Route path="/feed/history" element={<div>History Page</div>} />
+            <Route path="/feed/history" element={<WatchHistory />} />
             <Route
               path="/feed/liked-videos"
               element={<div>Liked Videos Page</div>}

@@ -488,15 +488,16 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     //STEP_1: Match the user id in mongodb with user id in watchHistory collection
     {
       //will match the user id in mongodb with user id in watchHistory collection. createFromHexString is used to convert string id to object id which mongodb uses to find the data
+
       $match: {
-        _id: mongoose.Types.ObjectId.createFromHexString(req.user?._id),
+        _id: mongoose.Types.ObjectId.createFromHexString(req.user?._id.toString()),
       },
     },
     //STEP_2: Lookup the video details from video collection using watchHistory
     //Here watchHistory in user model is an array of video ids. So we are using $lookup to get the video details from video collection using video id from watchHistory. secondly in each video there is owner field which is user id. we are using $lookup to get the owner(user) details from user collection using owner id from video collection. lastly owner field is filter out using $project to get only required fields from owner(user) collection
     {
       $lookup: {
-        from: "video",
+        from: "videos",
         localField: "watchHistory",
         foreignField: "_id",
         as: "watchHistory",
@@ -505,7 +506,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
           {
             //get owner details from user collection
             $lookup: {
-              from: "user",
+              from: "users",
               localField: "owner",
               foreignField: "_id",
               as: "owner",

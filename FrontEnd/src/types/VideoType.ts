@@ -18,6 +18,8 @@ export interface Video {
   createdAt: string;
   updatedAt: string;
   __v: number;
+  tags: string[];
+  category: string;
 }
 
 export interface PublishVideo {
@@ -26,6 +28,8 @@ export interface PublishVideo {
   description: string;
   videoFile: string;
   thumbnail: string;
+  tags: string;
+  category: string;
   views: number;
   isPublished: boolean;
   owner: string; // only the id of the owner

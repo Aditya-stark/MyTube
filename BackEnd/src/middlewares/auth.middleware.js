@@ -1,3 +1,6 @@
+/* this file is used to verify and differentiate user and guest users like watch history will require Authenticated user to access the data but guest cant access it
+ */
+
 import { ApiError } from "../utils/ApiError.js";
 import jwt from "jsonwebtoken";
 import { asyncHandler } from "../utils/asyncHandler.js";

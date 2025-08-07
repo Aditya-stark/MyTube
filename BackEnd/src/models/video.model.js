@@ -19,6 +19,30 @@ const videoSchema = new Schema(
       type: String,
       required: true,
     },
+    tags: {
+      type: [String], // array of strings for tags
+      default: [],
+    },
+    category: {
+      type: String,
+      required: true,
+      enum: [
+        "Education",
+        "Entertainment",
+        "Music",
+        "Gaming",
+        "News",
+        "Sports",
+        "Technology",
+        "Lifestyle",
+        "Travel",
+        "Health",
+        "Food",
+        "Fashion",
+        "Vlog",
+        "Other",
+      ],
+    },
     views: {
       type: Number,
       default: 0,

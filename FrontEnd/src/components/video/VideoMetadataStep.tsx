@@ -7,6 +7,8 @@ interface VideoMetadataStepProps {
     title: string;
     description: string;
     thumbnail: File | null;
+    tags: string;
+    category: string;
     video: File | null;
   }) => void;
   onBack: () => void;
@@ -18,11 +20,12 @@ const VideoMetadataStep: React.FC<VideoMetadataStepProps> = ({
   onSubmit,
   onBack,
 }) => {
-
   let [title, setTitle] = useState(videoFile.name.split(".")[0]);
   const [description, setDescription] = useState("");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreviewUrl, setThumbnailPreviewUrl] = useState<string | null>(null);
+  const [tags, setTags] = useState("");
+  const [category, setCategory] = useState("");
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   //HANDLE THUMBNAIL SUBMISSION
@@ -41,13 +44,15 @@ const VideoMetadataStep: React.FC<VideoMetadataStepProps> = ({
     setThumbnailPreviewUrl(null);
     setTitle("");
     setDescription("");
+    setTags("");
+    setCategory("");
     if (thumbnailPreviewUrl) {
       URL.revokeObjectURL(thumbnailPreviewUrl); // Clean up the object URL
     }
     if (videoPreviewUrl) {
       URL.revokeObjectURL(videoPreviewUrl); // Clean up the object URL
     }
-    onSubmit({ title, description, thumbnail, video: videoFile });
+    onSubmit({ title, description, thumbnail, tags, category, video: videoFile });
   };
 
   return (
@@ -96,6 +101,49 @@ const VideoMetadataStep: React.FC<VideoMetadataStepProps> = ({
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     required
                   />
+                </div>
+
+                {/* Tags Input */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tags
+                  </label>
+                  <input
+                    type="text"
+                    value={tags}
+                    onChange={(e) => setTags(e.target.value)}
+                    placeholder="Comma separated tags"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+
+                {/* Category Select */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+                    required
+                  >
+                    <option value="">Select category</option>
+                    <option value="Education">Education</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Music">Music</option>
+                    <option value="Gaming">Gaming</option>
+                    <option value="News">News</option>
+                    <option value="Sports">Sports</option>
+                    <option value="Technology">Technology</option>
+                    <option value="Lifestyle">Lifestyle</option>
+                    <option value="Travel">Travel</option>
+                    <option value="Health">Health</option>
+                    <option value="Food">Food</option>
+                    <option value="Fashion">Fashion</option>
+                    <option value="Vlog">Vlog</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
 
                 {/* Thumbnail upload*/}

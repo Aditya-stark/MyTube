@@ -10,6 +10,8 @@ const WatchHistory = () => {
     (state: RootState) => state.auth
   );
 
+  console.log("Watch History:", watchHistory);
+
   useEffect(() => {
     dispatch(getWatchHistory());
   }, [dispatch]);
@@ -26,7 +28,7 @@ const WatchHistory = () => {
       ) : error ? (
         <div className="text-red-500 text-center">{error}</div>
       ) : watchHistory && watchHistory.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+        <div className="flex flex-col">
           {watchHistory.map((video: any) => (
             <HistoryVideoCard key={video._id} video={video} />
           ))}

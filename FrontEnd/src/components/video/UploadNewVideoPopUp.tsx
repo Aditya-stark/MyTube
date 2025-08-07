@@ -44,6 +44,8 @@ const UploadNewVideoPopUp: React.FC<UploadNewVideoPopUpProps> = ({
   const handleSubmitVideo = async (data: {
     title: string;
     description: string;
+    tags: string;
+    category: string;
     thumbnail: File | null;
     video: File | null;
   }) => {
@@ -61,6 +63,12 @@ const UploadNewVideoPopUp: React.FC<UploadNewVideoPopUpProps> = ({
     }
     if (data.video) {
       formData.append("video", data.video);
+    }
+    if (data.tags) {
+      formData.append("tags", data.tags);
+    }
+    if (data.category) {
+      formData.append("category", data.category);
     }
 
     try {

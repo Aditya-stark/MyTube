@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router";
-import { MdOutlineHistory } from "react-icons/md";
 
 interface HistoryVideoCardProps {
   video: {
@@ -12,43 +11,64 @@ interface HistoryVideoCardProps {
     };
     views: number;
     description: string;
+    duration: number;
   };
 }
 
 const HistoryVideoCard: React.FC<HistoryVideoCardProps> = ({ video }) => {
   const navigate = useNavigate();
 
+  function formatViews(views: number): string {
+    if (views < 1000) return views.toString();
+    if (views < 1_000_000) return `${(views / 1000).toFixed(1)}K`;
+    if (views < 1_000_000_000) return `${(views / 1_000_000).toFixed(1)}M`;
+    return `${(views / 1_000_000_000).toFixed(1)}B`;
+  }
+
+  function formatDuration(duration: number): string {
+    const min = Math.floor(duration / 60)
+      .toString()
+      .padStart(2, "0");
+    const sec = Math.floor(duration % 60)
+      .toString()
+      .padStart(2, "0");
+    return `${min}:${sec}`;
+  }
+
   const handleVideoClick = () => {
-    navigate(`/watch/${video._id}`);
+    navigate(`/watch?vId=${video._id}`);
   };
 
   return (
     <div
-      className="bg-white shadow-lg rounded-lg overflow-hidden hover:cursor-pointer group flex flex-col w-full min-w-0 max-w-full"
+      className="flex md:w-[80%] w-full items-start bg-white shadow-sm rounded-lg hover:bg-gray-100 transition mb-4 cursor-pointer min-h-[120px] max-h-[170px]"
       onClick={handleVideoClick}
     >
-      <div className="relative">
+      {/* Thumbnail */}
+      <div className="relative w-[240px] aspect-[16/9] rounded-md overflow-hidden flex-shrink-0">
         <img
           src={video.thumbnail || "/default-video-thumb.jpg"}
           alt="Video Thumbnail"
-          className="w-full h-40 object-cover group-hover:brightness-50"
+          className="w-full h-full object-cover"
         />
-        <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-          <MdOutlineHistory className="inline text-lg" />
-          {video.views} {video.views === 1 ? "view" : "views"}
-        </div>
+        <span className="absolute bottom-2 right-2 bg-black/80 text-white text-sm px-2 py-0.5 rounded">
+          {formatDuration(video.duration)}
+        </span>
       </div>
-      <div className="flex-1 flex flex-col p-2">
+      {/* Details */}
+      <div className="flex flex-col justify-center flex-1 pl-4 pr-3 py-2">
         <h3
-          className="text-sm sm:text-base font-semibold mb-1"
+          className="text-lg font-semibold text-gray-900 mb-1 line-clamp-2"
           title={video.title}
         >
           {video.title}
         </h3>
-        <span className="text-xs text-gray-600 mb-1">
-          {video.owner.fullName} ({video.owner.username})
-        </span>
-        <p className="text-xs text-gray-500 line-clamp-2">
+        <div className="flex items-center text-sm text-gray-600 mb-1">
+          <span className="font-medium">{video.owner.fullName}</span>
+          <span className="mx-1">•</span>
+          <span>{formatViews(video.views)} views</span>
+        </div>
+        <p className="text-xs text-gray-500 mb-0.5 line-clamp-2">
           {video.description}
         </p>
       </div>

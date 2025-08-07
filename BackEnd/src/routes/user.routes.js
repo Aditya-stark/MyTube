@@ -16,7 +16,10 @@ import {
 } from "../controllers/user.controller.js";
 import { loginUser } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import {
+  verifyJWT,
+  watchHistoryOptionalJWT,
+} from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
@@ -55,7 +58,7 @@ router
   .patch(verifyJWT, upload.single("coverImage"), updateUserCoverImage);
 
 //Get User Profile Details
-router.route("/:username").get( getUserChannelProfile);
+router.route("/:username").get(watchHistoryOptionalJWT, getUserChannelProfile);
 
 //Get Watch History
 router.route("/watch/history").get(verifyJWT, getWatchHistory);

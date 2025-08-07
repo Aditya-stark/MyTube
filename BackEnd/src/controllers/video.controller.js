@@ -243,8 +243,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
   // return the video document
 
   // Get information from the req.body
-  const { title, description, isPublished } = req.body;
-  if ([title, description].some((field) => field?.trim() === "")) {
+  const { title, description, tags, category, isPublished } = req.body;
+  if ([title, description, category].some((field) => field?.trim() === "")) {
     return res.status(400).json(new ApiError(400, "All fields are required"));
   }
 
@@ -269,6 +269,12 @@ const publishAVideo = asyncHandler(async (req, res) => {
     thumbnail: thumbnailCloudinary.url,
     title,
     description,
+    tags: Array.isArray(tags)
+      ? tags.map((tag) => tag.trim())
+      : tags
+        ? tags.split(",").map((tag) => tag.trim())
+        : [],
+    category,
     duration: videoCloudinary.duration,
     owner: req.user._id,
     views: 0,
@@ -382,7 +388,7 @@ const getVideoById = asyncHandler(async (req, res) => {
       });
       // Add the video to the START of the history
 
-      await User.findByIdAndUpdate(req.user._id, {  
+      await User.findByIdAndUpdate(req.user._id, {
         $push: { watchHistory: { $each: [objectId], $position: 0 } },
       });
     }
@@ -407,11 +413,13 @@ const updatedVideo = asyncHandler(async (req, res) => {
 
   // Get the updated information from the req.body
   const video = req.video;
-  const { title, description, isPublished } = req.body;
+  const { title, description, tags, category, isPublished } = req.body;
   // Get the thumbnail from the req.file
   const thumbnailLocalPath = req.file?.path;
 
-  if ([title, description].some((field) => field?.trim() === "")) {
+  if (
+    [title, description, tags, category].some((field) => field?.trim() === "")
+  ) {
     console.log("Error1");
 
     return res.status(400).json(new ApiError(400, "All fields are required"));
@@ -446,6 +454,16 @@ const updatedVideo = asyncHandler(async (req, res) => {
   video.description = description;
   if (thumbnailUrl) {
     video.thumbnail = thumbnailUrl;
+  }
+  if (Array.isArray(tags)) {
+    video.tags = tags.map((tag) => tag.trim());
+  } else if (tags) {
+    video.tags = tags.split(",").map((tag) => tag.trim());
+  } else {
+    video.tags = [];
+  }
+  if (category) {
+    video.category = category;
   }
   if (isPublished === "true") {
     video.isPublished = true;

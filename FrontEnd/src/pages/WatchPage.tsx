@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { AppDispatch, RootState } from "../store/store";
-import { updateVideoLikeCount, videoById } from "../features/videos/videoSlice";
+import {
+  getRecommendedVideos,
+  updateVideoLikeCount,
+  videoById,
+} from "../features/videos/videoSlice";
 import VideoPlayer from "../components/video/player/VideoPlayer";
 import type Player from "video.js/dist/types/player";
 import { FaRegThumbsDown, FaRegThumbsUp } from "react-icons/fa";
@@ -14,11 +18,13 @@ import {
 } from "../features/likes/likesSlice";
 import { addComment, getComments } from "../features/commentSlice";
 import { CommentComponent } from "../components/comment/CommentComponent";
+import RecommedationSection from "../components/video/RecommedationSection";
 
 export const WatchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const videoId = searchParams.get("vId");
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   const { currentVideo, isLoading } = useSelector(
     (state: RootState) => state.videos
@@ -27,6 +33,9 @@ export const WatchPage: React.FC = () => {
     (state: RootState) => state.likes
   );
   const { user } = useSelector((state: RootState) => state.auth);
+  const { recommendedVideos, isRecommendedLoading } = useSelector(
+    (state: RootState) => state.videos
+  );
   const { comments, totalComments, hasMore, isLoadingMore, lastCommentId } =
     useSelector((state: RootState) => state.comments);
 
@@ -49,6 +58,7 @@ export const WatchPage: React.FC = () => {
           );
         }
       });
+      dispatch(getRecommendedVideos(videoId));
     }
   }, [videoId, dispatch]);
 
@@ -252,17 +262,12 @@ export const WatchPage: React.FC = () => {
           </div>
 
           {/* Sidebar - Takes 1/3 of the screen on large devices */}
-          <div className="mt-4 lg:mt-0">
-            <h2 className="text-md sm:text-lg lg:text-xl font-bold mb-2 sm:mb-4">
-              Related Videos
-            </h2>
-            {/* Here you would map through related videos */}
-            <div className="space-y-3 sm:space-y-4">
-              <p className="text-xs sm:text-sm text-gray-500">
-                Related videos will appear here
-              </p>
-            </div>
-          </div>
+
+          {/* Here you would map through related videos */}
+          <RecommedationSection
+            videos={recommendedVideos ?? []} // Ensure always an array
+            onVideoClick={(id) => navigate(`/watch?vId=${id}`)}
+          />
         </div>
       </div>
     </div>

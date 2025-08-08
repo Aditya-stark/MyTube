@@ -9,6 +9,7 @@ import {
 } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 import { User } from "../models/user.model.js";
+import { Recommendations } from "../models/recommendation.model.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   // Extract query parameters from the request (page, limit, query, sortBy, sortType, userId)
@@ -567,6 +568,51 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
   }
 });
 
+const getVideoRecommendations = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  const recommendations = await Recommendations.findOne({ video_id: videoId });
+
+  if (!recommendations) {
+    return res.status(404).json(new ApiError(404, "No recommendations found"));
+  }
+
+  // Find all the recommended videos
+  const recommendedObjectIds = recommendations.recommended_ids.map(
+    (id) => mongoose.Types.ObjectId.createFromHexString(id)
+  );
+  const recommendedVideos = await Video.aggregate([
+    { $match: { _id: { $in: recommendedObjectIds } } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+      },
+    },
+    { $unwind: "$owner" },
+    {
+      $project: {
+        _id: 1,
+        title: 1,
+        thumbnail: 1,
+        views: 1,
+        duration: 1,
+        owner: {
+          _id: 1,
+          username: 1,
+          avatar: 1,
+          fullName: 1,
+        },
+      },
+    },
+  ]);
+
+  console.log("Recommended Videos:", recommendedVideos);
+
+  return res.status(200).json(new ApiResponse(200, recommendedVideos));
+});
+
 export {
   getAllVideos,
   getAllVideosByUserId,
@@ -575,4 +621,5 @@ export {
   updatedVideo,
   deleteVideo,
   togglePublishStatus,
+  getVideoRecommendations,
 };

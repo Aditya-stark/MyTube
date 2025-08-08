@@ -4,6 +4,7 @@ import {
   getAllVideos,
   getAllVideosByUserId,
   getVideoById,
+  getVideoRecommendations,
   publishAVideo,
   togglePublishStatus,
   updatedVideo,
@@ -48,5 +49,8 @@ router.route("/delete/:videoId").delete(verifyJWT, verifiedVideo, deleteVideo);
 router
   .route("/publish/:videoId")
   .patch(verifiedVideo, verifyJWT, togglePublishStatus);
+
+//Get Video Recommendations
+router.route("/recommendations/:videoId").get(getVideoRecommendations);
 
 export default router;

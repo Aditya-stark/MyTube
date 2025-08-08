@@ -50,11 +50,13 @@ export const VideoService = {
   ) => {
     try {
       // Always clean username to remove @ if present
-      const cleanUsername = username.startsWith('@') ? username.substring(1) : username;
-      
+      const cleanUsername = username.startsWith("@")
+        ? username.substring(1)
+        : username;
+
       // Use clean username in URL
       let url = `/videos/user/${cleanUsername}`;
-      
+
       const params = new URLSearchParams();
       if (lastVideoId) params.append("lastVideoId", lastVideoId);
       if (sortBy) params.append("sortBy", sortBy);
@@ -114,6 +116,22 @@ export const VideoService = {
       return res.data;
     } catch (error) {
       console.error("Error deleting video:", error);
+      throw error;
+    }
+  },
+
+  // Get recommended videos
+  getRecommendedVideos: async (videoId: String) => {
+    try {
+      const res = await apiClient.get(`/videos/recommendations/${videoId}`);
+      if (!res.data.success) {
+        throw new Error(
+          res.data.message || "Failed to fetch recommended videos"
+        );
+      }
+      return res.data;
+    } catch (error) {
+      console.error("Error fetching recommended videos:", error);
       throw error;
     }
   },

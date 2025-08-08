@@ -387,6 +387,10 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = false;
         state.user = null;
+        if (state.channelProfileData) {
+          state.channelProfileData.isSubscribed = false;
+        }
+
       })
       .addCase(logout.rejected, (state, action) => {
         state.isLoading = false;

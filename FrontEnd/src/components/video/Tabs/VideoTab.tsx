@@ -58,7 +58,7 @@ const VideoTab: React.FC<VideoTabProps> = ({
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMoreVideos && !isLoadingMore) {
-          dispatch(loadMoreUserVideos({ sortBy }));
+          dispatch(loadMoreUserVideos({ username, sortBy }));
         }
       },
       { threshold: 0.1 }

@@ -48,14 +48,22 @@ export const getVideosByUsername = createAsyncThunk(
 
 export const loadMoreUserVideos = createAsyncThunk(
   "videos/getMoreUserVideos",
-  async ({ sortBy }: { sortBy: string }, { getState, rejectWithValue }) => {
+  async (
+    { username, sortBy }: { username: string; sortBy: string },
+    { getState, rejectWithValue }
+  ) => {
     try {
       const state = getState() as RootState;
       const lastVideoId = state.videos.lastVideoId;
       if (!lastVideoId) {
         return { videos: [], hasMoreVideos: false, lastVideoId: null };
       }
-      const res = await VideoService.getVideosByUsername(lastVideoId, sortBy);
+      // Correctly pass username (path), lastVideoId and sortBy (query)
+      const res = await VideoService.getVideosByUsername(
+        username,
+        lastVideoId,
+        sortBy
+      );
       if (res.success) {
         return res.data;
       }
@@ -128,6 +136,23 @@ export const deleteVideo = createAsyncThunk(
   }
 );
 
+export const getRecommendedVideos = createAsyncThunk(
+  "videos/recommendedVideos",
+  async (videoId: string, { rejectWithValue }) => {
+    try {
+      const res = await VideoService.getRecommendedVideos(videoId);
+      if (res.success) {
+        return res.data;
+      }
+      return rejectWithValue(res.message);
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data.message || "Something went wrong"
+      );
+    }
+  }
+);
+
 interface VideoState {
   videos: PaginatedVideos | null;
   currentVideo: Video | null;
@@ -138,6 +163,9 @@ interface VideoState {
   hasMoreVideos?: boolean;
   lastVideoId?: string | null;
   isLoadingMore?: boolean;
+  recommendedVideos: Video[] | null;
+  isRecommendedLoading: boolean;
+  recommendedError: string | null;
 }
 
 const initialState: VideoState = {
@@ -150,6 +178,9 @@ const initialState: VideoState = {
   hasMoreVideos: false,
   lastVideoId: null,
   isLoadingMore: false,
+  recommendedVideos: null,
+  isRecommendedLoading: false,
+  recommendedError: null,
 };
 
 const videoSlice = createSlice({
@@ -260,10 +291,23 @@ const videoSlice = createSlice({
         state.error = null;
         console.log("Video deleted successfully");
       })
-      .addCase(deleteVideo.rejected, (state, acttion) => {
+      .addCase(deleteVideo.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = acttion.payload as string;
-        console.error("Error deleting video:", acttion.payload);
+        state.error = action.payload as string;
+        console.error("Error deleting video:", action.payload);
+      })
+      .addCase(getRecommendedVideos.pending, (state) => {
+        state.isRecommendedLoading = true;
+        state.recommendedError = null;
+      })
+      .addCase(getRecommendedVideos.fulfilled, (state, action) => {
+        state.isRecommendedLoading = false;
+        state.recommendedVideos = action.payload;
+        console.log("Recommended videos fetched successfully:", action.payload);
+      })
+      .addCase(getRecommendedVideos.rejected, (state, action) => {
+        state.isRecommendedLoading = false;
+        state.recommendedError = action.payload as string;
       });
   },
 });

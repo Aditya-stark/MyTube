@@ -95,6 +95,13 @@ function App() {
               path="/feed/liked-videos"
               element={<div>Liked Videos Page</div>}
             />
+            <Route
+              path="/feed/playlists"
+              element={<div>Playlists</div>}
+            /><Route
+              path="/feed/videos"
+              element={<div>Videos</div>}
+            />
           </Route>
         </Route>
       </Routes>

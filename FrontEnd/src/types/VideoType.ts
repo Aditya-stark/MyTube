@@ -14,6 +14,7 @@ export interface Video {
     username?: string;
     subscriberCount?: number; // number of subscribers
   };
+  isSubscribed?: boolean; // indicates if the current user is subscribed to the video owner
   likesCount: number; // number of likes
   createdAt: string;
   updatedAt: string;

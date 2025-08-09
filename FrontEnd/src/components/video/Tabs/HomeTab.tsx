@@ -29,7 +29,7 @@ const HomeTab: React.FC<{ user: ChannelProfileData }> = ({ user }) => {
         <div className="bg-gray-50 px-5 py-3">
           <div className="text-sm">
             <a
-              href="/videos"
+              href={`/@${user.username}/videos`}
               className="font-medium text-blue-600 hover:text-blue-500"
             >
               View all videos

@@ -86,7 +86,7 @@ export const UserProfileCard = () => {
               </div>
               <div className="flex items-center text-xs sm:text-sm">
                 <span className="font-bold text-blue-600 mr-1">
-                  {channelProfileData.channelSubcribedToCount || 0}
+                  {channelProfileData.channelSubscribedToCount || 0}
                 </span>
                 <span className="text-xxs sm:text-xs text-gray-500">
                   subscribed

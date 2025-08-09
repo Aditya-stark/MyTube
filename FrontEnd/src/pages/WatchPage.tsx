@@ -19,6 +19,7 @@ import {
 import { addComment, getComments } from "../features/commentSlice";
 import { CommentComponent } from "../components/comment/CommentComponent";
 import RecommedationSection from "../components/video/RecommedationSection";
+import { toggleSubscription } from "../features/subscriptionSlice";
 
 export const WatchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -32,6 +33,7 @@ export const WatchPage: React.FC = () => {
   const { isCurrentVideoLiked } = useSelector(
     (state: RootState) => state.likes
   );
+
   const { user } = useSelector((state: RootState) => state.auth);
   const { recommendedVideos, isRecommendedLoading } = useSelector(
     (state: RootState) => state.videos
@@ -40,6 +42,7 @@ export const WatchPage: React.FC = () => {
     useSelector((state: RootState) => state.comments);
 
   const [likeCount, setLikeCount] = useState<number>(0);
+  const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -62,10 +65,11 @@ export const WatchPage: React.FC = () => {
     }
   }, [videoId, dispatch]);
 
-  // Update like count when video loads
+  // Update like count and subscription status
   useEffect(() => {
     if (currentVideo) {
       setLikeCount(currentVideo.likesCount);
+      setIsSubscribed(currentVideo.isSubscribed || false);
     }
   }, [currentVideo]);
 
@@ -120,6 +124,16 @@ export const WatchPage: React.FC = () => {
       });
   };
 
+  // Handle Subscribe
+  const handleSubscribe = () => {
+    if (!currentVideo?._id) return;
+    dispatch(toggleSubscription(currentVideo.ownerDetails?._id))
+      .unwrap()
+      .then(() => {
+        setIsSubscribed((prev) => !prev);
+      });
+  };
+
   if (isLoading || !currentVideo) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -142,7 +156,7 @@ export const WatchPage: React.FC = () => {
 
   return (
     <div className="flex justify-center w-full">
-      <div className="container mx-auto px-2 sm:px-6 lg:px-20 py-3 sm:py-4">
+      <div className="container mx-auto px-2 sm:px-6 md:px-5 lg:px-15 xl:px-25 py-3 sm:py-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Video Player Column - Takes 2/3 of the screen on large devices */}
           <div className="lg:col-span-2">
@@ -169,10 +183,18 @@ export const WatchPage: React.FC = () => {
                           "/default-avatar.png"
                         }
                         alt="User Avatar"
-                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover hover:cursor-pointer"
+                        onClick={() =>
+                          navigate(`/@${currentVideo.ownerDetails?.username}`)
+                        }
                       />
                       <div className="flex flex-col min-w-0">
-                        <p className="text-sm sm:text-md font-bold truncate">
+                        <p
+                          className="text-sm sm:text-md font-bold truncate hover:cursor-pointer"
+                          onClick={() =>
+                            navigate(`/@${currentVideo.ownerDetails?.username}`)
+                          }
+                        >
                           {currentVideo.ownerDetails?.fullName}
                         </p>
                         <p className="text-xs text-gray-400 truncate">
@@ -180,8 +202,15 @@ export const WatchPage: React.FC = () => {
                           subscribers
                         </p>
                       </div>
-                      <button className="ml-auto px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-blue-600 text-white rounded-full hover:bg-blue-700 transition font-bold shadow whitespace-nowrap">
-                        Subscribe
+                      <button
+                        className={`ml-auto px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-full font-bold shadow whitespace-nowrap ${
+                          isSubscribed
+                            ? "bg-gray-400 text-white hover:bg-gray-500 cursor-pointer"
+                            : "bg-blue-600 text-white hover:bg-blue-700"
+                        }`}
+                        onClick={handleSubscribe}
+                      >
+                        {isSubscribed ? "Subscribed" : "Subscribe"}
                       </button>
                     </div>
 
@@ -233,7 +262,12 @@ export const WatchPage: React.FC = () => {
                         alt="User Avatar"
                         className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
                       />
-                      <div className="flex flex-col min-w-0">
+                      <div
+                        className="flex flex-col min-w-0"
+                        onClick={() =>
+                          navigate(`/@${currentVideo.ownerDetails?.username}`)
+                        }
+                      >
                         <p className="text-sm sm:text-md font-bold truncate">
                           {currentVideo.ownerDetails?.fullName}
                         </p>

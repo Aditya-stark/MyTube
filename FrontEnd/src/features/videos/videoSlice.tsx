@@ -303,7 +303,6 @@ const videoSlice = createSlice({
       .addCase(getRecommendedVideos.fulfilled, (state, action) => {
         state.isRecommendedLoading = false;
         state.recommendedVideos = action.payload;
-        console.log("Recommended videos fetched successfully:", action.payload);
       })
       .addCase(getRecommendedVideos.rejected, (state, action) => {
         state.isRecommendedLoading = false;

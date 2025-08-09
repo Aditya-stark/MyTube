@@ -307,6 +307,8 @@ const getVideoById = asyncHandler(async (req, res) => {
 
     // Get the videoId from the request parameters
     const { videoId } = req.params;
+    const userId = req.user ? req.user._id : null;
+    console.log("Slice User ID:", userId);
 
     // Find the video with the given videoId with Aggregation pipeline
     const videoDataArr = await Video.aggregate([
@@ -325,9 +327,9 @@ const getVideoById = asyncHandler(async (req, res) => {
       // Lookup to get subscriber count for the owner
       {
         $lookup: {
-          from: "subscribers",
-          localField: "owner",
-          foreignField: "channel",
+          from: "subscriptions",
+          let: { ownerId: "$owner" },
+          pipeline: [{ $match: { $expr: { $eq: ["$channel", "$$ownerId"] } } }],
           as: "subscribers",
         },
       },
@@ -351,6 +353,16 @@ const getVideoById = asyncHandler(async (req, res) => {
         },
       },
       {
+        $addFields: {
+          isSubscribed: {
+            $in: [
+              { $ifNull: [userId, null] }, // If userId is null, $in will be false
+              "$subscribers.subscriber"
+            ]
+          }
+        },
+      },
+      {
         $project: {
           _id: 1,
           title: 1,
@@ -362,9 +374,11 @@ const getVideoById = asyncHandler(async (req, res) => {
           isPublished: 1,
           createdAt: 1,
           updatedAt: 1,
+          isSubscribed: 1,
           ownerDetails: {
             _id: 1,
             fullName: 1,
+            username: 1,
             avatar: 1,
             subscriberCount: 1,
           },
@@ -577,8 +591,8 @@ const getVideoRecommendations = asyncHandler(async (req, res) => {
   }
 
   // Find all the recommended videos
-  const recommendedObjectIds = recommendations.recommended_ids.map(
-    (id) => mongoose.Types.ObjectId.createFromHexString(id)
+  const recommendedObjectIds = recommendations.recommended_ids.map((id) =>
+    mongoose.Types.ObjectId.createFromHexString(id)
   );
   const recommendedVideos = await Video.aggregate([
     { $match: { _id: { $in: recommendedObjectIds } } },
@@ -598,6 +612,7 @@ const getVideoRecommendations = asyncHandler(async (req, res) => {
         thumbnail: 1,
         views: 1,
         duration: 1,
+        createdAt: 1,
         owner: {
           _id: 1,
           username: 1,

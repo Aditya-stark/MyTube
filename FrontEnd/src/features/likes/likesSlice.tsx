@@ -100,17 +100,48 @@ export const checkCommentLikeStatus = createAsyncThunk(
   }
 );
 
+// Get Liked Videos
+export const getLikedVideos = createAsyncThunk(
+  "likes/getLikedVideos",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await LikesService.getLikedVideos();
+
+      if (res.success) {
+        return res.data;
+      }
+      return rejectWithValue(res.message);
+    } catch (error: any) {
+      console.error("Error fetching liked videos:", error);
+      return rejectWithValue(
+        error.response?.data.message || "Something went wrong"
+      );
+    }
+  }
+);
+
+// Shape returned by backend for liked videos: each entry is a like document containing embedded video info
+export interface LikedVideoEntry {
+  _id: string;
+  video?: any; // video object with _id, title, thumbnail, views, owner {...}
+  likedBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 interface LikesState {
-  isCurrentVideoLiked: boolean; // Indicates if the current video is liked
-  isLoading: boolean; // Loading state for like actions
-  error: string | null; // Error message if any
-  commentLikes: { [commentId: string]: boolean }; // Track comment likes
-  commentLikeCounts: { [commentId: string]: number }; // Track comment like counts
+  isCurrentVideoLiked: boolean;
+  likedVideos: LikedVideoEntry[];
+  isLoading: boolean;
+  error: string | null;
+  commentLikes: { [commentId: string]: boolean };
+  commentLikeCounts: { [commentId: string]: number };
 }
 
 // Initial state for likes
 const initialState: LikesState = {
   isCurrentVideoLiked: false,
+  likedVideos: [],
   isLoading: false,
   error: null,
   commentLikes: {},
@@ -175,6 +206,22 @@ const likesSlice = createSlice({
         const { commentId, isLiked, likesCount } = action.payload;
         state.commentLikes[commentId] = isLiked;
         state.commentLikeCounts[commentId] = likesCount;
+      })
+      .addCase(checkCommentLikeStatus.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(getLikedVideos.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getLikedVideos.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.likedVideos = action.payload;
+      })
+      .addCase(getLikedVideos.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
   },
 });

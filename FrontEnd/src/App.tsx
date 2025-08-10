@@ -22,6 +22,8 @@ import PlayListTabPage from "./pages/PlayListTab";
 import PlaylistListPage from "./pages/PlaylistListPage";
 import WatchHistory from "./pages/WatchHistory";
 import FeedPlaylist from "./pages/FeedPlaylist";
+import FeedVideo from "./pages/FeedVideo";
+import FeedLikedVideos from "./pages/FeedLikedVideos";
 
 function LayoutWithHeader() {
   const [isUploadPopupOpen, setIsUploadPopupOpen] = useState(false);
@@ -94,15 +96,10 @@ function App() {
             <Route path="/feed/history" element={<WatchHistory />} />
             <Route
               path="/feed/liked-videos"
-              element={<div>Liked Videos Page</div>}
+              element={<FeedLikedVideos />}
             />
-            <Route
-              path="/feed/playlists"
-              element={<FeedPlaylist />}
-            /><Route
-              path="/feed/videos"
-              element={<div>Videos</div>}
-            />
+            <Route path="/feed/playlists" element={<FeedPlaylist />} />
+            <Route path="/feed/videos" element={<FeedVideo />} />
           </Route>
         </Route>
       </Routes>

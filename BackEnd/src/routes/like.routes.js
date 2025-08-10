@@ -14,9 +14,14 @@ import { verifiedTweet } from "../middlewares/tweet.middleware.js";
 
 const router = Router();
 
+// Route to get all videos liked by the user
+router
+  .route("/video/liked")
+  .get(verifyJWT, getLikedVideos);
+
+// Route to like/unlike a specific video
 router
   .route("/video/like/:videoId")
-  .get(verifyJWT, verifiedVideo, getLikedVideos)
   .post(verifyJWT, verifiedVideo, toggleVideoLikes);
 
 router

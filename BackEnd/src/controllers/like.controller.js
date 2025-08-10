@@ -53,9 +53,15 @@ const toggleCommentLikes = asyncHandler(async (req, res) => {
       comment: req.comment._id,
     });
 
-    return res.status(200).json(
-      new ApiResponse(200, { likeStatus: false, likesCount }, "Comment unliked")
-    );
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { likeStatus: false, likesCount },
+          "Comment unliked"
+        )
+      );
   } else {
     // Like the comment
     await Like.create({
@@ -68,9 +74,11 @@ const toggleCommentLikes = asyncHandler(async (req, res) => {
       comment: req.comment._id,
     });
 
-    return res.status(201).json(
-      new ApiResponse(201, { likeStatus: true, likesCount }, "Comment liked")
-    );
+    return res
+      .status(201)
+      .json(
+        new ApiResponse(201, { likeStatus: true, likesCount }, "Comment liked")
+      );
   }
 });
 
@@ -99,7 +107,14 @@ const getLikedVideos = asyncHandler(async (req, res) => {
   const likedVideos = await Like.find({
     likedBy: req.user._id,
     video: { $exists: true },
-  }).populate("video");
+  }).populate({
+    path: "video",
+    select: "title thumbnail views owner id ",
+    populate: {
+      path: "owner",
+      select: "username avatar fullName name",
+    },
+  });
 
   return res
     .status(200)
@@ -116,9 +131,11 @@ const getVideoLikeStatus = asyncHandler(async (req, res) => {
     likedBy: req.user._id,
   });
 
-  return res.status(200).json(
-    new ApiResponse(200, { isLiked: !!isLiked }, "Video like status fetched")
-  );
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, { isLiked: !!isLiked }, "Video like status fetched")
+    );
 });
 
 const getCommentLikeStatus = asyncHandler(async (req, res) => {
@@ -136,9 +153,15 @@ const getCommentLikeStatus = asyncHandler(async (req, res) => {
     comment: comment._id,
   });
 
-  return res.status(200).json(
-    new ApiResponse(200, { isLiked: !!isLiked, likesCount }, "Comment like status fetched")
-  );
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { isLiked: !!isLiked, likesCount },
+        "Comment like status fetched"
+      )
+    );
 });
 
 export {

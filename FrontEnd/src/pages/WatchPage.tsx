@@ -126,6 +126,10 @@ export const WatchPage: React.FC = () => {
 
   // Handle Subscribe
   const handleSubscribe = () => {
+    if(currentVideo?.ownerDetails._id === user?._id) {
+      alert("You cannot subscribe to yourself.");
+      return;
+    }
     if (!currentVideo?._id) return;
     dispatch(toggleSubscription(currentVideo.ownerDetails?._id))
       .unwrap()

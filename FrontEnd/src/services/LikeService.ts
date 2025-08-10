@@ -40,10 +40,23 @@ export const LikesService = {
   // Get Comment Like Status
   getCommentLikeStatus: async (commentId: string) => {
     try {
-      const res = await apiClient.get(`/likes/comment/like-status/${commentId}`);
+      const res = await apiClient.get(
+        `/likes/comment/like-status/${commentId}`
+      );
       return res.data;
     } catch (error) {
       console.error("Error getting comment like status:", error);
+      throw error;
+    }
+  },
+
+  //Get Liked videos
+  getLikedVideos: async () => {
+    try {
+      const res = await apiClient.get(`/likes/video/liked`);
+      return res.data;
+    } catch (error) {
+      console.error("Error getting liked videos:", error);
       throw error;
     }
   },

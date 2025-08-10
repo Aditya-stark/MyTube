@@ -21,6 +21,7 @@ import { SidebarProvider } from "./contexts/SidebarContext";
 import PlayListTabPage from "./pages/PlayListTab";
 import PlaylistListPage from "./pages/PlaylistListPage";
 import WatchHistory from "./pages/WatchHistory";
+import FeedPlaylist from "./pages/FeedPlaylist";
 
 function LayoutWithHeader() {
   const [isUploadPopupOpen, setIsUploadPopupOpen] = useState(false);
@@ -97,7 +98,7 @@ function App() {
             />
             <Route
               path="/feed/playlists"
-              element={<div>Playlists</div>}
+              element={<FeedPlaylist />}
             /><Route
               path="/feed/videos"
               element={<div>Videos</div>}

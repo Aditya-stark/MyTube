@@ -22,6 +22,7 @@ const createPlaylist = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, playlist, "Playlist created"));
 });
 
+//Get playlist for the current user
 const getUserPlaylists = asyncHandler(async (req, res) => {
   const playlists = await Playlist.find({ owner: req.user._id })
     .populate({

@@ -24,6 +24,7 @@ import WatchHistory from "./pages/WatchHistory";
 import FeedPlaylist from "./pages/FeedPlaylist";
 import FeedVideo from "./pages/FeedVideo";
 import FeedLikedVideos from "./pages/FeedLikedVideos";
+import FeedSubscription from "./pages/FeedSubscription";
 
 function LayoutWithHeader() {
   const [isUploadPopupOpen, setIsUploadPopupOpen] = useState(false);
@@ -91,7 +92,7 @@ function App() {
             {/* Keep these feed-specific routes */}
             <Route
               path="/feed/subscriptions"
-              element={<div>Subscriptions Page</div>}
+              element={<FeedSubscription />}
             />
             <Route path="/feed/history" element={<WatchHistory />} />
             <Route

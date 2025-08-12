@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { PaginatedVideos, Video } from "../../types/VideoType";
 import VideoService from "../../services/VideoService";
 import { RootState } from "../../store/store";
+import { SubscriptionService } from "../../services/SubscriptionService";
 
 export const publishVideo = createAsyncThunk(
   "videos/publish",
@@ -153,6 +154,23 @@ export const getRecommendedVideos = createAsyncThunk(
   }
 );
 
+export const getSubscribedVideos = createAsyncThunk(
+  "subscription/getSubscribedVideos",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await SubscriptionService.getSubscribedVideos();
+      if (res.success) {
+        return res.data;
+      }
+      return rejectWithValue(res.message || "Failed to get subscribed videos");
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data.message || "Failed to get subscribed videos"
+      );
+    }
+  }
+);
+
 interface VideoState {
   videos: PaginatedVideos | null;
   currentVideo: Video | null;
@@ -166,6 +184,10 @@ interface VideoState {
   recommendedVideos: Video[] | null;
   isRecommendedLoading: boolean;
   recommendedError: string | null;
+
+  subscribedVideos: Video[] | null;
+  subscribedVideosLoading: boolean;
+  subscribedVideosError: string | null;
 }
 
 const initialState: VideoState = {
@@ -181,6 +203,10 @@ const initialState: VideoState = {
   recommendedVideos: null,
   isRecommendedLoading: false,
   recommendedError: null,
+
+  subscribedVideos: null,
+  subscribedVideosLoading: false,
+  subscribedVideosError: null,
 };
 
 const videoSlice = createSlice({
@@ -307,6 +333,18 @@ const videoSlice = createSlice({
       .addCase(getRecommendedVideos.rejected, (state, action) => {
         state.isRecommendedLoading = false;
         state.recommendedError = action.payload as string;
+      })
+      .addCase(getSubscribedVideos.pending, (state) => {
+        state.subscribedVideosLoading = true;
+        state.subscribedVideosError = null;
+      })
+      .addCase(getSubscribedVideos.fulfilled, (state, action) => {
+        state.subscribedVideosLoading = false;
+        state.subscribedVideos = action.payload;
+      })
+      .addCase(getSubscribedVideos.rejected, (state, action) => {
+        state.subscribedVideosLoading = false;
+        state.subscribedVideosError = action.payload as string;
       });
   },
 });

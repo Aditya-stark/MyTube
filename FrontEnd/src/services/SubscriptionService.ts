@@ -1,6 +1,8 @@
 import apiClient from "../api/apiClient";
 
+// Subscription related API calls
 export const SubscriptionService = {
+  // Toggle subscription for a channel
   toggleSubscription: async (channelId: string) => {
     try {
       const res = await apiClient.post(`/subscriptions/${channelId}`);
@@ -13,5 +15,18 @@ export const SubscriptionService = {
       throw error;
     }
   },
-};
 
+  // Get Susbcribed channel videos
+  getSubscribedVideos: async () => {
+    try {
+      const res = await apiClient.get("/videos/subscribed/videos");
+      if (!res.data.success) {
+        throw new Error(res.data.message || "Failed to get subscribed videos");
+      }
+      return res.data;
+    } catch (error: any) {
+      console.log("Error getting the video at service");
+      throw error;
+    }
+  },
+};

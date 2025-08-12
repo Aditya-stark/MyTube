@@ -10,6 +10,7 @@ import {
 import mongoose from "mongoose";
 import { User } from "../models/user.model.js";
 import { Recommendations } from "../models/recommendation.model.js";
+import { Subscription } from "../models/subscription.model.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   // Extract query parameters from the request (page, limit, query, sortBy, sortType, userId)
@@ -308,7 +309,6 @@ const getVideoById = asyncHandler(async (req, res) => {
     // Get the videoId from the request parameters
     const { videoId } = req.params;
     const userId = req.user ? req.user._id : null;
-    console.log("Slice User ID:", userId);
 
     // Find the video with the given videoId with Aggregation pipeline
     const videoDataArr = await Video.aggregate([
@@ -357,9 +357,9 @@ const getVideoById = asyncHandler(async (req, res) => {
           isSubscribed: {
             $in: [
               { $ifNull: [userId, null] }, // If userId is null, $in will be false
-              "$subscribers.subscriber"
-            ]
-          }
+              "$subscribers.subscriber",
+            ],
+          },
         },
       },
       {
@@ -410,6 +410,71 @@ const getVideoById = asyncHandler(async (req, res) => {
 
     // Return the video details along with the owner details
     return res.status(200).json(new ApiResponse(200, videoData, "Video Found"));
+  } catch (error) {
+    return res.status(500).json(new ApiError(500, error.message));
+  }
+});
+
+//Get the videos of subscribed channel
+const getSubscribedChannelVideos = asyncHandler(async (req, res) => {
+  try {
+    console.log("Getting Subscribed Channel Videos");
+    const userId = req.user._id;
+
+    const subscribedChannels = await Subscription.find({ subscriber: userId });
+    console.log("Subscribed Channels:", subscribedChannels);
+
+    const channelIds = subscribedChannels.map((channel) => channel.channel);
+    console.log("Subscribed Channel IDs:", channelIds);
+    const videos = await Video.aggregate([
+      {
+        // Find videos by ownersIds in the channelIds
+        $match: {
+          owner: { $in: channelIds },
+        },
+      },
+      // Lookup to populate the owner field
+      {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "owner",
+        },
+      },
+      {
+        $unwind: "$owner",
+      },
+      // Select the details needed
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          views: 1,
+          thumbnail: 1,
+          duration: 1,
+          isPublished: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          owner: {
+            _id: 1,
+            fullName: 1,
+            username: 1,
+            avatar: 1,
+          },
+        },
+      },
+    ]);
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          videos,
+          "Subscribed Channel Videos Fetched Successfully"
+        )
+      );
   } catch (error) {
     return res.status(500).json(new ApiError(500, error.message));
   }
@@ -594,7 +659,7 @@ const getVideoRecommendations = asyncHandler(async (req, res) => {
   const recommendedObjectIds = recommendations.recommended_ids.map((id) =>
     mongoose.Types.ObjectId.createFromHexString(id)
   );
-  const recommendedVideos = await Video.aggregate([
+  let recommendedVideos = await Video.aggregate([
     { $match: { _id: { $in: recommendedObjectIds } } },
     {
       $lookup: {
@@ -623,6 +688,15 @@ const getVideoRecommendations = asyncHandler(async (req, res) => {
     },
   ]);
 
+  // Shuffle the result for the fresh and dynamic feel
+  for (let i = recommendedVideos.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [recommendedVideos[i], recommendedVideos[j]] = [
+      recommendedVideos[j],
+      recommendedVideos[i],
+    ];
+  }
+
   console.log("Recommended Videos:", recommendedVideos);
 
   return res.status(200).json(new ApiResponse(200, recommendedVideos));
@@ -633,6 +707,7 @@ export {
   getAllVideosByUserId,
   publishAVideo,
   getVideoById,
+  getSubscribedChannelVideos,
   updatedVideo,
   deleteVideo,
   togglePublishStatus,

@@ -3,6 +3,7 @@ import {
   deleteVideo,
   getAllVideos,
   getAllVideosByUserId,
+  getSubscribedChannelVideos,
   getVideoById,
   getVideoRecommendations,
   publishAVideo,
@@ -36,6 +37,9 @@ router.route("/publish").post(
 );
 //Get Video by Id
 router.route("/:videoId").get(watchHistoryOptionalJWT, getVideoById);
+
+//Get the videos of subscribed channel
+router.route("/subscribed/videos").get(verifyJWT, getSubscribedChannelVideos);
 
 //Update Video
 router

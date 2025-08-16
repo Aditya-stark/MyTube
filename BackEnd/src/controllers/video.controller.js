@@ -420,67 +420,65 @@ const getSubscribedChannelVideos = asyncHandler(async (req, res) => {
   try {
     console.log("Getting Subscribed Channel Videos");
     const userId = req.user._id;
+    const { limit = 8, lastVideoId } = req.query;
+    const parsedLimit = parseInt(limit, 10);
 
+    // Validate the limit
+    if (isNaN(parsedLimit) || parsedLimit < 1) {
+      return res.status(400).json(new ApiError(400, "Invalid limit"));
+    }
+
+    // Validate the lastVideoId
+    if (lastVideoId) {
+      try {
+        const lastVideo = await Video.findById(lastVideoId);
+        if (!lastVideo) {
+          return res.status(400).json(new ApiError(400, "Invalid lastVideoId"));
+        }
+      } catch (error) {
+        return res.status(400).json(new ApiError(400, "Invalid lastVideoId"));
+      }
+    }
+
+    // Get the subscribed channels
     const subscribedChannels = await Subscription.find({ subscriber: userId });
     console.log("Subscribed Channels:", subscribedChannels);
 
     const channelIds = subscribedChannels.map((channel) => channel.channel);
     console.log("Subscribed Channel IDs:", channelIds);
-    const videos = await Video.aggregate([
-      {
-        // Find videos by ownersIds in the channelIds
-        $match: {
-          owner: { $in: channelIds },
-        },
-      },
-      // Lookup to populate the owner field
-      {
-        $lookup: {
-          from: "users",
-          localField: "owner",
-          foreignField: "_id",
-          as: "owner",
-        },
-      },
-      {
-        $unwind: "$owner",
-      },
-      // Select the details needed
-      {
-        $project: {
-          _id: 1,
-          title: 1,
-          views: 1,
-          thumbnail: 1,
-          duration: 1,
-          isPublished: 1,
-          createdAt: 1,
-          updatedAt: 1,
-          owner: {
-            _id: 1,
-            fullName: 1,
-            username: 1,
-            avatar: 1,
-          },
-        },
-      },
-    ]);
+    let cursorCondition = {};
+    if (lastVideoId) {
+      const lastVideo = await Video.findById(lastVideoId);
+      if (lastVideo) {
+        cursorCondition = { createdAt: { $lt: lastVideo.createdAt } };
+      }
+    }
 
-    return res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          videos,
-          "Subscribed Channel Videos Fetched Successfully"
-        )
-      );
+    // Get videos from subscribed channels
+    const videos = await Video.find({
+      owner: { $in: channelIds },
+      ...cursorCondition,
+    })
+      .sort({ createdAt: -1 })
+      .limit(parsedLimit + 1)
+      .populate("owner", "username avatar fullName");
+
+    const hasMoreVideos = videos.length > parsedLimit;
+    const videosToReturn = hasMoreVideos ? videos.slice(0, parsedLimit) : videos;
+
+    return res.status(200).json(
+      new ApiResponse(200, {
+        videos: videosToReturn,
+        hasMoreVideos,
+        lastVideoId: videosToReturn.length > 0 ? videosToReturn[videosToReturn.length - 1]._id : null,
+      })
+    );
   } catch (error) {
     return res.status(500).json(new ApiError(500, error.message));
   }
 });
 
-//Updated the video
+// Updated the video
 const updatedVideo = asyncHandler(async (req, res) => {
   // Get the updated information from the req.body
   // Get the thumbnail from the req.file

@@ -17,7 +17,6 @@ import {
 import { AuthService } from "../../services/AuthService";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../../utils/firebase.utils";
-import { act } from "react";
 
 export const login = createAsyncThunk(
   "auth/login",

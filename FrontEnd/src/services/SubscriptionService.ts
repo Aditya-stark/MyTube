@@ -17,9 +17,11 @@ export const SubscriptionService = {
   },
 
   // Get Susbcribed channel videos
-  getSubscribedVideos: async () => {
+  getSubscribedVideos: async (limit: number, lastVideoId?: string) => {
     try {
-      const res = await apiClient.get("/videos/subscribed/videos");
+      const res = await apiClient.get("/videos/subscribed/videos", {
+        params: { limit, lastVideoId },
+      });
       if (!res.data.success) {
         throw new Error(res.data.message || "Failed to get subscribed videos");
       }

@@ -156,9 +156,15 @@ export const getRecommendedVideos = createAsyncThunk(
 
 export const getSubscribedVideos = createAsyncThunk(
   "subscription/getSubscribedVideos",
-  async (_, { rejectWithValue }) => {
+  async (
+    { limit, lastVideoId }: { limit: 8; lastVideoId?: string | null },
+    { rejectWithValue }
+  ) => {
     try {
-      const res = await SubscriptionService.getSubscribedVideos();
+      const res = await SubscriptionService.getSubscribedVideos(
+        limit,
+        lastVideoId ?? undefined
+      );
       if (res.success) {
         return res.data;
       }
@@ -188,6 +194,9 @@ interface VideoState {
   subscribedVideos: Video[] | null;
   subscribedVideosLoading: boolean;
   subscribedVideosError: string | null;
+  subscribedHasMore: boolean;
+  subscribedLastVideoId?: string | null;
+  subscribedIsLoadingMore: boolean;
 }
 
 const initialState: VideoState = {
@@ -207,6 +216,9 @@ const initialState: VideoState = {
   subscribedVideos: null,
   subscribedVideosLoading: false,
   subscribedVideosError: null,
+  subscribedHasMore: false,
+  subscribedLastVideoId: null,
+  subscribedIsLoadingMore: false,
 };
 
 const videoSlice = createSlice({
@@ -334,16 +346,39 @@ const videoSlice = createSlice({
         state.isRecommendedLoading = false;
         state.recommendedError = action.payload as string;
       })
-      .addCase(getSubscribedVideos.pending, (state) => {
-        state.subscribedVideosLoading = true;
+      .addCase(getSubscribedVideos.pending, (state, action) => {
+        // If lastVideoId was provided we are loading more, otherwise initial load
+        const args = action.meta.arg as { limit: number; lastVideoId?: string | null };
+        if (args?.lastVideoId) {
+          state.subscribedIsLoadingMore = true;
+        } else {
+          state.subscribedVideosLoading = true;
+        }
         state.subscribedVideosError = null;
       })
       .addCase(getSubscribedVideos.fulfilled, (state, action) => {
-        state.subscribedVideosLoading = false;
-        state.subscribedVideos = action.payload;
+        const args = action.meta.arg as { limit: number; lastVideoId?: string | null };
+        const payload = action.payload as { videos: Video[]; hasMoreVideos?: boolean; lastVideoId?: string | null };
+        // If this was a load-more request (lastVideoId present) append, else replace
+        if (args?.lastVideoId) {
+          state.subscribedIsLoadingMore = false;
+          state.subscribedVideos = state.subscribedVideos
+            ? [...state.subscribedVideos, ...payload.videos]
+            : payload.videos;
+        } else {
+          state.subscribedVideosLoading = false;
+          state.subscribedVideos = payload.videos;
+        }
+        state.subscribedHasMore = !!payload.hasMoreVideos;
+        state.subscribedLastVideoId = payload.lastVideoId || null;
       })
       .addCase(getSubscribedVideos.rejected, (state, action) => {
-        state.subscribedVideosLoading = false;
+        const args = action.meta.arg as { limit: number; lastVideoId?: string | null };
+        if (args?.lastVideoId) {
+          state.subscribedIsLoadingMore = false;
+        } else {
+          state.subscribedVideosLoading = false;
+        }
         state.subscribedVideosError = action.payload as string;
       });
   },

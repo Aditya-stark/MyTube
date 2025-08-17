@@ -11,6 +11,7 @@ import mongoose from "mongoose";
 import { User } from "../models/user.model.js";
 import { Recommendations } from "../models/recommendation.model.js";
 import { Subscription } from "../models/subscription.model.js";
+import axios from "axios";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   // Extract query parameters from the request (page, limit, query, sortBy, sortType, userId)
@@ -284,10 +285,37 @@ const publishAVideo = asyncHandler(async (req, res) => {
     localVideoData: videoCloudinary,
   });
 
-  //Return the video document
-  return res
+  //Return the video document as plain JSON so frontend receives a clean object
+  const videoResponse =
+    video && typeof video.toObject === "function" ? video.toObject() : video;
+  // ensure _id is a string for client-side ease
+  if (videoResponse && videoResponse._id) {
+    try {
+      videoResponse._id = videoResponse._id.toString();
+    } catch (e) {
+      // ignore if cannot convert
+    }
+  }
+
+  res
     .status(201)
-    .json(new ApiResponse(201, video, "Video Published succesfully"));
+    .json(new ApiResponse(201, videoResponse, "Video Published succesfully"));
+
+  // call single-video endpoint (non-blocking)
+  axios
+    .post(
+      `http://localhost:5000/generate-recommendations/${video._id.toString()}`,
+      {},
+      { timeout: 30000 }
+    )
+    .then(() =>
+      console.info("Recommendation job submitted for", video._id.toString())
+    )
+    .catch((err) =>
+      console.error("Recommendation job failed:", err?.message || err)
+    );
+
+  return;
 });
 
 // Get Video by Id

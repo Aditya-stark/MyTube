@@ -9,11 +9,17 @@ interface VideoCardProps {
   video: {
     _id: string;
     title: string;
-    description: string;
+    description?: string;
     thumbnail: string;
     duration: number;
     views: number;
     createdAt: string;
+    owner?: {
+      _id?: string;
+      fullName?: string;
+      username?: string;
+      avatar?: string;
+    };
   };
   isOwner?: boolean;
   onEdit?: (video: any) => void;
@@ -31,15 +37,28 @@ const VideoCard: React.FC<VideoCardProps> = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  // Function to format the views count
   function formatViews(views: number): string {
     if (views < 1000) return views.toString();
-    if (views < 1_000_000) return `${(views / 1000).toFixed(1)}K `;
-    if (views < 1_000_000_000) return `${(views / 1_000_000).toFixed(1)}M `;
-    return `${(views / 1_000_000_000).toFixed(1)}B `;
+    if (views < 1_000_000) return `${(views / 1000).toFixed(1)}K`;
+    if (views < 1_000_000_000) return `${(views / 1_000_000).toFixed(1)}M`;
+    return `${(views / 1_000_000_000).toFixed(1)}B`;
   }
 
-  // Handle click outside menu to close it
+  function formatDuration(duration: number): string {
+    const min = Math.floor(duration / 60)
+      .toString()
+      .padStart(2, "0");
+    const sec = Math.floor(duration % 60)
+      .toString()
+      .padStart(2, "0");
+    return `${min}:${sec}`;
+  }
+
+  const handleMenuToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setMenuOpen(!menuOpen);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -55,7 +74,6 @@ const VideoCard: React.FC<VideoCardProps> = ({
     };
   }, [menuOpen]);
 
-  // Menu action handlers
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     setMenuOpen(false);
@@ -80,15 +98,18 @@ const VideoCard: React.FC<VideoCardProps> = ({
     navigate(`/watch?vId=${video._id}`);
   };
 
-  const handleMenuToggle = (e: React.MouseEvent) => {
+  const handleOwnerClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setMenuOpen(!menuOpen);
+    if (video.owner?.username) navigate(`/channel/${video.owner.username}`);
   };
 
   return (
-    <div className="bg-gray-100 overflow-visible cursor-pointer mb-1 relative">
-      {/* Video Thumbnail*/}
-      <div className="relative pb-[56.25%]" onClick={handleVideoClick}>
+    <div
+      className="bg-gray-100 overflow-visible cursor-pointer mb-1 relative rounded-lg "
+      onClick={handleVideoClick}
+    >
+      {/* Video Thumbnail */}
+      <div className="relative pb-[56.25%]">
         <img
           src={video.thumbnail}
           alt={video.title}
@@ -96,91 +117,102 @@ const VideoCard: React.FC<VideoCardProps> = ({
         />
         {/* Duration Badge */}
         <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-1 rounded">
-          {Math.floor(video.duration / 60)
-            .toString()
-            .padStart(2, "0")}
-          :
-          {Math.floor(video.duration % 60)
-            .toString()
-            .padStart(2, "0")}
+          {formatDuration(video.duration)}
         </div>
       </div>
 
-      {/* Video Info */}
-      <div className="pt-2" onClick={handleVideoClick}>
-        <div className="flex items-start justify-between">
-          {/* Title */}
-          <div className="text-sm font-medium text-gray-900 line-clamp-2 cursor-pointer">
+      {/* Video Info - same design as VideoCardWithOwnerDetail */}
+      <div className="flex pt-2 pb-3 gap-3 items-start">
+        {/* Avatar - render only if viewer is NOT the owner */}
+        {!isOwner && (
+          <button
+            onClick={handleOwnerClick}
+            tabIndex={0}
+            aria-label={`Go to ${video.owner?.fullName || "channel"}'s channel`}
+            className="flex-shrink-0 flex items-start"
+          >
+            <img
+              src={video.owner?.avatar || "/default-avatar.png"}
+              alt={video.owner?.fullName || "channel"}
+              className="w-8 h-8 rounded-full object-cover"
+            />
+          </button>
+        )}
+
+        {/* Title + Channel Info */}
+        <div className="flex flex-col flex-1">
+          <div className="text-sm md:text-sm xl:text-base font-semibold text-gray-900 line-clamp-2 hover:underline">
             {video.title}
           </div>
-          {/* 3-Dot Menu */}
-          <div className="relative flex-shrink-0" ref={menuRef}>
+
+          {/* fullName - render only if viewer is NOT the owner */}
+          {!isOwner && (
             <button
-              onClick={handleMenuToggle}
-              className="p-1 rounded-full hover:bg-gray-200 transition-colors"
-              title="More options"
+              onClick={handleOwnerClick}
+              className="text-xs font-bold text-gray-500 hover:text-gray-700 hover:underline w-fit mt-1"
             >
-              <BsThreeDotsVertical size={16} className="text-gray-500" />
+              {video.owner?.fullName || "Unknown"}
             </button>
+          )}
 
-            {menuOpen && (
-              <>
-                {/* Dropdown Menu */}
-                <div className="absolute right-0 top-full min-w-[140px] bg-white border border-gray-200 rounded-md shadow-lg z-1">
-                  {/* Save to Playlist - Always visible */}
-                  <button
-                    className="flex items-center w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition-colors text-gray-700"
-                    onClick={handleSaveToPlaylist}
-                  >
-                    <MdPlaylistAdd size={16} className="mr-2" />
-                    Save to Playlist
-                  </button>
-
-                  {/* Owner Actions */}
-                  {isOwner && (
-                    <>
-                      {/* Divider */}
-                      <hr className="my-1 border-gray-200" />
-
-                      {/* Edit Option */}
-                      <button
-                        className="flex items-center w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition-colors text-gray-700"
-                        onClick={handleEdit}
-                      >
-                        <MdEdit size={16} className="mr-2" />
-                        Edit Video
-                      </button>
-
-                      {/* Delete Option */}
-                      <button
-                        className="flex items-center w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition-colors text-red-600"
-                        onClick={handleDelete}
-                      >
-                        <MdDelete size={16} className="mr-2" />
-                        Delete Video
-                      </button>
-                    </>
-                  )}
-                </div>
-              </>
-            )}
+          <div className="text-xs text-gray-500 mt-1">
+            {formatViews(video.views)} views • {format(video.createdAt)}
           </div>
         </div>
-        {/* Views, Date, and Actions */}
-        <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
-          {/* Views and Date */}
-          <span className="flex-1">
-            {formatViews(video.views)} views • {format(video.createdAt)}
-          </span>
+
+        {/* 3-dot menu */}
+        <div ref={menuRef} className="relative ml-2">
+          <button
+            onClick={handleMenuToggle}
+            className="p-1 rounded-full hover:bg-gray-200 transition-colors text-gray-600"
+            title="More options"
+            aria-label="More options"
+          >
+            <BsThreeDotsVertical size={16} />
+          </button>
+
+          {menuOpen && (
+            <div className="absolute right-0 top-full min-w-[160px] bg-white border border-gray-200 rounded-md shadow-lg z-10">
+              <button
+                className="flex items-center w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition-colors text-gray-700"
+                onClick={handleSaveToPlaylist}
+              >
+                <MdPlaylistAdd size={16} className="mr-2" />
+                Save to Playlist
+              </button>
+
+              {isOwner && (
+                <>
+                  <hr className="my-1 border-gray-200" />
+                  <button
+                    className="flex items-center w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition-colors text-gray-700"
+                    onClick={handleEdit}
+                  >
+                    <MdEdit size={16} className="mr-2" />
+                    Edit Video
+                  </button>
+                  <button
+                    className="flex items-center w-full text-left px-3 py-2 text-sm hover:bg-gray-100 transition-colors text-red-600"
+                    onClick={handleDelete}
+                  >
+                    <MdDelete size={16} className="mr-2" />
+                    Delete Video
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Playlist Popup */}
       {playlistPopupOpen && (
-        <PlaylistPopUp
-          videoId={video._id}
-          onClose={() => setPlaylistPopupOpen(false)}
-        />
+        <div onClick={(e) => e.stopPropagation()}>
+          <PlaylistPopUp
+            videoId={video._id}
+            onClose={() => setPlaylistPopupOpen(false)}
+          />
+        </div>
       )}
     </div>
   );

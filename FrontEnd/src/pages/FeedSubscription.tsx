@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getSubscribedVideos } from "../features/videos/videoSlice";
 import VideoCardWithOwnerDetail from "../components/video/VideoCardWithOwnerDetail";
+import VideoCard from "../components/video/VideoCard";
 
 const FeedSubscription = () => {
   const {
@@ -68,7 +69,7 @@ const FeedSubscription = () => {
         observer.unobserve(loaderRef.current);
       }
     };
-    }, [
+  }, [
     dispatch,
     subscribedHasMore,
     subscribedIsLoadingMore,
@@ -94,7 +95,7 @@ const FeedSubscription = () => {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {subscribedVideos.map((video: any) => (
-                    <VideoCardWithOwnerDetail key={video._id} video={video} />
+                    <VideoCard key={video._id} video={video} />
                   ))}
                 </div>
                 {subscribedHasMore && (
@@ -102,10 +103,14 @@ const FeedSubscription = () => {
                     {subscribedIsLoadingMore ? (
                       <div className="flex justify-center items-center space-x-2">
                         <div className="animate-spin h-5 w-5 border-t-2 border-b-2 border-blue-500 rounded-full"></div>
-                        <span className="text-gray-600">Loading more videos...</span>
+                        <span className="text-gray-600">
+                          Loading more videos...
+                        </span>
                       </div>
                     ) : (
-                      <div className="text-gray-500 text-sm">Scroll for more videos</div>
+                      <div className="text-gray-500 text-sm">
+                        Scroll for more videos
+                      </div>
                     )}
                   </div>
                 )}

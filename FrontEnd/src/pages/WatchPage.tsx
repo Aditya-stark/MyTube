@@ -47,6 +47,21 @@ export const WatchPage: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     if (videoId) {
+      console.log("Fetching video by ID:", videoId);
+      fetch("http://localhost:5000/genrate-recommendations", {
+        method: "POST",
+        body: JSON.stringify({ videoId }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          // You can dispatch an action or handle recommendations here if needed
+          // Example: dispatch(setRecommendations(data.recommendations));
+          // Or just log them:
+          console.log("Recommendations Saved:", data);
+        })
+        .catch((err) => {
+          console.error("Error fetching recommendations:", err);
+        });
       dispatch(videoById(videoId));
       dispatch(checkVideoLikeStatus(videoId));
       dispatch(getComments(videoId)).then((result) => {
@@ -126,7 +141,7 @@ export const WatchPage: React.FC = () => {
 
   // Handle Subscribe
   const handleSubscribe = () => {
-    if(currentVideo?.ownerDetails._id === user?._id) {
+    if (currentVideo?.ownerDetails._id === user?._id) {
       alert("You cannot subscribe to yourself.");
       return;
     }

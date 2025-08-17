@@ -464,13 +464,18 @@ const getSubscribedChannelVideos = asyncHandler(async (req, res) => {
       .populate("owner", "username avatar fullName");
 
     const hasMoreVideos = videos.length > parsedLimit;
-    const videosToReturn = hasMoreVideos ? videos.slice(0, parsedLimit) : videos;
+    const videosToReturn = hasMoreVideos
+      ? videos.slice(0, parsedLimit)
+      : videos;
 
     return res.status(200).json(
       new ApiResponse(200, {
         videos: videosToReturn,
         hasMoreVideos,
-        lastVideoId: videosToReturn.length > 0 ? videosToReturn[videosToReturn.length - 1]._id : null,
+        lastVideoId:
+          videosToReturn.length > 0
+            ? videosToReturn[videosToReturn.length - 1]._id
+            : null,
       })
     );
   } catch (error) {
